@@ -1,0 +1,602 @@
+#!/usr/bin/env python3
+
+"""54gene WGS germline pipeline
+
+AUTHORS:
+    B. Ballew
+
+This pipeline takes demultiplexed, adapter-removed, compressed fastqs as input,
+and generates QC reports, aligned BAMs, gVCFs, and multi-sample VCFs.
+
+"""
+
+import os
+import datetime
+import subprocess
+import glob
+
+# temporary variable assignments for testing:
+nt = 2
+fq_dir = "/Users/bariballew/fastqs/"
+ref = "resources/Homo_sapiens_assembly38.fasta"
+dbsnp = "resources/Homo_sapiens_assembly38.dbsnp138.vcf"
+indels = "resources/Homo_sapiens_assembly38.known_indels.vcf.gz"
+bed = "resources/Homo_sapiens_assembly38.bed"
+tempDir = "temp/"
+# https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0/
+
+
+# reference the config file
+configfile: "config/config.yaml"
+
+
+# import variables from config
+sampleFile = config["sampleFile"]
+
+# get ref genome file base name
+tempRef = os.path.splitext(ref)[0]
+if ref.endswith((".gz")):
+    refNoExt = os.path.splitext(tempRef)[0]
+else:
+    refNoExt = tempRef
+
+# set a datetime stamp for GATK DBImport step
+currentDt = datetime.datetime.now()
+dt = currentDt.strftime("%Y%m%d%H%M%S")
+
+# parse manifest file
+# note that the lab says they're not planning on splitting samples
+# across lanes - that makes this really easy!
+# should double-check that sample_ID will always be unique
+# otherwise consider appending other info like lane/well/runID
+# will want to add functionality to analyze across multiple runs
+SAMPLES = []
+with open(sampleFile) as f:
+    next(f)  # assume one header row
+    for line in f:
+        SAMPLES.append(line.split(",")[0])
+
+
+# read in chromosome list from reference dict file (assumes the dict is already created)
+# this circumvents the issue of whether to use hg19-style or b37-style chromosome annotation
+# as it just pulls the chromosome names directly from the dict index.
+chromList = []
+with open(refNoExt + ".dict") as f:
+    next(f)
+    for line in f:
+        f1 = line.split("\t")[1]
+        f2 = f1.split(":")[1]
+        if not subprocess.call(["grep", "-q", "^" + f2 + "\\s", bed]):
+            chromList.append(f2)
+
+
+def get_DBImport_path1(wildcards):
+    return glob.glob(
+        "results/HaplotypeCaller/DBImport/"
+        + dt
+        + "_"
+        + wildcards.chrom
+        + "/"
+        + wildcards.chrom
+        + "*/genomicsdb_meta_dir/genomicsdb_meta*.json"
+    )
+
+
+def get_DBImport_path2(wildcards):
+    path = "".join(
+        glob.glob("results/HaplotypeCaller/DBImport/" + dt + "_" + wildcards.chrom + "/*/__*/")
+    )
+    myList = []
+    if os.path.exists(path):
+        myList = [
+            "AD.tdb",
+            "AD_var.tdb",
+            "ALT.tdb",
+            "ALT_var.tdb",
+            "BaseQRankSum.tdb",
+            "__book_keeping.tdb.gz",
+            "__coords.tdb",
+            "DP_FORMAT.tdb",
+            "DP.tdb",
+            "DS.tdb",
+            "END.tdb",
+            "ExcessHet.tdb",
+            "FILTER.tdb",
+            "FILTER_var.tdb",
+            "GQ.tdb",
+            "GT.tdb",
+            "GT_var.tdb",
+            "ID.tdb",
+            "ID_var.tdb",
+            "InbreedingCoeff.tdb",
+            "MIN_DP.tdb",
+            "MLEAC.tdb",
+            "MLEAC_var.tdb",
+            "MLEAF.tdb",
+            "MLEAF_var.tdb",
+            "MQRankSum.tdb",
+            "PGT.tdb",
+            "PGT_var.tdb",
+            "PID.tdb",
+            "PID_var.tdb",
+            "PL.tdb",
+            "PL_var.tdb",
+            "QUAL.tdb",
+            "RAW_MQandDP.tdb",
+            "ReadPosRankSum.tdb",
+            "REF.tdb",
+            "REF_var.tdb",
+            "SB.tdb",
+            "__tiledb_fragment.tdb",
+        ]
+        myList = [path + file for file in myList]
+    return myList
+
+
+rule all:
+    input:
+        expand("results/alignment_stats/{sample}.txt", sample=SAMPLES), # "results/multiqc/multiqc.html",
+        "results/HaplotypeCaller/genotyped/combined/HC_variants.vcf.gz",
+
+
+rule fastqc:
+    """
+    """
+    input:
+        fq_dir + "{fq}.fastq.gz",
+    output:
+        html="results/fastqc/{fq}/{fq}_fastqc.html",
+        zip="results/fastqc/{fq}/{fq}_fastqc.zip",
+    threads: nt
+    conda:
+        "envs/fastqc.yaml"
+    shell:
+        "fastqc {input} --quiet -t {threads} --outdir=results/fastqc/{wildcards.fq}/"
+
+
+rule multiqc:
+    """
+    NOT WORKING.
+    """
+    input:
+        expand(
+            "results/fastqc/{sample}_L001_R1_001/{sample}_L001_R1_001_fastqc.zip", sample=SAMPLES
+        ),
+        expand(
+            "results/fastqc/{sample}_L001_R2_001/{sample}_L001_R2_001_fastqc.zip", sample=SAMPLES
+        ), # dedup metrics and samtools-stats can go here too when ready
+    output:
+        "results/multiqc/multiqc.html",
+    params:
+        outDir="results/multiqc/",
+        outName="multiqc.html", # inDirs=expand("results/fastqc/{sample}_L001_R1_001/",sample=SAMPLES),expand("results/fastqc/{sample}_L001_R2_001/",sample=SAMPLES)
+    conda:
+        "envs/multiqc.yaml"
+    shell:
+        "multiqc --force -o {params.outDir} -n {params.outName} {input}"
+
+
+rule quality_trimming:
+    """Assume paired-end.  May want to tweak params; possibly put in config.
+    """
+    input:
+        r1=fq_dir + "{sample}_L001_R1_001.fastq.gz",
+        r2=fq_dir + "{sample}_L001_R2_001.fastq.gz",
+    output:
+        r1_paired="results/paired_trimmed_reads/{sample}_r1.fastq.gz",
+        r2_paired="results/paired_trimmed_reads/{sample}_r2.fastq.gz",
+        r1_unpaired="results/unpaired_trimmed_reads/{sample}_r1.fastq.gz",
+        r2_unpaired="results/unpaired_trimmed_reads/{sample}_r2.fastq.gz",
+    params:
+        lead=12,
+        trail=12,
+        window="4:15",
+        minlen=36,
+    threads: nt
+    conda:
+        "envs/trimmomatic.yaml"
+    shell:
+        "trimmomatic PE "
+        "-threads {threads} "
+        "-phred33 "
+        "{input.r1} {input.r2} "
+        "{output.r1_paired} {output.r1_unpaired} "
+        "{output.r2_paired} {output.r2_unpaired} "
+        "LEADING:{params.lead} "
+        "TRAILING:{params.trail} "
+        "SLIDINGWINDOW:{params.window} "
+        "MINLEN:{params.minlen}" #ILLUMINACLIP:/path/to/adapters/TruSeq3-PE-2.fa:2:30:10
+
+
+rule align_reads:
+    """
+    Aligns with BWA; this step combines R1 and R2 data into a single
+    output bam.
+
+    For samples where multiple fastq files represent a single sample,
+    e.g. if a sample was run over several lanes, each R1/R1 fastq pair
+    will be aligned separately here.  Then the aligned bams from a single
+    sample will be combined during the dedup step below. **N/A for 54gene ATM.
+
+    Note that I'm putting "null" as the read group for now, but we could
+    use the flowcell ID or some such.
+    """
+    input:
+        r=ref,
+        r1="results/paired_trimmed_reads/{sample}_r1.fastq.gz",
+        r2="results/paired_trimmed_reads/{sample}_r2.fastq.gz",
+        d=refNoExt + ".dict",
+        fai=ref + ".fai",
+        amb=ref + ".64.amb",
+        ann=ref + ".64.ann",
+        bwt=ref + ".64.bwt",
+        pac=ref + ".64.pac",
+        sa=ref + ".64.sa",
+    output:
+        temp("results/mapped/{sample}.bam"),
+    params:
+        pl="ILLUMINA", # g = '{rg}',
+        sort_order="coordinate",
+    threads: nt
+    conda:
+        "envs/bwa_samtools.yaml"
+    shell:
+        "bwa mem "
+        "-K 10000000 -M "
+        '-R "@RG\\tCN:54gene\\tID:null\\tSM:{wildcards.sample}\\tPL:{params.pl}\\tLB:N/A" '
+        "-t {threads} "
+        "{input.r} {input.r1} {input.r2} | "
+        "samtools sort -@ {threads} -o {output} - " # note - wanted to use bwa-mem2, but doesn't seem to be working via conda
+
+
+rule mark_duplicates:
+    """
+    """
+    input:
+        "results/mapped/{sample}.bam",
+    output:
+        bam=temp("results/dedup/{sample}.bam"),
+        metrics="results/dedup/{sample}.metrics.txt",
+    conda:
+        "envs/picard.yaml"
+    shell:
+        "picard MarkDuplicates "
+        "REMOVE_DUPLICATES=true "
+        "INPUT={input} "
+        "OUTPUT={output.bam} "
+        "METRICS_FILE={output.metrics}"
+
+
+rule recalibrate_bams:
+    """
+    Note that using conda gatk4 seems to require additional
+    setup of various python dependencies (https://gatk.broadinstitute.org/hc/en-us/articles/360035889851--How-to-Install-and-use-Conda-for-GATK4)
+    Instead, use docker container.
+    """
+    input:
+        bam="results/dedup/{sample}.bam",
+        r=ref,
+        d=refNoExt + ".dict",
+        snps=dbsnp,
+        indels=indels,
+    output:
+        "results/bqsr/{sample}.recal_table",
+    conda:
+        "envs/gatk.yaml" # container:
+         #     "docker://broadinstitute/gatk:4.1.3.0"
+    shell:
+        "gatk BaseRecalibrator "
+        "-R {input.r} "
+        "-I {input.bam} "
+        "--known-sites {input.snps} "
+        "--known-sites {input.indels} "
+        "-O {output}"
+
+
+rule apply_bqsr:
+    """
+    TODO add indexes to input for known files; zip the dbsnp one
+    """
+    input:
+        bam="results/mapped/{sample}.bam",
+        r=ref,
+        d=refNoExt + ".dict",
+        recal="results/bqsr/{sample}.recal_table",
+    output:
+        "results/bqsr/{sample}.bam",
+    conda:
+        "envs/gatk.yaml" # container:
+         #     "docker://broadinstitute/gatk:4.1.3.0"
+    shell:
+        "gatk ApplyBQSR "
+        "-R {input.r} "
+        "-I {input.bam} "
+        "--bqsr-recal-file {input.recal} "
+        "-O {output}"
+
+
+rule index_bams:
+    """
+    """
+    input:
+        "results/bqsr/{sample}.bam",
+    output:
+        "results/bqsr/{sample}.bam.bai",
+    conda:
+        "envs/bwa_samtools.yaml"
+    shell:
+        "samtools index {input} {output}"
+
+
+rule samtools_stats:
+    """Generate stats for bams
+    """
+    input:
+        "results/bqsr/{sample}.bam",
+    output:
+        "results/alignment_stats/{sample}.txt",
+    conda:
+        "envs/bwa_samtools.yaml"
+    shell:
+        "samtools stats {input} > {output}"
+
+
+rule split_bed_file:
+    """Separates bed regions by chromosome.
+
+    For DV:
+    If you're not assigning a number of shards by which to divide
+    and parallelize, then the pipeline will parallelize by chrom.
+    To do this, we take the bed file (e.g. exome capture region)
+    and split the regions by chromosome.  Subsequent steps are run
+    concurrently on each of the single-chromosome bed files.
+
+    For GATK:
+    HaplotypeCaller can't be parallelized per task (e.g. threads),
+    so must be run over sub-regions if you want parallelization.
+    **Do we want to use the old 4000-region bed file, or is by-chrom
+    sufficient?
+
+    Note that grep exits with 0 if a match is found, 1 if no match,
+    and 2 if error.  Snakemake looks for exit codes of 0 to determine
+    that a job finished successfully.  No match is an acceptable outcome
+    here, so the shell command below should allow match or no match.
+
+    don't love the || true solution; what will it do for exit > 1?
+    """
+    input:
+        bed,
+    output:
+        temp("results/split_regions/{chrom}.bed"),
+    shell:
+        'grep "^{wildcards.chrom}[[:space:]]" {input} > {output} || true'
+
+
+rule HC_call_variants:
+    """Call gVCFs with GATK4
+    Runs over each chrom in parallel.
+    """
+    input:
+        r=ref,
+        d=refNoExt + ".dict",
+        fai=ref + ".fai",
+        amb=ref + ".64.amb",
+        ann=ref + ".64.ann",
+        bwt=ref + ".64.bwt",
+        pac=ref + ".64.pac",
+        sa=ref + ".64.sa",
+        bed="results/split_regions/{chrom}.bed",
+        bam="results/bqsr/{sample}.bam",
+        bai="results/bqsr/{sample}.bam.bai",
+    output:
+        gvcf=temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf"),
+        idx=temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.idx"),
+    conda:
+        "envs/gatk.yaml"
+    shell:
+        'gatk --java-options "-Xmx4G" HaplotypeCaller '
+        "-R {input.r} "
+        "-I {input.bam} "
+        "-ERC GVCF "
+        "-L {input.bed} "
+        "-O {output.gvcf} "
+        "-G StandardAnnotation "
+        "-G StandardHCAnnotation"
+
+
+rule HC_compress_gvcfs:
+    """Zip and index gVCFs
+    """
+    input:
+        gvcf="results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf",
+        idx="results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.idx",
+    output:
+        temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.gz"),
+        temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.gz.tbi"),
+    conda:
+        "envs/bcftools_tabix.yaml"
+    shell:
+        "bgzip {input.gvcf} && "
+        "tabix -p vcf {input.gvcf}.gz"
+
+
+rule HC_concat_gvcfs:
+    """
+    Not clear whether it would be fastest to concat per-chrom gvcfs and
+    then genotype, or genotype and then concat.
+    """
+    input:
+        vcfList=expand(
+            "results/HaplotypeCaller/called/{chrom}/{{sample}}.g.vcf.gz", chrom=chromList
+        ),
+        indexList=expand(
+            "results/HaplotypeCaller/called/{chrom}/{{sample}}.g.vcf.gz.tbi", chrom=chromList
+        ),
+    output:
+        "results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz",
+    params:
+        lambda wildcards, input: " -I ".join(input.vcfList),
+    conda:
+        "envs/gatk.yaml"
+    shell:
+        'gatk --java-options "-Xmx4G" GatherVcfs -I {params} -O {output}'
+
+
+rule HC_index_gvcf:
+    input:
+        "results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz",
+    output:
+        "results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz.tbi",
+    conda:
+        "envs/bcftools_tabix.yaml"
+    shell:
+        "tabix -p vcf {input}"
+
+
+rule HC_create_each_sample_map_file:
+    """Create sample file to be read by GenomicsDBImport
+
+    Can pass all vcfs on the command line, each with a -V before it,
+    but with enough samples you will hit the character limit.  Instead,
+    create a sample map file and read from it.
+
+    sample map is formatted as follows: sample_name--tab--path_to_sample_vcf per line
+
+    See GATK's documentation for additional details.
+    """
+    input:
+        gvcf="results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz",
+        index="results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz.tbi",
+    output:
+        temp("results/HaplotypeCaller/DBImport/{sample}.map"),
+    conda:
+        "envs/bcftools_tabix.yaml"
+    shell:
+        "n=$(bcftools query -l {input.gvcf});"
+        'echo "${{n}}\t{input.gvcf}" > {output}'
+
+
+rule HC_create_cohort_map_file:
+    input:
+        expand("results/HaplotypeCaller/DBImport/{sample}.map", sample=SAMPLES),
+    output:
+        temp("results/HaplotypeCaller/DBImport/cohort.sample_map"),
+    params:
+        mapDir="results/HaplotypeCaller/DBImport/",
+    shell:
+        "for i in {params.mapDir}*.map; do cat $i >> {output}; done"
+
+
+rule HC_consolidate_gvcfs:
+    """Split samples by chromosome
+
+    The output of this step includes some files that are in subdirectories
+    with unpredictable names.  I've attempted to include them in the input
+    of the next rule via glob in the functions below (o5 and o6 in rule
+    HC_genotypeGVCFs) but this is still being tested.
+
+    Note that DBImport requires a new or empty directory for
+    --genomicsdb-workspace-path.  Possible issue when resuming a pipeline.
+    Snakemake's implicit directory management results in an error when
+    DBImport finds that the workspace path already exists (even though it
+    seems empty?).  Removing the directory just prior to running DBImport
+    seems to solve this problem, but will be problematic on resuming the
+    pipeline.  Added a datetime stamp (dt) to the dir to help address this.
+    However, this datetime stamp will need to be overridden if the pipeline
+    is stopped and then resumed prior to completion of rule HC_genotypeGVCFs.
+
+    What exactly is GenomicsDB for?  GenotypeGVCFs can only take one single
+    input.  GenomicsDB is a method of consolidating gvcfs across samples,
+    to provide the input for genotyping.  The alternative is to use
+    CombineGVCFs.  See
+    https://software.broadinstitute.org/gatk/documentation/article?id=11813
+    for more details.
+
+    As documented here (https://software.broadinstitute.org/gatk/documentation/
+    tooldocs/4.0.11.0/org_broadinstitute_hellbender_tools_genomicsdb_
+    GenomicsDBImport.php), DBImport can take up a lot of /tmp space.  GATK
+    recommends using --tmp-dir to redirect to a large temp space.  Annoyingly,
+    this tool appears unable to implicitly create temp subdirectories, so you
+    have to explicitly include temp dir creation in the shell section.
+    Note that GenotypeGVCFs below does not suffer from this directory creation
+    issue.
+    """
+    input:
+        sampleMap="results/HaplotypeCaller/DBImport/cohort.sample_map",
+        gvcfList=expand(
+            "results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz", sample=SAMPLES
+        ),
+        indexList=expand(
+            "results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz.tbi", sample=SAMPLES
+        ),
+    output:
+        t=temp(directory(tempDir + "HC_DBImport/{chrom}/")),
+        o1=temp("results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/vcfheader.vcf"),
+        o2=temp("results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/vidmap.json"),
+        o3=temp("results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/callset.json"),
+        o4=temp("results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/__tiledb_workspace.tdb"),
+    params:
+        interval="{chrom}",
+        db="results/HaplotypeCaller/DBImport/" + dt + "_{chrom}",
+    conda:
+        "envs/gatk.yaml"
+    shell:
+        "mkdir -p {output.t} && "
+        "rm -r {params.db} && "
+        'gatk --java-options "-Xmx20G" GenomicsDBImport '
+        "--sample-name-map {input.sampleMap} "
+        "--genomicsdb-workspace-path {params.db} "
+        "-L {params.interval} "
+        "--tmp-dir {output.t}"
+
+
+rule HC_genotype_gvcfs:
+    """Joint genotyping
+    """
+    input:
+        r=ref,
+        bed=bed,
+        o1="results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/vcfheader.vcf",
+        o2="results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/vidmap.json",
+        o3="results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/callset.json",
+        o4="results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/__tiledb_workspace.tdb",
+        o5=get_DBImport_path1,
+        o6=get_DBImport_path2,
+    output:
+        vcf=temp("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz"),
+        idx=temp("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz.tbi"),
+    params:
+        db="results/HaplotypeCaller/DBImport/" + dt + "_{chrom}",
+        t=tempDir + "HC_genotype_gvcfs/{chrom}/",
+    conda:
+        "envs/gatk.yaml"
+    shell:
+        "mkdir -p {params.t} && "
+        'gatk --java-options "-Xmx4G" GenotypeGVCFs '
+        "-R {input.r} "
+        "-V gendb://{params.db} "
+        "-O {output.vcf} "
+        "--tmp-dir {params.t} "
+        "-stand-call-conf 30 "
+        "-G StandardAnnotation "
+        "-G StandardHCAnnotation"
+
+
+rule HC_concat_vcfs_bcftools:
+    """
+    """
+    input:
+        vcfList=expand("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz", chrom=chromList),
+        indexList=expand("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz.tbi", chrom=chromList),
+    output:
+        projectVCF=protected("results/HaplotypeCaller/genotyped/combined/HC_variants.vcf.gz"),
+        idx=protected("results/HaplotypeCaller/genotyped/combined/HC_variants.vcf.gz.tbi"),
+    params:
+        tempDir + "HC_concat_vcfs_bcftools/",
+    conda:
+        "envs/bcftools_tabix.yaml"
+    shell:
+        "mkdir -p {params} && "
+        "bcftools concat -a {input.vcfList} -Ou | "
+        "bcftools sort -T {params} -Oz -o {output.projectVCF} && "
+        "tabix -p vcf {output.projectVCF}"

@@ -1,0 +1,11 @@
+[Header]
+SomeStuff
+[Manifests]
+OtherStuff
+[Reads]
+MoreStuff
+[Settings]
+EvenMoreStuff
+[Data]
+Sample_ID,Sample_Name,Plate,Well,Index1,Index2
+NA12878-190515228A-v1-450-Rep19_S19,,,,,,
