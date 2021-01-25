@@ -1,2 +1,2 @@
 [codespell]
-skip = dedup
+ignore-words-list = dedup
