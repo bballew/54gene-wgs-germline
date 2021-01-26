@@ -18,12 +18,11 @@ import glob
 # temporary variable assignments for testing:
 nt = 2
 fq_dir = "/Users/bariballew/fastqs/"
-ref = "resources/Homo_sapiens_assembly38.fasta"
-dbsnp = "resources/Homo_sapiens_assembly38.dbsnp138.vcf"
-indels = "resources/Homo_sapiens_assembly38.known_indels.vcf.gz"
-bed = "resources/Homo_sapiens_assembly38.bed"
 tempDir = "temp/"
 # https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0/
+
+
+bed = "resources/Homo_sapiens_assembly38.bed"  # change if not WGS - put switch in config?
 
 
 # reference the config file
@@ -33,12 +32,6 @@ configfile: "config/config.yaml"
 # import variables from config
 sampleFile = config["sampleFile"]
 
-# get ref genome file base name
-tempRef = os.path.splitext(ref)[0]
-if ref.endswith((".gz")):
-    refNoExt = os.path.splitext(tempRef)[0]
-else:
-    refNoExt = tempRef
 
 # set a datetime stamp for GATK DBImport step
 currentDt = datetime.datetime.now()
@@ -57,17 +50,36 @@ with open(sampleFile) as f:
         SAMPLES.append(line.split(",")[0])
 
 
-# read in chromosome list from reference dict file (assumes the dict is already created)
-# this circumvents the issue of whether to use hg19-style or b37-style chromosome annotation
-# as it just pulls the chromosome names directly from the dict index.
-chromList = []
-with open(refNoExt + ".dict") as f:
-    next(f)
-    for line in f:
-        f1 = line.split("\t")[1]
-        f2 = f1.split(":")[1]
-        if not subprocess.call(["grep", "-q", "^" + f2 + "\\s", bed]):
-            chromList.append(f2)
+# Previously read from dict, but now that I'm programmatically retrieving
+# the ref genome and index files, it's easier to just have a hard-coded list
+# and trade off the flexibility of changing ref genomes
+chromList = [
+    "chr1",
+    "chr2",
+    "chr3",
+    "chr4",
+    "chr5",
+    "chr6",
+    "chr7",
+    "chr8",
+    "chr9",
+    "chr10",
+    "chr11",
+    "chr12",
+    "chr13",
+    "chr14",
+    "chr15",
+    "chr16",
+    "chr17",
+    "chr18",
+    "chr19",
+    "chr20",
+    "chr21",
+    "chr22",
+    "chrX",
+    "chrY",
+    "chrM",
+]
 
 
 def get_DBImport_path1(wildcards):
@@ -137,6 +149,39 @@ rule all:
     input:
         expand("results/alignment_stats/{sample}.txt", sample=SAMPLES), # "results/multiqc/multiqc.html",
         "results/HaplotypeCaller/genotyped/combined/HC_variants.vcf.gz",
+
+
+rule get_resources:
+    output:
+        "resources/Homo_sapiens_assembly38.fasta",
+        "resources/Homo_sapiens_assembly38.dict",
+        "resources/Homo_sapiens_assembly38.fasta.64.alt",
+        "resources/Homo_sapiens_assembly38.fasta.64.amb",
+        "resources/Homo_sapiens_assembly38.fasta.64.ann",
+        "resources/Homo_sapiens_assembly38.fasta.64.bwt",
+        "resources/Homo_sapiens_assembly38.fasta.64.pac",
+        "resources/Homo_sapiens_assembly38.fasta.64.sa",
+        "resources/Homo_sapiens_assembly38.fasta.fai",
+        "resources/Homo_sapiens_assembly38.known_indels.vcf.gz",
+        "resources/Homo_sapiens_assembly38.known_indels.vcf.gz.tbi",
+        "resources/Homo_sapiens_assembly38.dbsnp138.vcf",
+        "resources/Homo_sapiens_assembly38.dbsnp138.vcf.idx",
+    conda:
+        "envs/aws.yaml"
+    shell:
+        "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.fasta resources/ --no-sign-request && "
+        "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.dict resources/ --no-sign-request && "
+        "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.64.alt resources/ --no-sign-request && "
+        "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.64.amb resources/ --no-sign-request && "
+        "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.64.ann resources/ --no-sign-request && "
+        "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.64.bwt resources/ --no-sign-request && "
+        "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.64.pac resources/ --no-sign-request && "
+        "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.64.sa resources/ --no-sign-request && "
+        "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai resources/ --no-sign-request && "
+        "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz resources/ --no-sign-request && "
+        "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz.tbi resources/ --no-sign-request && "
+        "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf resources/ --no-sign-request && "
+        "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf.idx resources/ --no-sign-request"
 
 
 rule fastqc:
@@ -222,16 +267,16 @@ rule align_reads:
     use the flowcell ID or some such.
     """
     input:
-        r=ref,
+        r="resources/Homo_sapiens_assembly38.fasta",
         r1="results/paired_trimmed_reads/{sample}_r1.fastq.gz",
         r2="results/paired_trimmed_reads/{sample}_r2.fastq.gz",
-        d=refNoExt + ".dict",
-        fai=ref + ".fai",
-        amb=ref + ".64.amb",
-        ann=ref + ".64.ann",
-        bwt=ref + ".64.bwt",
-        pac=ref + ".64.pac",
-        sa=ref + ".64.sa",
+        d="resources/Homo_sapiens_assembly38.dict",
+        fai="resources/Homo_sapiens_assembly38.fasta.fai",
+        amb="resources/Homo_sapiens_assembly38.fasta.64.amb",
+        ann="resources/Homo_sapiens_assembly38.fasta.64.ann",
+        bwt="resources/Homo_sapiens_assembly38.fasta.64.bwt",
+        pac="resources/Homo_sapiens_assembly38.fasta.64.pac",
+        sa="resources/Homo_sapiens_assembly38.fasta.64.sa",
     output:
         temp("results/mapped/{sample}.bam"),
     params:
@@ -275,10 +320,10 @@ rule recalibrate_bams:
     """
     input:
         bam="results/dedup/{sample}.bam",
-        r=ref,
-        d=refNoExt + ".dict",
-        snps=dbsnp,
-        indels=indels,
+        r="resources/Homo_sapiens_assembly38.fasta",
+        d="resources/Homo_sapiens_assembly38.dict",
+        snps="resources/Homo_sapiens_assembly38.dbsnp138.vcf",
+        indels="resources/Homo_sapiens_assembly38.known_indels.vcf.gz",
     output:
         "results/bqsr/{sample}.recal_table",
     conda:
@@ -299,8 +344,8 @@ rule apply_bqsr:
     """
     input:
         bam="results/mapped/{sample}.bam",
-        r=ref,
-        d=refNoExt + ".dict",
+        r="resources/Homo_sapiens_assembly38.fasta",
+        d="resources/Homo_sapiens_assembly38.dict",
         recal="results/bqsr/{sample}.recal_table",
     output:
         "results/bqsr/{sample}.bam",
@@ -377,14 +422,14 @@ rule HC_call_variants:
     Runs over each chrom in parallel.
     """
     input:
-        r=ref,
-        d=refNoExt + ".dict",
-        fai=ref + ".fai",
-        amb=ref + ".64.amb",
-        ann=ref + ".64.ann",
-        bwt=ref + ".64.bwt",
-        pac=ref + ".64.pac",
-        sa=ref + ".64.sa",
+        r="resources/Homo_sapiens_assembly38.fasta",
+        d="resources/Homo_sapiens_assembly38.dict",
+        fai="resources/Homo_sapiens_assembly38.fasta.fai",
+        amb="resources/Homo_sapiens_assembly38.fasta.64.amb",
+        ann="resources/Homo_sapiens_assembly38.fasta.64.ann",
+        bwt="resources/Homo_sapiens_assembly38.fasta.64.bwt",
+        pac="resources/Homo_sapiens_assembly38.fasta.64.pac",
+        sa="resources/Homo_sapiens_assembly38.fasta.64.sa",
         bed="results/split_regions/{chrom}.bed",
         bam="results/bqsr/{sample}.bam",
         bai="results/bqsr/{sample}.bam.bai",
@@ -554,7 +599,7 @@ rule HC_genotype_gvcfs:
     """Joint genotyping
     """
     input:
-        r=ref,
+        r="resources/Homo_sapiens_assembly38.fasta",
         bed=bed,
         o1="results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/vcfheader.vcf",
         o2="results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/vidmap.json",

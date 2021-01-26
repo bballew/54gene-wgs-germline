@@ -1,12 +1,9 @@
 # Project Folders
 temp
 results
-results/*
-!results/README.md
 
-resources
 resources/*
-!resources/README.md
+!resources/Homo_sapiens_assembly38.bed
 
 # Workflow Artifacts
 .snakemake/
