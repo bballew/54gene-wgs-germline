@@ -406,15 +406,13 @@ rule split_bed_file:
     and 2 if error.  Snakemake looks for exit codes of 0 to determine
     that a job finished successfully.  No match is an acceptable outcome
     here, so the shell command below should allow match or no match.
-
-    don't love the || true solution; what will it do for exit > 1?
     """
     input:
         bed,
     output:
         temp("results/split_regions/{chrom}.bed"),
     shell:
-        'grep "^{wildcards.chrom}[[:space:]]" {input} > {output} || true'
+        'grep "^{wildcards.chrom}[[:space:]]" {input} > {output}; if [ $? -le 1 ]; then exit 0; else exit 1; fi'
 
 
 rule HC_call_variants:
