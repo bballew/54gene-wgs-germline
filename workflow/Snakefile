@@ -145,10 +145,14 @@ def get_DBImport_path2(wildcards):
     return myList
 
 
+include: "rules/filter.smk"
+
+
 rule all:
     input:
         expand("results/alignment_stats/{sample}.txt", sample=SAMPLES), # "results/multiqc/multiqc.html",
         "results/HaplotypeCaller/genotyped/combined/HC_variants.vcf.gz",
+        "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
 
 
 rule get_resources:
@@ -632,8 +636,8 @@ rule HC_concat_vcfs_bcftools:
         vcfList=expand("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz", chrom=chromList),
         indexList=expand("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz.tbi", chrom=chromList),
     output:
-        projectVCF=protected("results/HaplotypeCaller/genotyped/combined/HC_variants.vcf.gz"),
-        idx=protected("results/HaplotypeCaller/genotyped/combined/HC_variants.vcf.gz.tbi"),
+        projectVCF=protected("results/HaplotypeCaller/genotyped/HC_variants.vcf.gz"),
+        idx=protected("results/HaplotypeCaller/genotyped/HC_variants.vcf.gz.tbi"),
     params:
         tempDir + "HC_concat_vcfs_bcftools/",
     conda:
