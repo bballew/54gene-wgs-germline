@@ -119,7 +119,8 @@ rule merge_calls:
     conda:
         "../envs/bcftools_tabix.yaml"
     shell:
-        "bcftools concat -a -Ov {input} | bcftools sort -T {params} --threads {threads} -Oz -o {output.vcf} && "
+        "bcftools concat -a -Ov {input} | "
+        "bcftools sort -T {params} -Oz -o {output.vcf} && "
         "tabix -p vcf {output.vcf}" # 'gatk --java-options "-Xmx4G" GatherVcfs -I {input.snps} -I {input.indels} -O {output}'
 
 

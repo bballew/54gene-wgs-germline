@@ -17,7 +17,6 @@ import glob
 
 # temporary variable assignments for testing:
 nt = 2
-fq_dir = "/Users/bariballew/fastqs/"
 tempDir = "temp/"
 # https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0/
 
@@ -43,12 +42,67 @@ dt = currentDt.strftime("%Y%m%d%H%M%S")
 # should double-check that sample_ID will always be unique
 # otherwise consider appending other info like lane/well/runID
 # will want to add functionality to analyze across multiple runs
-SAMPLES = []
-with open(sampleFile) as f:
-    next(f)  # assume one header row
-    for line in f:
-        SAMPLES.append(line.split(",")[0])
 
+
+def read_in_manifest(s):
+    """
+    """
+    d = {}
+    with open(s) as f:
+        for line in f:
+            (rg, sm, read1, read2) = line.split()
+            d[rg] = sm, read1, read2
+    return d
+
+
+def create_samples_set(d):
+    """
+    """
+    sm_set = set()
+    for (key, value) in d.items():
+        sm_set.add(value[0])
+    return list(sm_set)
+
+
+def get_read1_fastq(wildcards):
+    """
+    """
+    (sm, read1, read2) = sampleDict[wildcards.rg]
+    return read1
+
+
+def get_read2_fastq(wildcards):
+    """
+    """
+    (sm, read1, read2) = sampleDict[wildcards.rg]
+    return read2
+
+
+def get_sm(wildcards):
+    """
+    """
+    (sm, read1, read2) = sampleDict[wildcards.rg]
+    return sm
+
+
+def list_markdup_inputs(wildcards):
+    """
+    Lists full path and file name for each readgroup bam that
+    has the same sample name (SM).  Used to create input string
+    for Sentieon command (-i /path/to/sample.bam -i
+    /path/to/sample2.bam ...) for rule score_duplicates and
+    remove_duplicates.
+    """
+    l1 = []
+    for (keys, vals) in sampleDict.items():
+        if wildcards.sample in vals:
+            l1.append("results/mapped/" + wildcards.sample + "/" + keys + ".bam")
+    s1 = " INPUT=".join(l1)
+    return s1
+
+
+sampleDict = read_in_manifest(sampleFile)
+SAMPLES = create_samples_set(sampleDict)
 
 # Previously read from dict, but now that I'm programmatically retrieving
 # the ref genome and index files, it's easier to just have a hard-coded list
@@ -148,10 +202,15 @@ def get_DBImport_path2(wildcards):
 include: "rules/filter.smk"
 
 
+##### Wildcard constraints #####
+wildcard_constraints:
+    sample="|".join(SAMPLES),
+    rg="|".join(sampleDict.keys()),
+
+
 rule all:
     input:
         expand("results/alignment_stats/{sample}.txt", sample=SAMPLES), # "results/multiqc/multiqc.html",
-        "results/HaplotypeCaller/genotyped/combined/HC_variants.vcf.gz",
         "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
 
 
@@ -188,54 +247,53 @@ rule get_resources:
         "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf.idx resources/ --no-sign-request"
 
 
-rule fastqc:
-    """
-    """
-    input:
-        fq_dir + "{fq}.fastq.gz",
-    output:
-        html="results/fastqc/{fq}/{fq}_fastqc.html",
-        zip="results/fastqc/{fq}/{fq}_fastqc.zip",
-    threads: nt
-    conda:
-        "envs/fastqc.yaml"
-    shell:
-        "fastqc {input} --quiet -t {threads} --outdir=results/fastqc/{wildcards.fq}/"
+# rule fastqc:
+#     """
+#     """
+#     input:
+#         fq_dir + "{fq}.fastq.gz",
+#     output:
+#         html="results/fastqc/{fq}/{fq}_fastqc.html",
+#         zip="results/fastqc/{fq}/{fq}_fastqc.zip",
+#     threads: nt
+#     conda:
+#         "envs/fastqc_multiqc.yaml"
+#     shell:
+#         "fastqc {input} --quiet -t {threads} --outdir=results/fastqc/{wildcards.fq}/"
 
 
-rule multiqc:
-    """
-    NOT WORKING.
-    """
-    input:
-        expand(
-            "results/fastqc/{sample}_L001_R1_001/{sample}_L001_R1_001_fastqc.zip", sample=SAMPLES
-        ),
-        expand(
-            "results/fastqc/{sample}_L001_R2_001/{sample}_L001_R2_001_fastqc.zip", sample=SAMPLES
-        ), # dedup metrics and samtools-stats can go here too when ready
-    output:
-        "results/multiqc/multiqc.html",
-    params:
-        outDir="results/multiqc/",
-        outName="multiqc.html", # inDirs=expand("results/fastqc/{sample}_L001_R1_001/",sample=SAMPLES),expand("results/fastqc/{sample}_L001_R2_001/",sample=SAMPLES)
-    conda:
-        "envs/multiqc.yaml"
-    shell:
-        "multiqc --force -o {params.outDir} -n {params.outName} {input}"
+# rule multiqc:
+#     """
+#     """
+#     input:
+#         expand(
+#             "results/fastqc/{sample}_L001_R1_001/{sample}_L001_R1_001_fastqc.zip", sample=SAMPLES
+#         ),
+#         expand(
+#             "results/fastqc/{sample}_L001_R2_001/{sample}_L001_R2_001_fastqc.zip", sample=SAMPLES
+#         ), # dedup metrics and samtools-stats can go here too when ready
+#     output:
+#         "results/multiqc/multiqc.html",
+#     params:
+#         outDir="results/multiqc/",
+#         outName="multiqc.html", # inDirs=expand("results/fastqc/{sample}_L001_R1_001/",sample=SAMPLES),expand("results/fastqc/{sample}_L001_R2_001/",sample=SAMPLES)
+#     conda:
+#         "envs/fastqc_multiqc.yaml"
+#     shell:
+#         "multiqc --force -o {params.outDir} -n {params.outName} {input}"
 
 
 rule quality_trimming:
     """Assume paired-end.  May want to tweak params; possibly put in config.
     """
     input:
-        r1=fq_dir + "{sample}_L001_R1_001.fastq.gz",
-        r2=fq_dir + "{sample}_L001_R2_001.fastq.gz",
+        r1=get_read1_fastq,
+        r2=get_read2_fastq,
     output:
-        r1_paired="results/paired_trimmed_reads/{sample}_r1.fastq.gz",
-        r2_paired="results/paired_trimmed_reads/{sample}_r2.fastq.gz",
-        r1_unpaired="results/unpaired_trimmed_reads/{sample}_r1.fastq.gz",
-        r2_unpaired="results/unpaired_trimmed_reads/{sample}_r2.fastq.gz",
+        r1_paired="results/paired_trimmed_reads/{sample}/{rg}_r1.fastq.gz",
+        r2_paired="results/paired_trimmed_reads/{sample}/{rg}_r2.fastq.gz",
+        r1_unpaired="results/unpaired_trimmed_reads/{sample}/{rg}_r1.fastq.gz",
+        r2_unpaired="results/unpaired_trimmed_reads/{sample}/{rg}_r2.fastq.gz",
     params:
         lead=12,
         trail=12,
@@ -265,15 +323,13 @@ rule align_reads:
     For samples where multiple fastq files represent a single sample,
     e.g. if a sample was run over several lanes, each R1/R1 fastq pair
     will be aligned separately here.  Then the aligned bams from a single
-    sample will be combined during the dedup step below. **N/A for 54gene ATM.
+    sample will be combined during the dedup step below.
 
-    Note that I'm putting "null" as the read group for now, but we could
-    use the flowcell ID or some such.
     """
     input:
         r="resources/Homo_sapiens_assembly38.fasta",
-        r1="results/paired_trimmed_reads/{sample}_r1.fastq.gz",
-        r2="results/paired_trimmed_reads/{sample}_r2.fastq.gz",
+        r1="results/paired_trimmed_reads/{sample}/{rg}_r1.fastq.gz",
+        r2="results/paired_trimmed_reads/{sample}/{rg}_r2.fastq.gz",
         d="resources/Homo_sapiens_assembly38.dict",
         fai="resources/Homo_sapiens_assembly38.fasta.fai",
         amb="resources/Homo_sapiens_assembly38.fasta.64.amb",
@@ -282,57 +338,65 @@ rule align_reads:
         pac="resources/Homo_sapiens_assembly38.fasta.64.pac",
         sa="resources/Homo_sapiens_assembly38.fasta.64.sa",
     output:
-        temp("results/mapped/{sample}.bam"),
+        temp("results/mapped/{sample}/{rg}.bam"),
     params:
-        pl="ILLUMINA", # g = '{rg}',
+        pl="ILLUMINA",
         sort_order="coordinate",
+        rg="{rg}",
+        sm=get_sm,
     threads: nt
     conda:
         "envs/bwa_samtools.yaml"
     shell:
         "bwa mem "
         "-K 10000000 -M "
-        '-R "@RG\\tCN:54gene\\tID:null\\tSM:{wildcards.sample}\\tPL:{params.pl}\\tLB:N/A" '
+        '-R "@RG\\tCN:54gene\\tID:{params.rg}\\tSM:{params.sm}\\tPL:{params.pl}\\tLB:N/A" '
         "-t {threads} "
         "{input.r} {input.r1} {input.r2} | "
         "samtools sort -@ {threads} -o {output} - " # note - wanted to use bwa-mem2, but doesn't seem to be working via conda
 
 
 rule mark_duplicates:
-    """
+    """Mark duplicates and merge multiple bams per sample.
+
+    If there are multiple fastq pairs per sample (e.g. if the sample
+    is split over multiple lanes), I am waiting to merge them until
+    this step, instead of concatenating them prior to alignment.  This
+    is to help maintain some additional parallelization going in to
+    alignment.
     """
     input:
-        "results/mapped/{sample}.bam",
+        expand("results/mapped/{{sample}}/{rg}.bam", rg=sampleDict.keys()),
     output:
         bam=temp("results/dedup/{sample}.bam"),
         metrics="results/dedup/{sample}.metrics.txt",
+    params:
+        list_markdup_inputs,
     conda:
         "envs/picard.yaml"
     shell:
         "picard MarkDuplicates "
         "REMOVE_DUPLICATES=true "
-        "INPUT={input} "
+        "INPUT={params} "
         "OUTPUT={output.bam} "
         "METRICS_FILE={output.metrics}"
 
 
 rule recalibrate_bams:
     """
-    Note that using conda gatk4 seems to require additional
-    setup of various python dependencies (https://gatk.broadinstitute.org/hc/en-us/articles/360035889851--How-to-Install-and-use-Conda-for-GATK4)
-    Instead, use docker container.
     """
     input:
         bam="results/dedup/{sample}.bam",
         r="resources/Homo_sapiens_assembly38.fasta",
         d="resources/Homo_sapiens_assembly38.dict",
         snps="resources/Homo_sapiens_assembly38.dbsnp138.vcf",
+        s_index="resources/Homo_sapiens_assembly38.dbsnp138.vcf.idx",
         indels="resources/Homo_sapiens_assembly38.known_indels.vcf.gz",
+        i_index="resources/Homo_sapiens_assembly38.known_indels.vcf.gz.tbi",
     output:
         "results/bqsr/{sample}.recal_table",
     conda:
-        "envs/gatk.yaml" # container:
-         #     "docker://broadinstitute/gatk:4.1.3.0"
+        "envs/gatk.yaml"
     shell:
         "gatk BaseRecalibrator "
         "-R {input.r} "
@@ -344,18 +408,16 @@ rule recalibrate_bams:
 
 rule apply_bqsr:
     """
-    TODO add indexes to input for known files; zip the dbsnp one
     """
     input:
-        bam="results/mapped/{sample}.bam",
+        bam="results/dedup/{sample}.bam",
         r="resources/Homo_sapiens_assembly38.fasta",
         d="resources/Homo_sapiens_assembly38.dict",
         recal="results/bqsr/{sample}.recal_table",
     output:
         "results/bqsr/{sample}.bam",
     conda:
-        "envs/gatk.yaml" # container:
-         #     "docker://broadinstitute/gatk:4.1.3.0"
+        "envs/gatk.yaml"
     shell:
         "gatk ApplyBQSR "
         "-R {input.r} "
@@ -416,7 +478,8 @@ rule split_bed_file:
     output:
         temp("results/split_regions/{chrom}.bed"),
     shell:
-        'grep "^{wildcards.chrom}[[:space:]]" {input} > {output}; if [ $? -le 1 ]; then exit 0; else exit 1; fi'
+        'grep "^{wildcards.chrom}[[:space:]]" {input} > {output}; '
+        "if [ $? -le 1 ]; then exit 0; else exit 1; fi"
 
 
 rule HC_call_variants:
