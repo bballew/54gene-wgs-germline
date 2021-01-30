@@ -210,7 +210,7 @@ wildcard_constraints:
 
 rule all:
     input:
-        expand("results/alignment_stats/{sample}.txt", sample=SAMPLES), # "results/multiqc/multiqc.html",
+        "results/multiqc/multiqc.html",
         "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
 
 
@@ -247,40 +247,54 @@ rule get_resources:
         "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf.idx resources/ --no-sign-request"
 
 
-# rule fastqc:
-#     """
-#     """
-#     input:
-#         fq_dir + "{fq}.fastq.gz",
-#     output:
-#         html="results/fastqc/{fq}/{fq}_fastqc.html",
-#         zip="results/fastqc/{fq}/{fq}_fastqc.zip",
-#     threads: nt
-#     conda:
-#         "envs/fastqc_multiqc.yaml"
-#     shell:
-#         "fastqc {input} --quiet -t {threads} --outdir=results/fastqc/{wildcards.fq}/"
+rule symlink_fastqs:
+    """
+    """
+    input:
+        r1=get_read1_fastq,
+        r2=get_read2_fastq,
+    output:
+        r1="results/input/{sample}_{rg}_r1.fastq.gz",
+        r2="results/input/{sample}_{rg}_r2.fastq.gz",
+    shell:
+        "ln -s {input.r1} {output.r1} && "
+        "ln -s {input.r2} {output.r2}"
 
 
-# rule multiqc:
-#     """
-#     """
-#     input:
-#         expand(
-#             "results/fastqc/{sample}_L001_R1_001/{sample}_L001_R1_001_fastqc.zip", sample=SAMPLES
-#         ),
-#         expand(
-#             "results/fastqc/{sample}_L001_R2_001/{sample}_L001_R2_001_fastqc.zip", sample=SAMPLES
-#         ), # dedup metrics and samtools-stats can go here too when ready
-#     output:
-#         "results/multiqc/multiqc.html",
-#     params:
-#         outDir="results/multiqc/",
-#         outName="multiqc.html", # inDirs=expand("results/fastqc/{sample}_L001_R1_001/",sample=SAMPLES),expand("results/fastqc/{sample}_L001_R2_001/",sample=SAMPLES)
-#     conda:
-#         "envs/fastqc_multiqc.yaml"
-#     shell:
-#         "multiqc --force -o {params.outDir} -n {params.outName} {input}"
+rule fastqc:
+    """
+    """
+    input:
+        r1="results/input/{sample}_{rg}_r1.fastq.gz",
+        r2="results/input/{sample}_{rg}_r2.fastq.gz",
+    output:
+        html1="results/fastqc/{sample}_{rg}_r1_fastqc.html",
+        zip1="results/fastqc/{sample}_{rg}_r1_fastqc.zip",
+        html2="results/fastqc/{sample}_{rg}_r2_fastqc.html",
+        zip2="results/fastqc/{sample}_{rg}_r2_fastqc.zip",
+    threads: nt
+    conda:
+        "envs/fastqc_multiqc.yaml"
+    shell:
+        "fastqc {input.r1} --quiet -t {threads} --outdir=results/fastqc/ && "
+        "fastqc {input.r2} --quiet -t {threads} --outdir=results/fastqc/"
+
+
+rule multiqc:
+    """
+    """
+    input:
+        expand("results/fastqc/{sample}_{rg}_r1_fastqc.zip", sample=SAMPLES, rg=sampleDict.keys()),
+        expand("results/fastqc/{sample}_{rg}_r2_fastqc.zip", sample=SAMPLES, rg=sampleDict.keys()), # dedup metrics and samtools-stats can go here too when ready
+    output:
+        "results/multiqc/multiqc.html",
+    params:
+        outDir="results/multiqc/",
+        outName="multiqc.html", # inDirs=expand("results/fastqc/{sample}_L001_R1_001/",sample=SAMPLES),expand("results/fastqc/{sample}_L001_R2_001/",sample=SAMPLES)
+    conda:
+        "envs/fastqc_multiqc.yaml"
+    shell:
+        "multiqc --force -o {params.outDir} -n {params.outName} {input}"
 
 
 rule quality_trimming:
