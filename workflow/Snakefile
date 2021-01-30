@@ -15,14 +15,6 @@ import datetime
 import subprocess
 import glob
 
-# temporary variable assignments for testing:
-nt = 2
-tempDir = "temp/"
-# https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0/
-
-
-bed = "resources/Homo_sapiens_assembly38.bed"  # change if not WGS - put switch in config?
-
 
 # reference the config file
 configfile: "config/config.yaml"
@@ -30,11 +22,14 @@ configfile: "config/config.yaml"
 
 # import variables from config
 sampleFile = config["sampleFile"]
-
+nt = config["threads"]
+tempDir = config["tempDir"]
 
 # set a datetime stamp for GATK DBImport step
 currentDt = datetime.datetime.now()
 dt = currentDt.strftime("%Y%m%d%H%M%S")
+
+bed = "resources/Homo_sapiens_assembly38.bed"  # change if not WGS - put switch in config?
 
 # parse manifest file
 # note that the lab says they're not planning on splitting samples
@@ -45,8 +40,7 @@ dt = currentDt.strftime("%Y%m%d%H%M%S")
 
 
 def read_in_manifest(s):
-    """
-    """
+    """Parse whitespace delimited manifest file."""
     d = {}
     with open(s) as f:
         for line in f:
@@ -56,8 +50,7 @@ def read_in_manifest(s):
 
 
 def create_samples_set(d):
-    """
-    """
+    """Generate a list of unique sample IDs from the manifest."""
     sm_set = set()
     for (key, value) in d.items():
         sm_set.add(value[0])
@@ -65,33 +58,28 @@ def create_samples_set(d):
 
 
 def get_read1_fastq(wildcards):
-    """
-    """
+    """Return r1 fastq for a given readgroup."""
     (sm, read1, read2) = sampleDict[wildcards.rg]
     return read1
 
 
 def get_read2_fastq(wildcards):
-    """
-    """
+    """Return r2 fastq for a given readgroup."""
     (sm, read1, read2) = sampleDict[wildcards.rg]
     return read2
 
 
 def get_sm(wildcards):
-    """
-    """
+    """Return sample name for a given readgroup."""
     (sm, read1, read2) = sampleDict[wildcards.rg]
     return sm
 
 
 def list_markdup_inputs(wildcards):
-    """
-    Lists full path and file name for each readgroup bam that
-    has the same sample name (SM).  Used to create input string
-    for Sentieon command (-i /path/to/sample.bam -i
-    /path/to/sample2.bam ...) for rule score_duplicates and
-    remove_duplicates.
+    """List path and filename for each readgroup bam with the same sample name.
+    Used to create input string for Picard MarkDuplicates (INPUT=/path/to/sample.bam
+    INPUT=/path/to/sample2.bam ...).  This allows merging of bams when there are
+    multiple fastq pairs per sample, resulting in multiple pre-dedup bams per sample.
     """
     l1 = []
     for (keys, vals) in sampleDict.items():
@@ -102,7 +90,9 @@ def list_markdup_inputs(wildcards):
 
 
 sampleDict = read_in_manifest(sampleFile)
+# dict where key is readgroup, values are sample, r1 fastq, r2 fastq
 SAMPLES = create_samples_set(sampleDict)
+# list of unique sample names
 
 # Previously read from dict, but now that I'm programmatically retrieving
 # the ref genome and index files, it's easier to just have a hard-coded list
@@ -137,6 +127,7 @@ chromList = [
 
 
 def get_DBImport_path1(wildcards):
+    """Define input files for rule HC_genotype_gvcfs."""
     return glob.glob(
         "results/HaplotypeCaller/DBImport/"
         + dt
@@ -149,6 +140,7 @@ def get_DBImport_path1(wildcards):
 
 
 def get_DBImport_path2(wildcards):
+    """Define input files for rule HC_genotype_gvcfs."""
     path = "".join(
         glob.glob("results/HaplotypeCaller/DBImport/" + dt + "_" + wildcards.chrom + "/*/__*/")
     )
@@ -202,7 +194,6 @@ def get_DBImport_path2(wildcards):
 include: "rules/filter.smk"
 
 
-##### Wildcard constraints #####
 wildcard_constraints:
     sample="|".join(SAMPLES),
     rg="|".join(sampleDict.keys()),
@@ -215,6 +206,10 @@ rule all:
 
 
 rule get_resources:
+    """Programmatically retrieve Broad resources from an AWS s3 bucket.
+    May want to allow a switch to their GCP bucket, depending on
+    which cloud provider we're using.
+    """
     output:
         "resources/Homo_sapiens_assembly38.fasta",
         "resources/Homo_sapiens_assembly38.dict",
@@ -248,7 +243,12 @@ rule get_resources:
 
 
 rule symlink_fastqs:
-    """
+    """Create symbolic links with a different naming scheme.
+    FastQC doesn't allow you to change the output file names, so
+    this is a way to get the sample and readgroup info into the reports
+    and use the filenaming convention followed in the rest of the pipeline.
+
+    Note that we're assuming paired end data throughout.
     """
     input:
         r1=get_read1_fastq,
@@ -262,8 +262,7 @@ rule symlink_fastqs:
 
 
 rule fastqc:
-    """
-    """
+    """Generate FastQC reports for all input fastqs."""
     input:
         r1="results/input/{sample}_{rg}_r1.fastq.gz",
         r2="results/input/{sample}_{rg}_r2.fastq.gz",
@@ -281,16 +280,18 @@ rule fastqc:
 
 
 rule multiqc:
-    """
+    """Generate one multiQC report for all input fastqs.
+    Should add samtools stats output and possibly others eventually,
+    dedup metrics, ...
     """
     input:
         expand("results/fastqc/{sample}_{rg}_r1_fastqc.zip", sample=SAMPLES, rg=sampleDict.keys()),
-        expand("results/fastqc/{sample}_{rg}_r2_fastqc.zip", sample=SAMPLES, rg=sampleDict.keys()), # dedup metrics and samtools-stats can go here too when ready
+        expand("results/fastqc/{sample}_{rg}_r2_fastqc.zip", sample=SAMPLES, rg=sampleDict.keys()),
     output:
         "results/multiqc/multiqc.html",
     params:
         outDir="results/multiqc/",
-        outName="multiqc.html", # inDirs=expand("results/fastqc/{sample}_L001_R1_001/",sample=SAMPLES),expand("results/fastqc/{sample}_L001_R2_001/",sample=SAMPLES)
+        outName="multiqc.html",
     conda:
         "envs/fastqc_multiqc.yaml"
     shell:
@@ -298,7 +299,10 @@ rule multiqc:
 
 
 rule quality_trimming:
-    """Assume paired-end.  May want to tweak params; possibly put in config.
+    """Quality trimming of read ends.
+    May want to tweak params; possibly put in config.  Could remove
+    adapter sequences here if we want to move that downstream at
+    some point.
     """
     input:
         r1=get_read1_fastq,
@@ -330,15 +334,14 @@ rule quality_trimming:
 
 
 rule align_reads:
-    """
-    Aligns with BWA; this step combines R1 and R2 data into a single
-    output bam.
-
-    For samples where multiple fastq files represent a single sample,
-    e.g. if a sample was run over several lanes, each R1/R1 fastq pair
-    will be aligned separately here.  Then the aligned bams from a single
-    sample will be combined during the dedup step below.
-
+    """Align reads to reference with BWA.
+    This step combines R1 and R2 data into a single output bam per
+    fastq pair.  For samples where multiple fastq files represent a
+    single sample, e.g. if a sample was run over several lanes, each
+    R1/R1 fastq pair will be aligned separately here.  Then the aligned
+    bams from a single sample will be combined during the dedup step
+    below.  This should help modestly speed up alignment, as it's run
+    in parallel for each fastq pair.
     """
     input:
         r="resources/Homo_sapiens_assembly38.fasta",
@@ -397,8 +400,7 @@ rule mark_duplicates:
 
 
 rule recalibrate_bams:
-    """
-    """
+    """Calculate table for BQSR."""
     input:
         bam="results/dedup/{sample}.bam",
         r="resources/Homo_sapiens_assembly38.fasta",
@@ -421,8 +423,7 @@ rule recalibrate_bams:
 
 
 rule apply_bqsr:
-    """
-    """
+    """Recalibrate bams."""
     input:
         bam="results/dedup/{sample}.bam",
         r="resources/Homo_sapiens_assembly38.fasta",
@@ -441,8 +442,7 @@ rule apply_bqsr:
 
 
 rule index_bams:
-    """
-    """
+    """Index post-BQSR bams."""
     input:
         "results/bqsr/{sample}.bam",
     output:
@@ -454,7 +454,8 @@ rule index_bams:
 
 
 rule samtools_stats:
-    """Generate stats for bams
+    """Generate stats for bams.
+    May want to do this pre-bqsr too.
     """
     input:
         "results/bqsr/{sample}.bam",
@@ -497,7 +498,7 @@ rule split_bed_file:
 
 
 rule HC_call_variants:
-    """Call gVCFs with GATK4
+    """Call gVCFs with GATK4.
     Runs over each chrom in parallel.
     """
     input:
@@ -529,8 +530,7 @@ rule HC_call_variants:
 
 
 rule HC_compress_gvcfs:
-    """Zip and index gVCFs
-    """
+    """Zip and index gVCFs."""
     input:
         gvcf="results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf",
         idx="results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.idx",
@@ -545,7 +545,7 @@ rule HC_compress_gvcfs:
 
 
 rule HC_concat_gvcfs:
-    """
+    """Combine per-chromosome gvcfs; maintain one per sample.
     Not clear whether it would be fastest to concat per-chrom gvcfs and
     then genotype, or genotype and then concat.
     """
@@ -567,6 +567,7 @@ rule HC_concat_gvcfs:
 
 
 rule HC_index_gvcf:
+    """index per-sample gvcfs."""
     input:
         "results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz",
     output:
@@ -578,7 +579,7 @@ rule HC_index_gvcf:
 
 
 rule HC_create_each_sample_map_file:
-    """Create sample file to be read by GenomicsDBImport
+    """Create sample file to be read by GenomicsDBImport.
 
     Can pass all vcfs on the command line, each with a -V before it,
     but with enough samples you will hit the character limit.  Instead,
@@ -601,6 +602,7 @@ rule HC_create_each_sample_map_file:
 
 
 rule HC_create_cohort_map_file:
+    """Combine per-sample map file into one cohort map file."""
     input:
         expand("results/HaplotypeCaller/DBImport/{sample}.map", sample=SAMPLES),
     output:
@@ -612,7 +614,7 @@ rule HC_create_cohort_map_file:
 
 
 rule HC_consolidate_gvcfs:
-    """Split samples by chromosome
+    """Split DBimport databases by chromosome.
 
     The output of this step includes some files that are in subdirectories
     with unpredictable names.  I've attempted to include them in the input
@@ -675,8 +677,7 @@ rule HC_consolidate_gvcfs:
 
 
 rule HC_genotype_gvcfs:
-    """Joint genotyping
-    """
+    """Joint genotyping."""
     input:
         r="resources/Homo_sapiens_assembly38.fasta",
         bed=bed,
@@ -707,8 +708,7 @@ rule HC_genotype_gvcfs:
 
 
 rule HC_concat_vcfs_bcftools:
-    """
-    """
+    """Combine per-chromosome joint-called multi-sample VCFs."""
     input:
         vcfList=expand("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz", chrom=chromList),
         indexList=expand("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz.tbi", chrom=chromList),

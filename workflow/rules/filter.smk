@@ -1,5 +1,12 @@
 rule split_multiallelics:
     """Normalize, left-align, and split mulit-allelics in the HC vcf.
+    Splitting multi-allelics means we won't have each row in the vcf
+    representing a unique genomic location.  But, this is allowed in
+    the vcf spec, and most downstream tools are ok with it.  Plus,
+    applying gatk hard filtering occurs via first separating out indels
+    and snps.  Multi-type loci don't get split into either category,
+    so by splitting the multi-allelics, you can apply the appropriate
+    filter to all alt alleles.
     """
     input:
         vcf="results/HaplotypeCaller/genotyped/HC_variants.vcf.gz",
@@ -107,6 +114,9 @@ rule hard_filter_indels:
 
 rule merge_calls:
     """
+    Opted for bcftools here, just because it's easy to multithread,
+    sort, zip, etc. all in one data stream.  Plus tabix is only in the
+    bcftools env right now :)
     """
     input:
         snps="results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz",
@@ -145,12 +155,3 @@ rule picard_metrics:
         "--DBSNP {input.dbsnp} "
         "-SD {input.d} "
         "-O {params}"
-
-
-# rule :
-#     """
-#     """
-#     input:
-#     output:
-#     conda: "../envs/gatk.yaml"
-#     shell:
