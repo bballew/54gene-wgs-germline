@@ -1,1 +1,3 @@
 sampleFile: "config/manifest.txt"
+threads: 8
+tempDir: "temp/"
