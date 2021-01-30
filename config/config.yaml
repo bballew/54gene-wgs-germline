@@ -1,1 +1,3 @@
-sampleFile: "config/sample_sheet_no_headers.csv"
+sampleFile: "config/manifest.txt"
+threads: 8
+tempDir: "temp/"

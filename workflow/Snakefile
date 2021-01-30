@@ -15,15 +15,6 @@ import datetime
 import subprocess
 import glob
 
-# temporary variable assignments for testing:
-nt = 2
-fq_dir = "/Users/bariballew/fastqs/"
-tempDir = "temp/"
-# https://console.cloud.google.com/storage/browser/genomics-public-data/resources/broad/hg38/v0/
-
-
-bed = "resources/Homo_sapiens_assembly38.bed"  # change if not WGS - put switch in config?
-
 
 # reference the config file
 configfile: "config/config.yaml"
@@ -31,11 +22,14 @@ configfile: "config/config.yaml"
 
 # import variables from config
 sampleFile = config["sampleFile"]
-
+nt = config["threads"]
+tempDir = config["tempDir"]
 
 # set a datetime stamp for GATK DBImport step
 currentDt = datetime.datetime.now()
 dt = currentDt.strftime("%Y%m%d%H%M%S")
+
+bed = "resources/Homo_sapiens_assembly38.bed"  # change if not WGS - put switch in config?
 
 # parse manifest file
 # note that the lab says they're not planning on splitting samples
@@ -43,12 +37,62 @@ dt = currentDt.strftime("%Y%m%d%H%M%S")
 # should double-check that sample_ID will always be unique
 # otherwise consider appending other info like lane/well/runID
 # will want to add functionality to analyze across multiple runs
-SAMPLES = []
-with open(sampleFile) as f:
-    next(f)  # assume one header row
-    for line in f:
-        SAMPLES.append(line.split(",")[0])
 
+
+def read_in_manifest(s):
+    """Parse whitespace delimited manifest file."""
+    d = {}
+    with open(s) as f:
+        for line in f:
+            (rg, sm, read1, read2) = line.split()
+            d[rg] = sm, read1, read2
+    return d
+
+
+def create_samples_set(d):
+    """Generate a list of unique sample IDs from the manifest."""
+    sm_set = set()
+    for (key, value) in d.items():
+        sm_set.add(value[0])
+    return list(sm_set)
+
+
+def get_read1_fastq(wildcards):
+    """Return r1 fastq for a given readgroup."""
+    (sm, read1, read2) = sampleDict[wildcards.rg]
+    return read1
+
+
+def get_read2_fastq(wildcards):
+    """Return r2 fastq for a given readgroup."""
+    (sm, read1, read2) = sampleDict[wildcards.rg]
+    return read2
+
+
+def get_sm(wildcards):
+    """Return sample name for a given readgroup."""
+    (sm, read1, read2) = sampleDict[wildcards.rg]
+    return sm
+
+
+def list_markdup_inputs(wildcards):
+    """List path and filename for each readgroup bam with the same sample name.
+    Used to create input string for Picard MarkDuplicates (INPUT=/path/to/sample.bam
+    INPUT=/path/to/sample2.bam ...).  This allows merging of bams when there are
+    multiple fastq pairs per sample, resulting in multiple pre-dedup bams per sample.
+    """
+    l1 = []
+    for (keys, vals) in sampleDict.items():
+        if wildcards.sample in vals:
+            l1.append("results/mapped/" + wildcards.sample + "/" + keys + ".bam")
+    s1 = " INPUT=".join(l1)
+    return s1
+
+
+sampleDict = read_in_manifest(sampleFile)
+# dict where key is readgroup, values are sample, r1 fastq, r2 fastq
+SAMPLES = create_samples_set(sampleDict)
+# list of unique sample names
 
 # Previously read from dict, but now that I'm programmatically retrieving
 # the ref genome and index files, it's easier to just have a hard-coded list
@@ -83,6 +127,7 @@ chromList = [
 
 
 def get_DBImport_path1(wildcards):
+    """Define input files for rule HC_genotype_gvcfs."""
     return glob.glob(
         "results/HaplotypeCaller/DBImport/"
         + dt
@@ -95,6 +140,7 @@ def get_DBImport_path1(wildcards):
 
 
 def get_DBImport_path2(wildcards):
+    """Define input files for rule HC_genotype_gvcfs."""
     path = "".join(
         glob.glob("results/HaplotypeCaller/DBImport/" + dt + "_" + wildcards.chrom + "/*/__*/")
     )
@@ -148,14 +194,22 @@ def get_DBImport_path2(wildcards):
 include: "rules/filter.smk"
 
 
+wildcard_constraints:
+    sample="|".join(SAMPLES),
+    rg="|".join(sampleDict.keys()),
+
+
 rule all:
     input:
-        expand("results/alignment_stats/{sample}.txt", sample=SAMPLES), # "results/multiqc/multiqc.html",
-        "results/HaplotypeCaller/genotyped/combined/HC_variants.vcf.gz",
+        "results/multiqc/multiqc.html",
         "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
 
 
 rule get_resources:
+    """Programmatically retrieve Broad resources from an AWS s3 bucket.
+    May want to allow a switch to their GCP bucket, depending on
+    which cloud provider we're using.
+    """
     output:
         "resources/Homo_sapiens_assembly38.fasta",
         "resources/Homo_sapiens_assembly38.dict",
@@ -188,54 +242,76 @@ rule get_resources:
         "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf.idx resources/ --no-sign-request"
 
 
-rule fastqc:
-    """
+rule symlink_fastqs:
+    """Create symbolic links with a different naming scheme.
+    FastQC doesn't allow you to change the output file names, so
+    this is a way to get the sample and readgroup info into the reports
+    and use the filenaming convention followed in the rest of the pipeline.
+
+    Note that we're assuming paired end data throughout.
     """
     input:
-        fq_dir + "{fq}.fastq.gz",
+        r1=get_read1_fastq,
+        r2=get_read2_fastq,
     output:
-        html="results/fastqc/{fq}/{fq}_fastqc.html",
-        zip="results/fastqc/{fq}/{fq}_fastqc.zip",
+        r1="results/input/{sample}_{rg}_r1.fastq.gz",
+        r2="results/input/{sample}_{rg}_r2.fastq.gz",
+    shell:
+        "ln -s {input.r1} {output.r1} && "
+        "ln -s {input.r2} {output.r2}"
+
+
+rule fastqc:
+    """Generate FastQC reports for all input fastqs."""
+    input:
+        r1="results/input/{sample}_{rg}_r1.fastq.gz",
+        r2="results/input/{sample}_{rg}_r2.fastq.gz",
+    output:
+        html1="results/fastqc/{sample}_{rg}_r1_fastqc.html",
+        zip1="results/fastqc/{sample}_{rg}_r1_fastqc.zip",
+        html2="results/fastqc/{sample}_{rg}_r2_fastqc.html",
+        zip2="results/fastqc/{sample}_{rg}_r2_fastqc.zip",
     threads: nt
     conda:
-        "envs/fastqc.yaml"
+        "envs/fastqc_multiqc.yaml"
     shell:
-        "fastqc {input} --quiet -t {threads} --outdir=results/fastqc/{wildcards.fq}/"
+        "fastqc {input.r1} --quiet -t {threads} --outdir=results/fastqc/ && "
+        "fastqc {input.r2} --quiet -t {threads} --outdir=results/fastqc/"
 
 
 rule multiqc:
-    """
-    NOT WORKING.
+    """Generate one multiQC report for all input fastqs.
+    Should add samtools stats output and possibly others eventually,
+    dedup metrics, ...
     """
     input:
-        expand(
-            "results/fastqc/{sample}_L001_R1_001/{sample}_L001_R1_001_fastqc.zip", sample=SAMPLES
-        ),
-        expand(
-            "results/fastqc/{sample}_L001_R2_001/{sample}_L001_R2_001_fastqc.zip", sample=SAMPLES
-        ), # dedup metrics and samtools-stats can go here too when ready
+        expand("results/fastqc/{sample}_{rg}_r1_fastqc.zip", sample=SAMPLES, rg=sampleDict.keys()),
+        expand("results/fastqc/{sample}_{rg}_r2_fastqc.zip", sample=SAMPLES, rg=sampleDict.keys()),
     output:
         "results/multiqc/multiqc.html",
     params:
         outDir="results/multiqc/",
-        outName="multiqc.html", # inDirs=expand("results/fastqc/{sample}_L001_R1_001/",sample=SAMPLES),expand("results/fastqc/{sample}_L001_R2_001/",sample=SAMPLES)
+        outName="multiqc.html",
     conda:
-        "envs/multiqc.yaml"
+        "envs/fastqc_multiqc.yaml"
     shell:
         "multiqc --force -o {params.outDir} -n {params.outName} {input}"
 
 
 rule quality_trimming:
-    """Assume paired-end.  May want to tweak params; possibly put in config.
+    """Quality trimming of read ends.
+    May want to tweak params; possibly put in config.  Could remove
+    adapter sequences here if we want to move that downstream at
+    some point.
     """
     input:
-        r1=fq_dir + "{sample}_L001_R1_001.fastq.gz",
-        r2=fq_dir + "{sample}_L001_R2_001.fastq.gz",
+        r1=get_read1_fastq,
+        r2=get_read2_fastq,
     output:
-        r1_paired="results/paired_trimmed_reads/{sample}_r1.fastq.gz",
-        r2_paired="results/paired_trimmed_reads/{sample}_r2.fastq.gz",
-        r1_unpaired="results/unpaired_trimmed_reads/{sample}_r1.fastq.gz",
-        r2_unpaired="results/unpaired_trimmed_reads/{sample}_r2.fastq.gz",
+        r1_paired="results/paired_trimmed_reads/{sample}/{rg}_r1.fastq.gz",
+        r2_paired="results/paired_trimmed_reads/{sample}/{rg}_r2.fastq.gz",
+        r1_unpaired="results/unpaired_trimmed_reads/{sample}/{rg}_r1.fastq.gz",
+        r2_unpaired="results/unpaired_trimmed_reads/{sample}/{rg}_r2.fastq.gz",
     params:
         lead=12,
         trail=12,
@@ -258,22 +334,19 @@ rule quality_trimming:
 
 
 rule align_reads:
-    """
-    Aligns with BWA; this step combines R1 and R2 data into a single
-    output bam.
-
-    For samples where multiple fastq files represent a single sample,
-    e.g. if a sample was run over several lanes, each R1/R1 fastq pair
-    will be aligned separately here.  Then the aligned bams from a single
-    sample will be combined during the dedup step below. **N/A for 54gene ATM.
-
-    Note that I'm putting "null" as the read group for now, but we could
-    use the flowcell ID or some such.
+    """Align reads to reference with BWA.
+    This step combines R1 and R2 data into a single output bam per
+    fastq pair.  For samples where multiple fastq files represent a
+    single sample, e.g. if a sample was run over several lanes, each
+    R1/R1 fastq pair will be aligned separately here.  Then the aligned
+    bams from a single sample will be combined during the dedup step
+    below.  This should help modestly speed up alignment, as it's run
+    in parallel for each fastq pair.
     """
     input:
         r="resources/Homo_sapiens_assembly38.fasta",
-        r1="results/paired_trimmed_reads/{sample}_r1.fastq.gz",
-        r2="results/paired_trimmed_reads/{sample}_r2.fastq.gz",
+        r1="results/paired_trimmed_reads/{sample}/{rg}_r1.fastq.gz",
+        r2="results/paired_trimmed_reads/{sample}/{rg}_r2.fastq.gz",
         d="resources/Homo_sapiens_assembly38.dict",
         fai="resources/Homo_sapiens_assembly38.fasta.fai",
         amb="resources/Homo_sapiens_assembly38.fasta.64.amb",
@@ -282,57 +355,64 @@ rule align_reads:
         pac="resources/Homo_sapiens_assembly38.fasta.64.pac",
         sa="resources/Homo_sapiens_assembly38.fasta.64.sa",
     output:
-        temp("results/mapped/{sample}.bam"),
+        temp("results/mapped/{sample}/{rg}.bam"),
     params:
-        pl="ILLUMINA", # g = '{rg}',
+        pl="ILLUMINA",
         sort_order="coordinate",
+        rg="{rg}",
+        sm=get_sm,
     threads: nt
     conda:
         "envs/bwa_samtools.yaml"
     shell:
         "bwa mem "
         "-K 10000000 -M "
-        '-R "@RG\\tCN:54gene\\tID:null\\tSM:{wildcards.sample}\\tPL:{params.pl}\\tLB:N/A" '
+        '-R "@RG\\tCN:54gene\\tID:{params.rg}\\tSM:{params.sm}\\tPL:{params.pl}\\tLB:N/A" '
         "-t {threads} "
         "{input.r} {input.r1} {input.r2} | "
         "samtools sort -@ {threads} -o {output} - " # note - wanted to use bwa-mem2, but doesn't seem to be working via conda
 
 
 rule mark_duplicates:
-    """
+    """Mark duplicates and merge multiple bams per sample.
+
+    If there are multiple fastq pairs per sample (e.g. if the sample
+    is split over multiple lanes), I am waiting to merge them until
+    this step, instead of concatenating them prior to alignment.  This
+    is to help maintain some additional parallelization going in to
+    alignment.
     """
     input:
-        "results/mapped/{sample}.bam",
+        expand("results/mapped/{{sample}}/{rg}.bam", rg=sampleDict.keys()),
     output:
         bam=temp("results/dedup/{sample}.bam"),
         metrics="results/dedup/{sample}.metrics.txt",
+    params:
+        list_markdup_inputs,
     conda:
         "envs/picard.yaml"
     shell:
         "picard MarkDuplicates "
         "REMOVE_DUPLICATES=true "
-        "INPUT={input} "
+        "INPUT={params} "
         "OUTPUT={output.bam} "
         "METRICS_FILE={output.metrics}"
 
 
 rule recalibrate_bams:
-    """
-    Note that using conda gatk4 seems to require additional
-    setup of various python dependencies (https://gatk.broadinstitute.org/hc/en-us/articles/360035889851--How-to-Install-and-use-Conda-for-GATK4)
-    Instead, use docker container.
-    """
+    """Calculate table for BQSR."""
     input:
         bam="results/dedup/{sample}.bam",
         r="resources/Homo_sapiens_assembly38.fasta",
         d="resources/Homo_sapiens_assembly38.dict",
         snps="resources/Homo_sapiens_assembly38.dbsnp138.vcf",
+        s_index="resources/Homo_sapiens_assembly38.dbsnp138.vcf.idx",
         indels="resources/Homo_sapiens_assembly38.known_indels.vcf.gz",
+        i_index="resources/Homo_sapiens_assembly38.known_indels.vcf.gz.tbi",
     output:
         "results/bqsr/{sample}.recal_table",
     conda:
-        "envs/gatk.yaml" # container:
-         #     "docker://broadinstitute/gatk:4.1.3.0"
+        "envs/gatk.yaml"
     shell:
         "gatk BaseRecalibrator "
         "-R {input.r} "
@@ -343,19 +423,16 @@ rule recalibrate_bams:
 
 
 rule apply_bqsr:
-    """
-    TODO add indexes to input for known files; zip the dbsnp one
-    """
+    """Recalibrate bams."""
     input:
-        bam="results/mapped/{sample}.bam",
+        bam="results/dedup/{sample}.bam",
         r="resources/Homo_sapiens_assembly38.fasta",
         d="resources/Homo_sapiens_assembly38.dict",
         recal="results/bqsr/{sample}.recal_table",
     output:
         "results/bqsr/{sample}.bam",
     conda:
-        "envs/gatk.yaml" # container:
-         #     "docker://broadinstitute/gatk:4.1.3.0"
+        "envs/gatk.yaml"
     shell:
         "gatk ApplyBQSR "
         "-R {input.r} "
@@ -365,8 +442,7 @@ rule apply_bqsr:
 
 
 rule index_bams:
-    """
-    """
+    """Index post-BQSR bams."""
     input:
         "results/bqsr/{sample}.bam",
     output:
@@ -378,7 +454,8 @@ rule index_bams:
 
 
 rule samtools_stats:
-    """Generate stats for bams
+    """Generate stats for bams.
+    May want to do this pre-bqsr too.
     """
     input:
         "results/bqsr/{sample}.bam",
@@ -416,11 +493,12 @@ rule split_bed_file:
     output:
         temp("results/split_regions/{chrom}.bed"),
     shell:
-        'grep "^{wildcards.chrom}[[:space:]]" {input} > {output}; if [ $? -le 1 ]; then exit 0; else exit 1; fi'
+        'grep "^{wildcards.chrom}[[:space:]]" {input} > {output}; '
+        "if [ $? -le 1 ]; then exit 0; else exit 1; fi"
 
 
 rule HC_call_variants:
-    """Call gVCFs with GATK4
+    """Call gVCFs with GATK4.
     Runs over each chrom in parallel.
     """
     input:
@@ -452,8 +530,7 @@ rule HC_call_variants:
 
 
 rule HC_compress_gvcfs:
-    """Zip and index gVCFs
-    """
+    """Zip and index gVCFs."""
     input:
         gvcf="results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf",
         idx="results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.idx",
@@ -468,7 +545,7 @@ rule HC_compress_gvcfs:
 
 
 rule HC_concat_gvcfs:
-    """
+    """Combine per-chromosome gvcfs; maintain one per sample.
     Not clear whether it would be fastest to concat per-chrom gvcfs and
     then genotype, or genotype and then concat.
     """
@@ -490,6 +567,7 @@ rule HC_concat_gvcfs:
 
 
 rule HC_index_gvcf:
+    """index per-sample gvcfs."""
     input:
         "results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz",
     output:
@@ -501,7 +579,7 @@ rule HC_index_gvcf:
 
 
 rule HC_create_each_sample_map_file:
-    """Create sample file to be read by GenomicsDBImport
+    """Create sample file to be read by GenomicsDBImport.
 
     Can pass all vcfs on the command line, each with a -V before it,
     but with enough samples you will hit the character limit.  Instead,
@@ -524,6 +602,7 @@ rule HC_create_each_sample_map_file:
 
 
 rule HC_create_cohort_map_file:
+    """Combine per-sample map file into one cohort map file."""
     input:
         expand("results/HaplotypeCaller/DBImport/{sample}.map", sample=SAMPLES),
     output:
@@ -535,7 +614,7 @@ rule HC_create_cohort_map_file:
 
 
 rule HC_consolidate_gvcfs:
-    """Split samples by chromosome
+    """Split DBimport databases by chromosome.
 
     The output of this step includes some files that are in subdirectories
     with unpredictable names.  I've attempted to include them in the input
@@ -598,8 +677,7 @@ rule HC_consolidate_gvcfs:
 
 
 rule HC_genotype_gvcfs:
-    """Joint genotyping
-    """
+    """Joint genotyping."""
     input:
         r="resources/Homo_sapiens_assembly38.fasta",
         bed=bed,
@@ -630,8 +708,7 @@ rule HC_genotype_gvcfs:
 
 
 rule HC_concat_vcfs_bcftools:
-    """
-    """
+    """Combine per-chromosome joint-called multi-sample VCFs."""
     input:
         vcfList=expand("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz", chrom=chromList),
         indexList=expand("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz.tbi", chrom=chromList),
