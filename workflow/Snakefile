@@ -224,6 +224,8 @@ rule get_resources:
         "resources/Homo_sapiens_assembly38.known_indels.vcf.gz.tbi",
         "resources/Homo_sapiens_assembly38.dbsnp138.vcf",
         "resources/Homo_sapiens_assembly38.dbsnp138.vcf.idx",
+    benchmark:
+        "results/performance_benchmarks/get_resources/benchmarks.tsv"
     conda:
         "envs/aws.yaml"
     shell:
@@ -256,6 +258,8 @@ rule symlink_fastqs:
     output:
         r1="results/input/{sample}_{rg}_r1.fastq.gz",
         r2="results/input/{sample}_{rg}_r2.fastq.gz",
+    benchmark:
+        "results/performance_benchmarks/symlink_fastqs/{sample}_{rg}.tsv"
     shell:
         "ln -s {input.r1} {output.r1} && "
         "ln -s {input.r2} {output.r2}"
@@ -271,6 +275,8 @@ rule fastqc:
         zip1="results/fastqc/{sample}_{rg}_r1_fastqc.zip",
         html2="results/fastqc/{sample}_{rg}_r2_fastqc.html",
         zip2="results/fastqc/{sample}_{rg}_r2_fastqc.zip",
+    benchmark:
+        "results/performance_benchmarks/fastqc/{sample}_{rg}.tsv"
     threads: nt
     conda:
         "envs/fastqc_multiqc.yaml"
@@ -289,6 +295,8 @@ rule multiqc:
         expand("results/fastqc/{sample}_{rg}_r2_fastqc.zip", sample=SAMPLES, rg=sampleDict.keys()),
     output:
         "results/multiqc/multiqc.html",
+    benchmark:
+        "results/performance_benchmarks/multiqc/benchmarks.tsv"
     params:
         outDir="results/multiqc/",
         outName="multiqc.html",
@@ -312,6 +320,8 @@ rule quality_trimming:
         r2_paired="results/paired_trimmed_reads/{sample}/{rg}_r2.fastq.gz",
         r1_unpaired="results/unpaired_trimmed_reads/{sample}/{rg}_r1.fastq.gz",
         r2_unpaired="results/unpaired_trimmed_reads/{sample}/{rg}_r2.fastq.gz",
+    benchmark:
+        "results/performance_benchmarks/quality_trimming/{sample}_{rg}.tsv"
     params:
         lead=12,
         trail=12,
@@ -356,6 +366,8 @@ rule align_reads:
         sa="resources/Homo_sapiens_assembly38.fasta.64.sa",
     output:
         temp("results/mapped/{sample}/{rg}.bam"),
+    benchmark:
+        "results/performance_benchmarks/align_reads/{sample}_{rg}.tsv"
     params:
         pl="ILLUMINA",
         sort_order="coordinate",
@@ -387,6 +399,8 @@ rule mark_duplicates:
     output:
         bam=temp("results/dedup/{sample}.bam"),
         metrics="results/dedup/{sample}.metrics.txt",
+    benchmark:
+        "results/performance_benchmarks/mark_duplicates/{sample}.tsv"
     params:
         list_markdup_inputs,
     conda:
@@ -411,6 +425,8 @@ rule recalibrate_bams:
         i_index="resources/Homo_sapiens_assembly38.known_indels.vcf.gz.tbi",
     output:
         "results/bqsr/{sample}.recal_table",
+    benchmark:
+        "results/performance_benchmarks/recalibrate_bams/{sample}.tsv"
     conda:
         "envs/gatk.yaml"
     shell:
@@ -431,6 +447,8 @@ rule apply_bqsr:
         recal="results/bqsr/{sample}.recal_table",
     output:
         "results/bqsr/{sample}.bam",
+    benchmark:
+        "results/performance_benchmarks/apply_bqsr/{sample}.tsv"
     conda:
         "envs/gatk.yaml"
     shell:
@@ -447,6 +465,8 @@ rule index_bams:
         "results/bqsr/{sample}.bam",
     output:
         "results/bqsr/{sample}.bam.bai",
+    benchmark:
+        "results/performance_benchmarks/index_bams/{sample}.tsv"
     conda:
         "envs/bwa_samtools.yaml"
     shell:
@@ -461,6 +481,8 @@ rule samtools_stats:
         "results/bqsr/{sample}.bam",
     output:
         "results/alignment_stats/{sample}.txt",
+    benchmark:
+        "results/performance_benchmarks/samtools_stats/{sample}.tsv"
     conda:
         "envs/bwa_samtools.yaml"
     shell:
@@ -492,6 +514,8 @@ rule split_bed_file:
         bed,
     output:
         temp("results/split_regions/{chrom}.bed"),
+    benchmark:
+        "results/performance_benchmarks/split_bed_file/{chrom}.tsv"
     shell:
         'grep "^{wildcards.chrom}[[:space:]]" {input} > {output}; '
         "if [ $? -le 1 ]; then exit 0; else exit 1; fi"
@@ -516,6 +540,8 @@ rule HC_call_variants:
     output:
         gvcf=temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf"),
         idx=temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.idx"),
+    benchmark:
+        "results/performance_benchmarks/HC_call_variants/{sample}_{chrom}.tsv"
     conda:
         "envs/gatk.yaml"
     shell:
@@ -537,6 +563,8 @@ rule HC_compress_gvcfs:
     output:
         temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.gz"),
         temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.gz.tbi"),
+    benchmark:
+        "results/performance_benchmarks/HC_compress_gvcfs/{sample}_{chrom}.tsv"
     conda:
         "envs/bcftools_tabix.yaml"
     shell:
@@ -558,6 +586,8 @@ rule HC_concat_gvcfs:
         ),
     output:
         "results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz",
+    benchmark:
+        "results/performance_benchmarks/HC_concat_gvcfs/{sample}.tsv"
     params:
         lambda wildcards, input: " -I ".join(input.vcfList),
     conda:
@@ -572,6 +602,8 @@ rule HC_index_gvcf:
         "results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz",
     output:
         "results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz.tbi",
+    benchmark:
+        "results/performance_benchmarks/HC_index_gvcf/{sample}.tsv"
     conda:
         "envs/bcftools_tabix.yaml"
     shell:
@@ -594,6 +626,8 @@ rule HC_create_each_sample_map_file:
         index="results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz.tbi",
     output:
         temp("results/HaplotypeCaller/DBImport/{sample}.map"),
+    benchmark:
+        "results/performance_benchmarks/HC_create_each_sample_map_file/{sample}.tsv"
     conda:
         "envs/bcftools_tabix.yaml"
     shell:
@@ -607,6 +641,8 @@ rule HC_create_cohort_map_file:
         expand("results/HaplotypeCaller/DBImport/{sample}.map", sample=SAMPLES),
     output:
         temp("results/HaplotypeCaller/DBImport/cohort.sample_map"),
+    benchmark:
+        "results/performance_benchmarks/HC_create_cohort_map_file/benchmarks.tsv"
     params:
         mapDir="results/HaplotypeCaller/DBImport/",
     shell:
@@ -661,6 +697,8 @@ rule HC_consolidate_gvcfs:
         o2=temp("results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/vidmap.json"),
         o3=temp("results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/callset.json"),
         o4=temp("results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/__tiledb_workspace.tdb"),
+    benchmark:
+        "results/performance_benchmarks/HC_consolidate_gvcfs/{chrom}.tsv"
     params:
         interval="{chrom}",
         db="results/HaplotypeCaller/DBImport/" + dt + "_{chrom}",
@@ -690,6 +728,8 @@ rule HC_genotype_gvcfs:
     output:
         vcf=temp("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz"),
         idx=temp("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz.tbi"),
+    benchmark:
+        "results/performance_benchmarks/HC_genotype_gvcfs/{chrom}.tsv"
     params:
         db="results/HaplotypeCaller/DBImport/" + dt + "_{chrom}",
         t=tempDir + "HC_genotype_gvcfs/{chrom}/",
@@ -715,6 +755,8 @@ rule HC_concat_vcfs_bcftools:
     output:
         projectVCF=protected("results/HaplotypeCaller/genotyped/HC_variants.vcf.gz"),
         idx=protected("results/HaplotypeCaller/genotyped/HC_variants.vcf.gz.tbi"),
+    benchmark:
+        "results/performance_benchmarks/HC_concat_vcfs_bcftools/benchmarks.tsv"
     params:
         tempDir + "HC_concat_vcfs_bcftools/",
     conda:

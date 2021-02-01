@@ -15,6 +15,8 @@ rule split_multiallelics:
     output:
         vcf=temp("results/HaplotypeCaller/genotyped/HC_variants_split_multiallelics.vcf.gz"),
         index=temp("results/HaplotypeCaller/genotyped/HC_variants_split_multiallelics.vcf.gz.tbi"),
+    benchmark:
+        "results/performance_benchmarks/split_multiallelics/benchmarks.tsv"
     threads: nt
     conda:
         "../envs/bcftools_tabix.yaml"
@@ -36,6 +38,8 @@ rule split_snps:
         index="results/HaplotypeCaller/genotyped/HC_variants_split_multiallelics.vcf.gz.tbi",
     output:
         temp("results/HaplotypeCaller/filtered/snps.all.vcf.gz"),
+    benchmark:
+        "results/performance_benchmarks/split_snps/benchmarks.tsv"
     conda:
         "../envs/gatk.yaml"
     shell:
@@ -53,6 +57,8 @@ rule split_indels:
         index="results/HaplotypeCaller/genotyped/HC_variants_split_multiallelics.vcf.gz.tbi",
     output:
         temp("results/HaplotypeCaller/filtered/indels.all.vcf.gz"),
+    benchmark:
+        "results/performance_benchmarks/split_indels/benchmarks.tsv"
     conda:
         "../envs/gatk.yaml"
     shell:
@@ -69,6 +75,8 @@ rule hard_filter_snps:
         "results/HaplotypeCaller/filtered/snps.all.vcf.gz",
     output:
         temp("results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz"),
+    benchmark:
+        "results/performance_benchmarks/hard_filter_snps/benchmarks.tsv"
     conda:
         "../envs/gatk.yaml"
     shell:
@@ -91,6 +99,8 @@ rule hard_filter_indels:
         "results/HaplotypeCaller/filtered/indels.all.vcf.gz",
     output:
         temp("results/HaplotypeCaller/filtered/indels.hardfiltered.vcf.gz"),
+    benchmark:
+        "results/performance_benchmarks/hard_filter_indels/benchmarks.tsv"
     conda:
         "../envs/gatk.yaml"
     shell:
@@ -124,6 +134,8 @@ rule merge_calls:
     output:
         vcf=protected("results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz"),
         index=protected("results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz.tbi"),
+    benchmark:
+        "results/performance_benchmarks/merge_calls/benchmarks.tsv"
     params:
         tempDir,
     conda:
@@ -145,6 +157,8 @@ rule picard_metrics:
     output:
         "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
         "results/HaplotypeCaller/filtered/HC.variant_calling_summary_metrics",
+    benchmark:
+        "results/performance_benchmarks/picard_metrics/benchmarks.tsv"
     params:
         "results/HaplotypeCaller/filtered/HC",
     conda:
