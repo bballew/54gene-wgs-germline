@@ -20,7 +20,7 @@ rule HC_call_variants:
     benchmark:
         "results/performance_benchmarks/HC_call_variants/{sample}_{chrom}.tsv"
     conda:
-        "envs/gatk.yaml"
+        "../envs/gatk.yaml"
     shell:
         'gatk --java-options "-Xmx4G" HaplotypeCaller '
         "-R {input.r} "
@@ -43,7 +43,7 @@ rule HC_compress_gvcfs:
     benchmark:
         "results/performance_benchmarks/HC_compress_gvcfs/{sample}_{chrom}.tsv"
     conda:
-        "envs/bcftools_tabix.yaml"
+        "../envs/bcftools_tabix.yaml"
     shell:
         "bgzip {input.gvcf} && "
         "tabix -p vcf {input.gvcf}.gz"
@@ -68,7 +68,7 @@ rule HC_concat_gvcfs:
     params:
         lambda wildcards, input: " -I ".join(input.vcfList),
     conda:
-        "envs/gatk.yaml"
+        "../envs/gatk.yaml"
     shell:
         'gatk --java-options "-Xmx4G" GatherVcfs -I {params} -O {output}'
 
@@ -82,7 +82,7 @@ rule HC_index_gvcf:
     benchmark:
         "results/performance_benchmarks/HC_index_gvcf/{sample}.tsv"
     conda:
-        "envs/bcftools_tabix.yaml"
+        "../envs/bcftools_tabix.yaml"
     shell:
         "tabix -p vcf {input}"
 
@@ -106,7 +106,7 @@ rule HC_create_each_sample_map_file:
     benchmark:
         "results/performance_benchmarks/HC_create_each_sample_map_file/{sample}.tsv"
     conda:
-        "envs/bcftools_tabix.yaml"
+        "../envs/bcftools_tabix.yaml"
     shell:
         "n=$(bcftools query -l {input.gvcf});"
         'echo "${{n}}\t{input.gvcf}" > {output}'
@@ -180,7 +180,7 @@ rule HC_consolidate_gvcfs:
         interval="{chrom}",
         db="results/HaplotypeCaller/DBImport/" + dt + "_{chrom}",
     conda:
-        "envs/gatk.yaml"
+        "../envs/gatk.yaml"
     shell:
         "mkdir -p {output.t} && "
         "rm -r {params.db} && "
@@ -211,7 +211,7 @@ rule HC_genotype_gvcfs:
         db="results/HaplotypeCaller/DBImport/" + dt + "_{chrom}",
         t=tempDir + "HC_genotype_gvcfs/{chrom}/",
     conda:
-        "envs/gatk.yaml"
+        "../envs/gatk.yaml"
     shell:
         "mkdir -p {params.t} && "
         'gatk --java-options "-Xmx4G" GenotypeGVCFs '
@@ -237,7 +237,7 @@ rule HC_concat_vcfs_bcftools:
     params:
         tempDir + "HC_concat_vcfs_bcftools/",
     conda:
-        "envs/bcftools_tabix.yaml"
+        "../envs/bcftools_tabix.yaml"
     shell:
         "mkdir -p {params} && "
         "bcftools concat -a {input.vcfList} -Ou | "
