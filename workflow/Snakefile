@@ -97,7 +97,7 @@ def list_markdup_inputs(wildcards):
     l1 = []
     for (keys, vals) in sampleDict.items():
         if wildcards.sample in vals:
-            l1.append("results/mapped/" + wildcards.sample + "/" + keys + ".bam")
+            l1.append("results/mapped/" + keys + ".bam")
     s1 = " INPUT=".join(l1)
     return s1
 
