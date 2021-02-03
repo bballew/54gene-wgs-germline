@@ -1,6 +1,8 @@
-# Project Folders
+# Project Folders and logs
 temp
 results
+logs
+WGS*out
 
 resources/*
 !resources/Homo_sapiens_assembly38.bed
