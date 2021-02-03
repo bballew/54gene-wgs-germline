@@ -416,13 +416,15 @@ rule mark_duplicates:
     benchmark:
         "results/performance_benchmarks/mark_duplicates/{sample}.tsv"
     params:
-        list_markdup_inputs,
+        l = list_markdup_inputs,
+        t = tempDir
     conda:
         "envs/picard.yaml"
     shell:
         "picard MarkDuplicates "
+        "TMP_DIR= {params.t}"
         "REMOVE_DUPLICATES=true "
-        "INPUT={params} "
+        "INPUT={params.l} "
         "OUTPUT={output.bam} "
         "METRICS_FILE={output.metrics}"
 

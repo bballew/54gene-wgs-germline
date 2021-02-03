@@ -3,6 +3,7 @@ temp
 results
 logs
 WGS*out
+wrapper*
 
 resources/*
 !resources/Homo_sapiens_assembly38.bed
