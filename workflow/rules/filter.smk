@@ -38,6 +38,7 @@ rule split_snps:
         index="results/HaplotypeCaller/genotyped/HC_variants_split_multiallelics.vcf.gz.tbi",
     output:
         temp("results/HaplotypeCaller/filtered/snps.all.vcf.gz"),
+        temp("results/HaplotypeCaller/filtered/snps.all.vcf.gz.tbi"),
     benchmark:
         "results/performance_benchmarks/split_snps/benchmarks.tsv"
     conda:
@@ -57,6 +58,7 @@ rule split_indels:
         index="results/HaplotypeCaller/genotyped/HC_variants_split_multiallelics.vcf.gz.tbi",
     output:
         temp("results/HaplotypeCaller/filtered/indels.all.vcf.gz"),
+        temp("results/HaplotypeCaller/filtered/indels.all.vcf.gz.tbi"),
     benchmark:
         "results/performance_benchmarks/split_indels/benchmarks.tsv"
     conda:
@@ -75,6 +77,7 @@ rule hard_filter_snps:
         "results/HaplotypeCaller/filtered/snps.all.vcf.gz",
     output:
         temp("results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz"),
+        temp("results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz.tbi"),
     benchmark:
         "results/performance_benchmarks/hard_filter_snps/benchmarks.tsv"
     conda:
@@ -99,6 +102,7 @@ rule hard_filter_indels:
         "results/HaplotypeCaller/filtered/indels.all.vcf.gz",
     output:
         temp("results/HaplotypeCaller/filtered/indels.hardfiltered.vcf.gz"),
+        temp("results/HaplotypeCaller/filtered/indels.hardfiltered.vcf.gz.tbi"),
     benchmark:
         "results/performance_benchmarks/hard_filter_indels/benchmarks.tsv"
     conda:

@@ -169,7 +169,7 @@ rule HC_consolidate_gvcfs:
             "results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz.tbi", sample=SAMPLES
         ),
     output:
-        t=directory(tempDir + "HC_DBImport/{chrom}/"),
+        t=temp(directory(tempDir + "HC_DBImport/{chrom}/")),
         o1="results/HaplotypeCaller/DBImport/{chrom}/vcfheader.vcf",
         o2="results/HaplotypeCaller/DBImport/{chrom}/vidmap.json",
         o3="results/HaplotypeCaller/DBImport/{chrom}/callset.json",
