@@ -11,7 +11,6 @@ and generates QC reports, aligned BAMs, gVCFs, and multi-sample VCFs.
 """
 
 import os
-import datetime
 import subprocess
 import glob
 
@@ -25,18 +24,14 @@ sampleFile = config["sampleFile"]
 nt = config["threads"]
 tempDir = config["tempDir"]
 
-# set a datetime stamp for GATK DBImport step
-currentDt = datetime.datetime.now()
-dt = currentDt.strftime("%Y%m%d%H%M%S")
-
 bed = "resources/Homo_sapiens_assembly38.bed"  # change if not WGS - put switch in config?
 
 # parse manifest file
-# note that the lab says they're not planning on splitting samples
-# across lanes - that makes this really easy!
-# should double-check that sample_ID will always be unique
-# otherwise consider appending other info like lane/well/runID
-# will want to add functionality to analyze across multiple runs
+# Our lab is not currently splitting samples across lanes,
+# which means we only expect one r1/r2 fastq pair per sample.
+# However, other data may not follow this pattern (e.g. the Yale
+# data).  The pipeline is capable of handling either scenario,
+# as long as the requirements for the input manifest are met.
 
 
 def read_in_manifest(s):
@@ -416,8 +411,8 @@ rule mark_duplicates:
     benchmark:
         "results/performance_benchmarks/mark_duplicates/{sample}.tsv"
     params:
-        l = list_markdup_inputs,
-        t = tempDir
+        l=list_markdup_inputs,
+        t=tempDir,
     conda:
         "envs/picard.yaml"
     shell:
