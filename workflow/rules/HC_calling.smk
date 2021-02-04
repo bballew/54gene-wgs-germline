@@ -169,16 +169,16 @@ rule HC_consolidate_gvcfs:
             "results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz.tbi", sample=SAMPLES
         ),
     output:
-        t=temp(directory(tempDir + "HC_DBImport/{chrom}/")),
-        o1=temp("results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/vcfheader.vcf"),
-        o2=temp("results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/vidmap.json"),
-        o3=temp("results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/callset.json"),
-        o4=temp("results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/__tiledb_workspace.tdb"),
+        t=directory(tempDir + "HC_DBImport/{chrom}/"),
+        o1="results/HaplotypeCaller/DBImport/{chrom}/vcfheader.vcf",
+        o2="results/HaplotypeCaller/DBImport/{chrom}/vidmap.json",
+        o3="results/HaplotypeCaller/DBImport/{chrom}/callset.json",
+        o4="results/HaplotypeCaller/DBImport/{chrom}/__tiledb_workspace.tdb",
     benchmark:
         "results/performance_benchmarks/HC_consolidate_gvcfs/{chrom}.tsv"
     params:
         interval="{chrom}",
-        db="results/HaplotypeCaller/DBImport/" + dt + "_{chrom}",
+        db="results/HaplotypeCaller/DBImport/{chrom}",
     conda:
         "../envs/gatk.yaml"
     shell:
@@ -196,10 +196,10 @@ rule HC_genotype_gvcfs:
     input:
         r="resources/Homo_sapiens_assembly38.fasta",
         bed=bed,
-        o1="results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/vcfheader.vcf",
-        o2="results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/vidmap.json",
-        o3="results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/callset.json",
-        o4="results/HaplotypeCaller/DBImport/" + dt + "_{chrom}/__tiledb_workspace.tdb",
+        o1="results/HaplotypeCaller/DBImport/{chrom}/vcfheader.vcf",
+        o2="results/HaplotypeCaller/DBImport/{chrom}/vidmap.json",
+        o3="results/HaplotypeCaller/DBImport/{chrom}/callset.json",
+        o4="results/HaplotypeCaller/DBImport/{chrom}/__tiledb_workspace.tdb",
         o5=get_DBImport_path1,
         o6=get_DBImport_path2,
     output:
@@ -208,7 +208,7 @@ rule HC_genotype_gvcfs:
     benchmark:
         "results/performance_benchmarks/HC_genotype_gvcfs/{chrom}.tsv"
     params:
-        db="results/HaplotypeCaller/DBImport/" + dt + "_{chrom}",
+        db="results/HaplotypeCaller/DBImport/{chrom}",
         t=tempDir + "HC_genotype_gvcfs/{chrom}/",
     conda:
         "../envs/gatk.yaml"
