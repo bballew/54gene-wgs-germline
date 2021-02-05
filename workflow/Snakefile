@@ -302,12 +302,14 @@ rule fastqc:
         zip2="results/fastqc/{rg}_r2_fastqc.zip",
     benchmark:
         "results/performance_benchmarks/fastqc/{rg}.tsv"
+    params:
+        t=tempDir,
     threads: nt
     conda:
         "envs/fastqc_multiqc.yaml"
     shell:
-        "fastqc {input.r1} --quiet -t {threads} --outdir=results/fastqc/ && "
-        "fastqc {input.r2} --quiet -t {threads} --outdir=results/fastqc/"
+        "fastqc {input.r1} -d {params.t} --quiet -t {threads} --outdir=results/fastqc/ && "
+        "fastqc {input.r2} -d {params.t} --quiet -t {threads} --outdir=results/fastqc/"
 
 
 rule multiqc:
