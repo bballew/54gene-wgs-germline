@@ -296,6 +296,7 @@ rule fastqc:
         r1="results/input/{rg}_r1.fastq.gz",
         r2="results/input/{rg}_r2.fastq.gz",
     output:
+        t=temp(directory(tempDir + "/fastqc/")),
         html1="results/fastqc/{rg}_r1_fastqc.html",
         zip1="results/fastqc/{rg}_r1_fastqc.zip",
         html2="results/fastqc/{rg}_r2_fastqc.html",
