@@ -21,7 +21,10 @@ def test_hard_filter_indels():
         shutil.copytree(data_path, workdir)
 
         # dbg
-        print("results/HaplotypeCaller/filtered/indels.hardfiltered.vcf.gz", file=sys.stderr)
+        print(
+            "results/HaplotypeCaller/filtered/indels.hardfiltered.vcf.gz results/HaplotypeCaller/filtered/indels.hardfiltered.vcf.gz.tbi",
+            file=sys.stderr,
+        )
 
         # Run the test job.
         sp.check_output(
@@ -29,7 +32,7 @@ def test_hard_filter_indels():
                 "python",
                 "-m",
                 "snakemake",
-                "results/HaplotypeCaller/filtered/indels.hardfiltered.vcf.gz",
+                "results/HaplotypeCaller/filtered/indels.hardfiltered.vcf.gz results/HaplotypeCaller/filtered/indels.hardfiltered.vcf.gz.tbi",
                 "-F",
                 "-j1",
                 "--keep-target-files",

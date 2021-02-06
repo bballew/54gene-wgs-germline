@@ -10,21 +10,18 @@ sys.path.insert(0, os.path.dirname(__file__))
 import common  # noqa: E402
 
 
-def test_hard_filter_snps():
+def test_multiqc():
 
     with TemporaryDirectory() as tmpdir:
         workdir = Path(tmpdir) / "workdir"
-        data_path = PurePosixPath(".tests/unit/hard_filter_snps/data")
-        expected_path = PurePosixPath(".tests/unit/hard_filter_snps/expected")
+        data_path = PurePosixPath(".tests/unit/multiqc/data")
+        expected_path = PurePosixPath(".tests/unit/multiqc/expected")
 
         # Copy data to the temporary workdir.
         shutil.copytree(data_path, workdir)
 
         # dbg
-        print(
-            "results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz.tbi",
-            file=sys.stderr,
-        )
+        print("results/multiqc/multiqc.html", file=sys.stderr)
 
         # Run the test job.
         sp.check_output(
@@ -32,7 +29,7 @@ def test_hard_filter_snps():
                 "python",
                 "-m",
                 "snakemake",
-                "results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz.tbi",
+                "results/multiqc/multiqc.html",
                 "-F",
                 "-j1",
                 "--keep-target-files",

@@ -22,7 +22,7 @@ def test_fastqc():
 
         # dbg
         print(
-            "results/fastqc/NA12878_readgroup1_r1_fastqc.html results/fastqc/NA12878_readgroup1_r1_fastqc.zip results/fastqc/NA12878_readgroup1_r2_fastqc.html results/fastqc/NA12878_readgroup1_r2_fastqc.zip",
+            "results/fastqc/readgroup1_r1_fastqc.html results/fastqc/readgroup1_r1_fastqc.zip results/fastqc/readgroup1_r2_fastqc.html results/fastqc/readgroup1_r2_fastqc.zip",
             file=sys.stderr,
         )
 
@@ -32,7 +32,7 @@ def test_fastqc():
                 "python",
                 "-m",
                 "snakemake",
-                "results/fastqc/NA12878_readgroup1_r1_fastqc.html results/fastqc/NA12878_readgroup1_r1_fastqc.zip results/fastqc/NA12878_readgroup1_r2_fastqc.html results/fastqc/NA12878_readgroup1_r2_fastqc.zip",
+                "results/fastqc/readgroup1_r1_fastqc.html results/fastqc/readgroup1_r1_fastqc.zip results/fastqc/readgroup1_r2_fastqc.html results/fastqc/readgroup1_r2_fastqc.zip",
                 "-F",
                 "-j1",
                 "--keep-target-files",

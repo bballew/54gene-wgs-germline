@@ -10,19 +10,19 @@ sys.path.insert(0, os.path.dirname(__file__))
 import common  # noqa: E402
 
 
-def test_hard_filter_snps():
+def test_split_indels():
 
     with TemporaryDirectory() as tmpdir:
         workdir = Path(tmpdir) / "workdir"
-        data_path = PurePosixPath(".tests/unit/hard_filter_snps/data")
-        expected_path = PurePosixPath(".tests/unit/hard_filter_snps/expected")
+        data_path = PurePosixPath(".tests/unit/split_indels/data")
+        expected_path = PurePosixPath(".tests/unit/split_indels/expected")
 
         # Copy data to the temporary workdir.
         shutil.copytree(data_path, workdir)
 
         # dbg
         print(
-            "results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz.tbi",
+            "results/HaplotypeCaller/filtered/indels.all.vcf.gz results/HaplotypeCaller/filtered/indels.all.vcf.gz.tbi",
             file=sys.stderr,
         )
 
@@ -32,7 +32,7 @@ def test_hard_filter_snps():
                 "python",
                 "-m",
                 "snakemake",
-                "results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz.tbi",
+                "results/HaplotypeCaller/filtered/indels.all.vcf.gz results/HaplotypeCaller/filtered/indels.all.vcf.gz.tbi",
                 "-F",
                 "-j1",
                 "--keep-target-files",
