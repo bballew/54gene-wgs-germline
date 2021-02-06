@@ -216,6 +216,13 @@ def get_DBImport_path2(wildcards):
     return myList
 
 
+TARGETS = []
+if full:
+    TARGETS.append("results/multiqc/multiqc.html")
+    TARGETS.append("results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics")
+elif jointgeno:
+    TARGETS.append("results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics")
+
 if full:
 
     include: "rules/resources.smk"
@@ -231,18 +238,11 @@ if full:
     include: "rules/filter.smk"
 
 
-TARGETS = [
-    "results/multiqc/multiqc.html",
-    "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
-]
 elif jointgeno:
 
     include: "rules/HC_joint_geno.smk"
 
     include: "rules/filter.smk"
-
-
-TARGETS = ["results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics"]
 
 
 wildcard_constraints:
