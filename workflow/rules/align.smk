@@ -63,7 +63,7 @@ rule mark_duplicates:
         "../envs/picard.yaml"
     shell:
         "picard MarkDuplicates "
-        "TMP_DIR= {params.t} "
+        "TMP_DIR={params.t} "
         "REMOVE_DUPLICATES=true "
         "INPUT={params.l} "
         "OUTPUT={output.bam} "
