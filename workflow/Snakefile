@@ -296,7 +296,7 @@ rule fastqc:
         r1="results/input/{rg}_r1.fastq.gz",
         r2="results/input/{rg}_r2.fastq.gz",
     output:
-        t=temp(directory(tempDir + "/fastqc/")),
+        t=temp(directory(tempDir + "fastqc/{rg}/")),
         html1="results/fastqc/{rg}_r1_fastqc.html",
         zip1="results/fastqc/{rg}_r1_fastqc.zip",
         html2="results/fastqc/{rg}_r2_fastqc.html",
@@ -355,11 +355,13 @@ rule quality_trimming:
         trail=12,
         window="4:15",
         minlen=36,
+        t=tempDir,
     threads: nt
     conda:
         "envs/trimmomatic.yaml"
     shell:
         "trimmomatic PE "
+        "-Djava.io.tmpdir={params.t} "
         "-threads {threads} "
         "-phred33 "
         "{input.r1} {input.r2} "
@@ -436,7 +438,7 @@ rule mark_duplicates:
         "envs/picard.yaml"
     shell:
         "picard MarkDuplicates "
-        "TMP_DIR= {params.t}"
+        "TMP_DIR={params.t} "
         "REMOVE_DUPLICATES=true "
         "INPUT={params.l} "
         "OUTPUT={output.bam} "
