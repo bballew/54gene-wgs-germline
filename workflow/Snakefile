@@ -303,12 +303,11 @@ rule fastqc:
         zip2="results/fastqc/{rg}_r2_fastqc.zip",
     benchmark:
         "results/performance_benchmarks/fastqc/{rg}.tsv"
-    params:
-        t=tempDir,
     threads: nt
     conda:
         "envs/fastqc_multiqc.yaml"
     shell:
+        "mkdir -p {output.t} && "
         "fastqc {input.r1} -d {params.t} --quiet -t {threads} --outdir=results/fastqc/ && "
         "fastqc {input.r2} -d {params.t} --quiet -t {threads} --outdir=results/fastqc/"
 
@@ -348,6 +347,7 @@ rule quality_trimming:
         r2_paired="results/paired_trimmed_reads/{rg}_r2.fastq.gz",
         r1_unpaired="results/unpaired_trimmed_reads/{rg}_r1.fastq.gz",
         r2_unpaired="results/unpaired_trimmed_reads/{rg}_r2.fastq.gz",
+        t=temp(directory(tempDir + "quality_trimming/{rg}/")),
     benchmark:
         "results/performance_benchmarks/quality_trimming/{rg}.tsv"
     params:
@@ -355,13 +355,13 @@ rule quality_trimming:
         trail=12,
         window="4:15",
         minlen=36,
-        t=tempDir,
     threads: nt
     conda:
         "envs/trimmomatic.yaml"
     shell:
+        "mkdir -p {output.t} && "
         "trimmomatic PE "
-        "-Djava.io.tmpdir={params.t} "
+        "-Djava.io.tmpdir={output.t} "
         "-threads {threads} "
         "-phred33 "
         "{input.r1} {input.r2} "
@@ -429,14 +429,15 @@ rule mark_duplicates:
     output:
         bam=temp("results/dedup/{sample}.bam"),
         metrics="results/dedup/{sample}.metrics.txt",
+        t=temp(directory(tempDir + "mark_dups/{sample}")),
     benchmark:
         "results/performance_benchmarks/mark_duplicates/{sample}.tsv"
     params:
         l=list_markdup_inputs,
-        t=tempDir,
     conda:
         "envs/picard.yaml"
     shell:
+        "mkdir -p {output.t} && "
         "picard MarkDuplicates "
         "TMP_DIR={params.t} "
         "REMOVE_DUPLICATES=true "

@@ -138,13 +138,13 @@ rule merge_calls:
     output:
         vcf=protected("results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz"),
         index=protected("results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz.tbi"),
+        t=temp(directory(tempDir + "merge_calls")),
     benchmark:
         "results/performance_benchmarks/merge_calls/benchmarks.tsv"
-    params:
-        tempDir,
     conda:
         "../envs/bcftools_tabix.yaml"
     shell:
+        "mkdir -p {output.t} && "
         "bcftools concat -a -Ov {input} | "
         "bcftools sort -T {params} -Oz -o {output.vcf} && "
         "tabix -p vcf {output.vcf}" # 'gatk --java-options "-Xmx4G" GatherVcfs -I {input.snps} -I {input.indels} -O {output}'

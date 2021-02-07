@@ -205,15 +205,15 @@ rule HC_genotype_gvcfs:
     output:
         vcf=temp("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz"),
         idx=temp("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz.tbi"),
+        t=temp(directory(tempDir + "HC_genotype_gvcfs/{chrom}/")),
     benchmark:
         "results/performance_benchmarks/HC_genotype_gvcfs/{chrom}.tsv"
     params:
-        db="results/HaplotypeCaller/DBImport/{chrom}",
-        t=tempDir + "HC_genotype_gvcfs/{chrom}/",
+        db="results/HaplotypeCaller/DBImport/{chrom}"
     conda:
         "../envs/gatk.yaml"
     shell:
-        "mkdir -p {params.t} && "
+        "mkdir -p {output.t} && "
         'gatk --java-options "-Xmx4G" GenotypeGVCFs '
         "-R {input.r} "
         "-V gendb://{params.db} "
@@ -232,14 +232,13 @@ rule HC_concat_vcfs_bcftools:
     output:
         projectVCF=protected("results/HaplotypeCaller/genotyped/HC_variants.vcf.gz"),
         idx=protected("results/HaplotypeCaller/genotyped/HC_variants.vcf.gz.tbi"),
+        t=temp(directory(tempDir + "HC_concat_vcfs_bcftools/")),
     benchmark:
         "results/performance_benchmarks/HC_concat_vcfs_bcftools/benchmarks.tsv"
-    params:
-        tempDir + "HC_concat_vcfs_bcftools/",
     conda:
         "../envs/bcftools_tabix.yaml"
     shell:
-        "mkdir -p {params} && "
+        "mkdir -p {output.t} && "
         "bcftools concat -a {input.vcfList} -Ou | "
         "bcftools sort -T {params} -Oz -o {output.projectVCF} && "
         "tabix -p vcf {output.projectVCF}"
