@@ -210,7 +210,7 @@ rule all:
     input:
         "results/multiqc/multiqc.html",
         "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
-
+        #expand("results/paired_trimmed_reads/{rg}_r1.fastq.gz", rg=sampleDict.keys())
 
 rule get_resources:
     """Programmatically retrieve Broad resources from an AWS s3 bucket.
@@ -296,18 +296,18 @@ rule fastqc:
         r1="results/input/{rg}_r1.fastq.gz",
         r2="results/input/{rg}_r2.fastq.gz",
     output:
-        t=temp(directory(tempDir + "fastqc/{rg}/")),
         html1="results/fastqc/{rg}_r1_fastqc.html",
         zip1="results/fastqc/{rg}_r1_fastqc.zip",
         html2="results/fastqc/{rg}_r2_fastqc.html",
         zip2="results/fastqc/{rg}_r2_fastqc.zip",
     benchmark:
         "results/performance_benchmarks/fastqc/{rg}.tsv"
-    threads: nt
+    params:
+        t=tempDir
+    threads: 8
     conda:
         "envs/fastqc_multiqc.yaml"
     shell:
-        "mkdir -p {output.t} && "
         "fastqc {input.r1} -d {params.t} --quiet -t {threads} --outdir=results/fastqc/ && "
         "fastqc {input.r2} -d {params.t} --quiet -t {threads} --outdir=results/fastqc/"
 
@@ -347,21 +347,22 @@ rule quality_trimming:
         r2_paired="results/paired_trimmed_reads/{rg}_r2.fastq.gz",
         r1_unpaired="results/unpaired_trimmed_reads/{rg}_r1.fastq.gz",
         r2_unpaired="results/unpaired_trimmed_reads/{rg}_r2.fastq.gz",
-        t=temp(directory(tempDir + "quality_trimming/{rg}/")),
+        #t=temp(directory(tempDir + "quality_trimming/{rg}/")),
     benchmark:
         "results/performance_benchmarks/quality_trimming/{rg}.tsv"
     params:
+        t=tempDir,
         lead=12,
         trail=12,
         window="4:15",
         minlen=36,
-    threads: nt
+    threads: 16
     conda:
         "envs/trimmomatic.yaml"
+        #"envs/bbmap.yaml"
     shell:
-        "mkdir -p {output.t} && "
         "trimmomatic PE "
-        "-Djava.io.tmpdir={output.t} "
+        "-Djava.io.tmpdir={params.t} "
         "-threads {threads} "
         "-phred33 "
         "{input.r1} {input.r2} "
@@ -371,6 +372,14 @@ rule quality_trimming:
         "TRAILING:{params.trail} "
         "SLIDINGWINDOW:{params.window} "
         "MINLEN:{params.minlen}" #ILLUMINACLIP:/path/to/adapters/TruSeq3-PE-2.fa:2:30:10
+        #"export JDK_JAVA_OPTIONS=-Djava.io.tmpdir={params.t} && "
+        #"bbduk.sh "
+        #"in={input.r1} in2={input.r2} "
+        #"out={output.r1_paired} out2={output.r2_paired} "
+        #"ordered=t "
+        #"qtrim=rl "
+        #"trimq=10 "
+        #"minlength=36"
 
 
 rule align_reads:
@@ -429,15 +438,14 @@ rule mark_duplicates:
     output:
         bam=temp("results/dedup/{sample}.bam"),
         metrics="results/dedup/{sample}.metrics.txt",
-        t=temp(directory(tempDir + "mark_dups/{sample}")),
     benchmark:
         "results/performance_benchmarks/mark_duplicates/{sample}.tsv"
     params:
         l=list_markdup_inputs,
+        t=tempDir
     conda:
         "envs/picard.yaml"
     shell:
-        "mkdir -p {output.t} && "
         "picard MarkDuplicates "
         "TMP_DIR={params.t} "
         "REMOVE_DUPLICATES=true "
@@ -457,18 +465,21 @@ rule recalibrate_bams:
         indels="resources/Homo_sapiens_assembly38.known_indels.vcf.gz",
         i_index="resources/Homo_sapiens_assembly38.known_indels.vcf.gz.tbi",
     output:
-        "results/bqsr/{sample}.recal_table",
+        table="results/bqsr/{sample}.recal_table",
+    params:
+        t=tempDir
     benchmark:
         "results/performance_benchmarks/recalibrate_bams/{sample}.tsv"
     conda:
         "envs/gatk.yaml"
     shell:
         "gatk BaseRecalibrator "
+        "--tmp-dir {params.t} "
         "-R {input.r} "
         "-I {input.bam} "
         "--known-sites {input.snps} "
         "--known-sites {input.indels} "
-        "-O {output}"
+        "-O {output.table}"
 
 
 rule apply_bqsr:
@@ -479,17 +490,20 @@ rule apply_bqsr:
         d="resources/Homo_sapiens_assembly38.dict",
         recal="results/bqsr/{sample}.recal_table",
     output:
-        "results/bqsr/{sample}.bam",
+        bam="results/bqsr/{sample}.bam",
+    params:
+        t=tempDir
     benchmark:
         "results/performance_benchmarks/apply_bqsr/{sample}.tsv"
     conda:
         "envs/gatk.yaml"
     shell:
         "gatk ApplyBQSR "
+        "--tmp-dir {params.t} "
         "-R {input.r} "
         "-I {input.bam} "
         "--bqsr-recal-file {input.recal} "
-        "-O {output}"
+        "-O {output.bam}"
 
 
 rule index_bams:
