@@ -22,9 +22,9 @@ rule HC_call_variants:
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=8000
+        mem_mb=16000
     shell:
-        'gatk HaplotypeCaller '
+        'gatk --java-options "-Xmx8g" HaplotypeCaller '
         "-R {input.r} "
         "-I {input.bam} "
         "-ERC GVCF "

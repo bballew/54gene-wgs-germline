@@ -347,7 +347,6 @@ rule quality_trimming:
         r2_paired="results/paired_trimmed_reads/{rg}_r2.fastq.gz",
         r1_unpaired="results/unpaired_trimmed_reads/{rg}_r1.fastq.gz",
         r2_unpaired="results/unpaired_trimmed_reads/{rg}_r2.fastq.gz",
-        #t=temp(directory(tempDir + "quality_trimming/{rg}/")),
     benchmark:
         "results/performance_benchmarks/quality_trimming/{rg}.tsv"
     params:
@@ -356,10 +355,12 @@ rule quality_trimming:
         trail=12,
         window="4:15",
         minlen=36,
-    threads: 16
+    threads: 8
     conda:
         "envs/trimmomatic.yaml"
         #"envs/bbmap.yaml"
+    resources:
+        mem_mb=8000
     shell:
         "trimmomatic PE "
         "-Djava.io.tmpdir={params.t} "
