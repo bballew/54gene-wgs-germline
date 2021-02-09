@@ -107,6 +107,8 @@ rule HC_consolidate_gvcfs:
         db="results/HaplotypeCaller/DBImport/{chrom}",
     conda:
         "../envs/gatk.yaml"
+    resources:
+        mem_mb=23000,
     shell:
         "mkdir -p {output.t} && "
         "rm -r {params.db} && "
@@ -135,12 +137,13 @@ rule HC_genotype_gvcfs:
         "results/performance_benchmarks/HC_genotype_gvcfs/{chrom}.tsv"
     params:
         db="results/HaplotypeCaller/DBImport/{chrom}",
-        t=tempDir + "HC_genotype_gvcfs/{chrom}/",
+        t=tempDir,
     conda:
         "../envs/gatk.yaml"
+    resources:
+        mem_mb=8000,
     shell:
-        "mkdir -p {params.t} && "
-        'gatk --java-options "-Xmx4G" GenotypeGVCFs '
+        "gatk GenotypeGVCFs "
         "-R {input.r} "
         "-V gendb://{params.db} "
         "-O {output.vcf} "
@@ -158,14 +161,13 @@ rule HC_concat_vcfs_bcftools:
     output:
         projectVCF=protected("results/HaplotypeCaller/genotyped/HC_variants.vcf.gz"),
         idx=protected("results/HaplotypeCaller/genotyped/HC_variants.vcf.gz.tbi"),
+    params:
+        t=tempDir,
     benchmark:
         "results/performance_benchmarks/HC_concat_vcfs_bcftools/benchmarks.tsv"
-    params:
-        tempDir + "HC_concat_vcfs_bcftools/",
     conda:
         "../envs/bcftools_tabix.yaml"
     shell:
-        "mkdir -p {params} && "
         "bcftools concat -a {input.vcfList} -Ou | "
-        "bcftools sort -T {params} -Oz -o {output.projectVCF} && "
+        "bcftools sort -T {params.t} -Oz -o {output.projectVCF} && "
         "tabix -p vcf {output.projectVCF}"

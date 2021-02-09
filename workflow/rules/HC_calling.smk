@@ -53,8 +53,10 @@ rule HC_call_variants:
         "results/performance_benchmarks/HC_call_variants/{sample}_{chrom}.tsv"
     conda:
         "../envs/gatk.yaml"
+    resources:
+        mem_mb=16000,
     shell:
-        'gatk --java-options "-Xmx4G" HaplotypeCaller '
+        'gatk --java-options "-Xmx8g" HaplotypeCaller '
         "-R {input.r} "
         "-I {input.bam} "
         "-ERC GVCF "
@@ -101,8 +103,10 @@ rule HC_concat_gvcfs:
         lambda wildcards, input: " -I ".join(input.vcfList),
     conda:
         "../envs/gatk.yaml"
+    resources:
+        mem_mb=8000,
     shell:
-        'gatk --java-options "-Xmx4G" GatherVcfs -I {params} -O {output}'
+        "gatk GatherVcfs -I {params} -O {output}"
 
 
 rule HC_index_gvcf:

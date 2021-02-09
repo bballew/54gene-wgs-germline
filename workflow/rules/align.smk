@@ -37,7 +37,7 @@ rule align_reads:
         '-R "@RG\\tCN:54gene\\tID:{params.rg}\\tSM:{params.sm}\\tPL:{params.pl}\\tLB:N/A" '
         "-t {threads} "
         "{input.r} {input.r1} {input.r2} | "
-        "samtools sort -@ {threads} -o {output} - " # note - wanted to use bwa-mem2, but doesn't seem to be working via conda
+        "samtools sort -@ 16 -m 3600M -o {output} - " # note - wanted to use bwa-mem2, but doesn't seem to be working via conda
 
 
 rule mark_duplicates:
@@ -60,9 +60,11 @@ rule mark_duplicates:
         l=list_markdup_inputs,
         t=tempDir,
     conda:
-        "../envs/picard.yaml"
+        "../envs/gatk.yaml"
+    resources:
+        mem_mb=8000,
     shell:
-        "picard MarkDuplicates "
+        'gatk --java-options "-XX:+UseParallelGC -XX:ParallelGCThreads=2" MarkDuplicates '
         "TMP_DIR={params.t} "
         "REMOVE_DUPLICATES=true "
         "INPUT={params.l} "
@@ -81,18 +83,23 @@ rule recalibrate_bams:
         indels="resources/Homo_sapiens_assembly38.known_indels.vcf.gz",
         i_index="resources/Homo_sapiens_assembly38.known_indels.vcf.gz.tbi",
     output:
-        "results/bqsr/{sample}.recal_table",
+        table="results/bqsr/{sample}.recal_table",
+    params:
+        t=tempDir,
     benchmark:
         "results/performance_benchmarks/recalibrate_bams/{sample}.tsv"
     conda:
         "../envs/gatk.yaml"
+    resources:
+        mem_mb=8000,
     shell:
-        "gatk BaseRecalibrator "
+        'gatk --java-options "-XX:+UseParallelGC -XX:ParallelGCThreads=20" BaseRecalibrator '
+        "--tmp-dir {params.t} "
         "-R {input.r} "
         "-I {input.bam} "
         "--known-sites {input.snps} "
         "--known-sites {input.indels} "
-        "-O {output}"
+        "-O {output.table}"
 
 
 rule apply_bqsr:
@@ -103,17 +110,22 @@ rule apply_bqsr:
         d="resources/Homo_sapiens_assembly38.dict",
         recal="results/bqsr/{sample}.recal_table",
     output:
-        "results/bqsr/{sample}.bam",
+        bam="results/bqsr/{sample}.bam",
+    params:
+        t=tempDir,
     benchmark:
         "results/performance_benchmarks/apply_bqsr/{sample}.tsv"
     conda:
         "../envs/gatk.yaml"
+    resources:
+        mem_mb=8000,
     shell:
         "gatk ApplyBQSR "
+        "--tmp-dir {params.t} "
         "-R {input.r} "
         "-I {input.bam} "
         "--bqsr-recal-file {input.recal} "
-        "-O {output}"
+        "-O {output.bam}"
 
 
 rule index_bams:

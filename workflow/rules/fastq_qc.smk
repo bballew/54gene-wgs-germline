@@ -53,7 +53,7 @@ rule fastqc:
         "results/performance_benchmarks/fastqc/{rg}.tsv"
     params:
         t=tempDir,
-    threads: nt
+    threads: 8
     conda:
         "../envs/fastqc_multiqc.yaml"
     shell:
@@ -99,15 +99,19 @@ rule quality_trimming:
     benchmark:
         "results/performance_benchmarks/quality_trimming/{rg}.tsv"
     params:
+        t=tempDir,
         lead=12,
         trail=12,
         window="4:15",
         minlen=36,
-    threads: nt
+    threads: 8
     conda:
-        "../envs/trimmomatic.yaml"
+        "../envs/trimmomatic.yaml" #"envs/bbmap.yaml"
+    resources:
+        mem_mb=8000,
     shell:
         "trimmomatic PE "
+        "-Djava.io.tmpdir={params.t} "
         "-threads {threads} "
         "-phred33 "
         "{input.r1} {input.r2} "
@@ -117,3 +121,11 @@ rule quality_trimming:
         "TRAILING:{params.trail} "
         "SLIDINGWINDOW:{params.window} "
         "MINLEN:{params.minlen}" #ILLUMINACLIP:/path/to/adapters/TruSeq3-PE-2.fa:2:30:10
+         #"export JDK_JAVA_OPTIONS=-Djava.io.tmpdir={params.t} && "
+         #"bbduk.sh "
+         #"in={input.r1} in2={input.r2} "
+         #"out={output.r1_paired} out2={output.r2_paired} "
+         #"ordered=t "
+         #"qtrim=rl "
+         #"trimq=10 "
+         #"minlength=36"
