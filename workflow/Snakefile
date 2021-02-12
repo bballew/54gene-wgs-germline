@@ -118,10 +118,25 @@ def list_markdup_inputs(wildcards):
     return s1
 
 
+def get_batch_limit_number(sampleDict, n):
+    """Assign weight of each trimming rule
+    Required to avoid hitting throughput limits of fsx; e.g. if there are 20 fastq
+    pairs to trim - 20 lines in the manifest, the limit for resources is set to 20
+    in the wrapper script, and the rule weight is set to 20/10 = 2.  So, only 10
+    concurrent trimming jobs will fit under the resource restriction.
+    """
+    limit = round(len(sampleDict.keys()) / n)
+    return limit
+
+
 sampleDict = read_in_manifest(sampleFile)
 # dict where key is readgroup, values are sample, r1 fastq, r2 fastq
 SAMPLES = create_samples_set(sampleDict) if full else sampleDict.keys()
 # list of unique sample names
+trim_limit = get_batch_limit_number(sampleDict, 3)
+# weight for trimming rule to avoid hitting fsx throughput limit
+fqc_limit = get_batch_limit_number(sampleDict, 3)
+# weight for fastqc rule to avoid hitting fsx throughput limit
 
 # Previously read from dict, but now that I'm programmatically retrieving
 # the ref genome and index files, it's easier to just have a hard-coded list
@@ -217,6 +232,7 @@ def get_DBImport_path2(wildcards):
 
 TARGETS = []
 if full:
+    # TARGETS.append(expand("results/paired_trimmed_reads/{rg}_r1.fastq.gz", rg=sampleDict.keys()))
     TARGETS.append("results/multiqc/multiqc.html")
     TARGETS.append("results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics")
 elif jointgeno:

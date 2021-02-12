@@ -56,6 +56,9 @@ rule fastqc:
     threads: 8
     conda:
         "../envs/fastqc_multiqc.yaml"
+    resources:
+        mem_mb=2000,
+        batch=fqc_limit,
     shell:
         "fastqc {input.r1} -d {params.t} --quiet -t {threads} --outdir=results/fastqc/ && "
         "fastqc {input.r2} -d {params.t} --quiet -t {threads} --outdir=results/fastqc/"
@@ -100,12 +103,26 @@ rule quality_trimming:
         j="results/paired_trimmed_reads/{rg}_fastp.json",
     benchmark:
         "results/performance_benchmarks/quality_trimming/{rg}.tsv"
+    threads: 4
     conda:
         "../envs/fastp.yaml"
+    resources:
+        mem_mb=4000,
+        batch=trim_limit,
     shell:
         "fastp -i {input.r1} -I {input.r2} "
+        "-w {threads} "
         "-o {output.r1_paired} -O {output.r2_paired} "
         "-h {output.h} -j {output.j} "
         "--adapter_sequence=AGATCGGAAGAGCACACGTCTGAACTCCAGTCA "
         "--adapter_sequence_r2=AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT "
         "-l 36"
+        # "cutadapt "
+        # "-j {threads} "
+        # "-a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA "
+        # "-A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT "
+        # "--nextseq-trim=15 "
+        # "--minimum-length=36 "
+        # "-o {output.r1_paired} "
+        # "-p {output.r2_paired} "
+        # "{input.r1} {input.r2}"
