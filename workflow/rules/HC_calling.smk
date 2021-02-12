@@ -103,7 +103,7 @@ rule HC_concat_gvcfs:
     benchmark:
         "results/performance_benchmarks/HC_concat_gvcfs/{sample}.tsv"
     params:
-        l=lambda wildcards, input: " -I ".join(input.vcfList),,
+        l=lambda wildcards, input: " -I ".join(input.vcfList),
         t=tempDir,
     conda:
         "../envs/gatk.yaml"
