@@ -23,6 +23,9 @@ configfile: "config/config.yaml"
 sampleFile = config["sampleFile"]
 nt = config["threads"]
 tempDir = config["tempDir"]
+full = config["runType"]["full"]
+jointgeno = config["runType"]["joint_genotyping"]
+
 
 bed = "resources/Homo_sapiens_assembly38.bed"  # change if not WGS - put switch in config?
 
@@ -35,12 +38,18 @@ bed = "resources/Homo_sapiens_assembly38.bed"  # change if not WGS - put switch 
 
 
 def read_in_manifest(s):
-    """Parse whitespace delimited manifest file."""
+    """Parse whitespace delimited manifest file.
+    Note the distinct requirements for the two different run types.
+    """
     d = {}
     with open(s) as f:
         for line in f:
-            (rg, sm, read1, read2) = line.split()
-            d[rg] = sm, read1, read2
+            if full:
+                (rg, sm, read1, read2) = line.split()
+                d[rg] = sm, read1, read2
+            elif jointgeno:
+                (sm, gvcf) = line.split()
+                d[sm] = gvcf
     return d
 
 
@@ -62,6 +71,18 @@ def get_read2_fastq(wildcards):
     """Return r2 fastq for a given readgroup."""
     (sm, read1, read2) = sampleDict[wildcards.rg]
     return read2
+
+
+def get_gvcf(wildcards):
+    """"""
+    gvcf = sampleDict[wildcards.sample]
+    return gvcf
+
+
+def get_gvcf_index(wildcards):
+    """"""
+    gvcf = sampleDict[wildcards.sample]
+    return gvcf + ".tbi"
 
 
 def get_sm(wildcards):
@@ -99,7 +120,7 @@ def list_markdup_inputs(wildcards):
 
 sampleDict = read_in_manifest(sampleFile)
 # dict where key is readgroup, values are sample, r1 fastq, r2 fastq
-SAMPLES = create_samples_set(sampleDict)
+SAMPLES = create_samples_set(sampleDict) if full else sampleDict.keys()
 # list of unique sample names
 
 # Previously read from dict, but now that I'm programmatically retrieving
@@ -130,7 +151,6 @@ chromList = [
     "chr22",
     "chrX",
     "chrY",
-    "chrM",
 ]
 
 
@@ -160,7 +180,7 @@ def get_DBImport_path2(wildcards):
             "__coords.tdb",
             "DP_FORMAT.tdb",
             "DP.tdb",
-            "DS.tdb",
+            #"DS.tdb",
             "END.tdb",
             "ExcessHet.tdb",
             "FILTER.tdb",
@@ -195,12 +215,33 @@ def get_DBImport_path2(wildcards):
     return myList
 
 
-include: "rules/HC_calling.smk"
-include: "rules/filter.smk"
-include: "rules/HC_joint_geno.smk"
-include: "rules/align.smk"
-include: "rules/resources.smk"
-include: "rules/fastq_qc.smk"
+TARGETS = []
+if full:
+    TARGETS.append("results/multiqc/multiqc.html")
+    TARGETS.append("results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics")
+elif jointgeno:
+    TARGETS.append("results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics")
+
+if full:
+
+    include: "rules/resources.smk"
+
+    include: "rules/fastq_qc.smk"
+
+    include: "rules/align.smk"
+
+    include: "rules/HC_calling.smk"
+
+    include: "rules/HC_joint_geno.smk"
+
+    include: "rules/filter.smk"
+
+
+elif jointgeno:
+
+    include: "rules/HC_joint_geno.smk"
+
+    include: "rules/filter.smk"
 
 
 wildcard_constraints:
@@ -210,5 +251,4 @@ wildcard_constraints:
 
 rule all:
     input:
-        "results/multiqc/multiqc.html",
-        "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics", #expand("results/paired_trimmed_reads/{rg}_r1.fastq.gz", rg=sampleDict.keys())
+        TARGETS,

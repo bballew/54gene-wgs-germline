@@ -35,7 +35,7 @@ rule group_symlinks:
     group:
         "symlink_group"
     shell:
-        "touch {output}"
+        "sleep 10 && touch {output}"
 
 
 rule fastqc:
@@ -94,38 +94,14 @@ rule quality_trimming:
     output:
         r1_paired="results/paired_trimmed_reads/{rg}_r1.fastq.gz",
         r2_paired="results/paired_trimmed_reads/{rg}_r2.fastq.gz",
-        r1_unpaired="results/unpaired_trimmed_reads/{rg}_r1.fastq.gz",
-        r2_unpaired="results/unpaired_trimmed_reads/{rg}_r2.fastq.gz",
+        h="results/paired_trimmed_reads/{rg}_fastp.html",
+        j="results/paired_trimmed_reads/{rg}_fastp.json",
     benchmark:
         "results/performance_benchmarks/quality_trimming/{rg}.tsv"
-    params:
-        t=tempDir,
-        lead=12,
-        trail=12,
-        window="4:15",
-        minlen=36,
-    threads: 8
     conda:
-        "../envs/trimmomatic.yaml" #"envs/bbmap.yaml"
-    resources:
-        mem_mb=8000,
+        "../envs/fastp.yaml"
     shell:
-        "trimmomatic PE "
-        "-Djava.io.tmpdir={params.t} "
-        "-threads {threads} "
-        "-phred33 "
-        "{input.r1} {input.r2} "
-        "{output.r1_paired} {output.r1_unpaired} "
-        "{output.r2_paired} {output.r2_unpaired} "
-        "LEADING:{params.lead} "
-        "TRAILING:{params.trail} "
-        "SLIDINGWINDOW:{params.window} "
-        "MINLEN:{params.minlen}" #ILLUMINACLIP:/path/to/adapters/TruSeq3-PE-2.fa:2:30:10
-         #"export JDK_JAVA_OPTIONS=-Djava.io.tmpdir={params.t} && "
-         #"bbduk.sh "
-         #"in={input.r1} in2={input.r2} "
-         #"out={output.r1_paired} out2={output.r2_paired} "
-         #"ordered=t "
-         #"qtrim=rl "
-         #"trimq=10 "
-         #"minlength=36"
+        "fastp -i {input.r1} -I {input.r2} "
+        "-o {output.r1_paired} -O {output.r2_paired} "
+        "-h {output.h} -j {output.j} "
+        "-A -l 36"

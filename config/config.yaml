@@ -1,3 +1,6 @@
 sampleFile: "config/manifest.txt"
-threads: 8
+threads: 1
 tempDir: "temp/"
+runType:
+  full: yes
+  joint_genotyping: no

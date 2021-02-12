@@ -1,3 +1,18 @@
+if jointgeno:
+
+    rule symlink_gvcfs:
+        """"""
+        input:
+            gvcf=get_gvcf,
+            index=get_gvcf_index,
+        output:
+            gvcf="results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz",
+            index="results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz.tbi",
+        shell:
+            "ln -s {input.gvcf} {output.gvcf} &&"
+            "ln -s {input.index} {output.index}"
+
+
 rule HC_create_each_sample_map_file:
     """Create sample file to be read by GenomicsDBImport.
 
@@ -70,6 +85,10 @@ rule HC_consolidate_gvcfs:
     have to explicitly include temp dir creation in the shell section.
     Note that GenotypeGVCFs below does not suffer from this directory creation
     issue.
+
+    For the batch and cache options - see DBImport docs.  May want to enable
+    caching for exome, due to many intervals.  May want to tweak batch size
+    based on sample size.
     """
     input:
         sampleMap="results/HaplotypeCaller/DBImport/cohort.sample_map",
@@ -80,7 +99,6 @@ rule HC_consolidate_gvcfs:
             "results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz.tbi", sample=SAMPLES
         ),
     output:
-        t=temp(directory(tempDir + "HC_DBImport/{chrom}/")),
         o1="results/HaplotypeCaller/DBImport/{chrom}/vcfheader.vcf",
         o2="results/HaplotypeCaller/DBImport/{chrom}/vidmap.json",
         o3="results/HaplotypeCaller/DBImport/{chrom}/callset.json",
@@ -90,19 +108,21 @@ rule HC_consolidate_gvcfs:
     params:
         interval="{chrom}",
         db="results/HaplotypeCaller/DBImport/{chrom}",
+        t=tempDir,
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=23000,
+        mem_mb=12000,
     shell:
-        "mkdir -p {output.t} && "
+        'export _JAVA_OPTIONS="" && '
         "rm -r {params.db} && "
-        'gatk --java-options "-Xmx20G" GenomicsDBImport '
+        'gatk --java-options "-Xmx6G" GenomicsDBImport '
+        "--batch-size 50 --disable-bam-index-caching "
         "--sample-name-map {input.sampleMap} "
         "--genomicsdb-workspace-path {params.db} "
         "-L {params.interval} "
-        "--tmp-dir {output.t}"
-
+        "--tmp-dir {params.t} "
+        "--reader-threads 5"
 
 rule HC_genotype_gvcfs:
     """Joint genotyping."""
@@ -126,9 +146,10 @@ rule HC_genotype_gvcfs:
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=8000,
+        mem_mb=12000,
     shell:
-        "gatk GenotypeGVCFs "
+        'export _JAVA_OPTIONS="" && '
+        'gatk --java-options "-Xmx4g" GenotypeGVCFs '
         "-R {input.r} "
         "-V gendb://{params.db} "
         "-O {output.vcf} "

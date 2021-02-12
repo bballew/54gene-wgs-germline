@@ -21,7 +21,10 @@ def test_split_snps():
         shutil.copytree(data_path, workdir)
 
         # dbg
-        print("results/HaplotypeCaller/filtered/snps.all.vcf.gz", file=sys.stderr)
+        print(
+            "results/HaplotypeCaller/filtered/snps.all.vcf.gz results/HaplotypeCaller/filtered/snps.all.vcf.gz.tbi",
+            file=sys.stderr,
+        )
 
         # Run the test job.
         sp.check_output(
@@ -29,7 +32,7 @@ def test_split_snps():
                 "python",
                 "-m",
                 "snakemake",
-                "results/HaplotypeCaller/filtered/snps.all.vcf.gz",
+                "results/HaplotypeCaller/filtered/snps.all.vcf.gz results/HaplotypeCaller/filtered/snps.all.vcf.gz.tbi",
                 "-F",
                 "-j1",
                 "--keep-target-files",
