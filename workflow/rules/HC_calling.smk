@@ -49,6 +49,8 @@ rule HC_call_variants:
     output:
         gvcf=temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf"),
         idx=temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.idx"),
+    params:
+        t=tempDir,
     benchmark:
         "results/performance_benchmarks/HC_call_variants/{sample}_{chrom}.tsv"
     conda:
@@ -57,6 +59,7 @@ rule HC_call_variants:
         mem_mb=16000,
     shell:
         'gatk --java-options "-Xmx4g" HaplotypeCaller '
+        "--tmp-dir {params.t} "
         "-R {input.r} "
         "-I {input.bam} "
         "-ERC GVCF "
@@ -100,14 +103,16 @@ rule HC_concat_gvcfs:
     benchmark:
         "results/performance_benchmarks/HC_concat_gvcfs/{sample}.tsv"
     params:
-        lambda wildcards, input: " -I ".join(input.vcfList),
+        l=lambda wildcards, input: " -I ".join(input.vcfList),,
+        t=tempDir,
     conda:
         "../envs/gatk.yaml"
     resources:
         mem_mb=8000,
     shell:
         'gatk --java-options "-XmX4g" GatherVcfs '
-        "-I {params} "
+        "--tmp-dir {params.t} "
+        "-I {params.l} "
         "-O {output}"
 
 

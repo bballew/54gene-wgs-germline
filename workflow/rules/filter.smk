@@ -39,6 +39,8 @@ rule split_snps:
     output:
         vcf=temp("results/HaplotypeCaller/filtered/snps.all.vcf.gz"),
         index=temp("results/HaplotypeCaller/filtered/snps.all.vcf.gz.tbi"),
+    params:
+        t=tempDir,
     benchmark:
         "results/performance_benchmarks/split_snps/benchmarks.tsv"
     conda:
@@ -48,6 +50,7 @@ rule split_snps:
     shell:
         'export _JAVA_OPTIONS="" && '
         'gatk --java-options "-Xmx1g" SelectVariants '
+        "--tmp-dir {params.t} "
         "-V {input.vcf} "
         "--select-type SNP "
         "-O {output.vcf}"
@@ -62,6 +65,8 @@ rule split_indels:
     output:
         vcf=temp("results/HaplotypeCaller/filtered/indels.all.vcf.gz"),
         index=temp("results/HaplotypeCaller/filtered/indels.all.vcf.gz.tbi"),
+    params:
+        t=tempDir,
     benchmark:
         "results/performance_benchmarks/split_indels/benchmarks.tsv"
     conda:
@@ -71,6 +76,7 @@ rule split_indels:
     shell:
         'export _JAVA_OPTIONS="" && '
         'gatk --java-options "-Xmx1g" SelectVariants '
+        "--tmp-dir {params.t} "
         "-V {input.vcf} "
         "--select-type INDEL "
         "-O {output.vcf}"
@@ -85,6 +91,8 @@ rule hard_filter_snps:
     output:
         vcf=temp("results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz"),
         index=temp("results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz.tbi"),
+    params:
+        t=tempDir,
     benchmark:
         "results/performance_benchmarks/hard_filter_snps/benchmarks.tsv"
     conda:
@@ -94,6 +102,7 @@ rule hard_filter_snps:
     shell:
         'export _JAVA_OPTIONS="" && '
         'gatk --java-options "-Xmx1g" VariantFiltration '
+        "--tmp-dir {params.t} "
         "-V {input.vcf} "
         '-filter "QD < 2.0" --filter-name "QD2" '
         '-filter "QUAL < 30.0" --filter-name "QUAL30" '
@@ -114,6 +123,8 @@ rule hard_filter_indels:
     output:
         vcf=temp("results/HaplotypeCaller/filtered/indels.hardfiltered.vcf.gz"),
         index=temp("results/HaplotypeCaller/filtered/indels.hardfiltered.vcf.gz.tbi"),
+    params:
+        t=tempDir,
     benchmark:
         "results/performance_benchmarks/hard_filter_indels/benchmarks.tsv"
     conda:
@@ -123,6 +134,7 @@ rule hard_filter_indels:
     shell:
         'export _JAVA_OPTIONS="" && '
         'gatk --java-options "-Xmx1g" VariantFiltration '
+        "--tmp-dir {params.t} "
         "-V {input.vcf} "
         '-filter "QD < 2.0" --filter-name "QD2" '
         '-filter "QUAL < 30.0" --filter-name "QUAL30" '
