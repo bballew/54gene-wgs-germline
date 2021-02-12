@@ -149,7 +149,8 @@ rule samtools_stats:
     May want to do this pre-bqsr too.
     """
     input:
-        "results/bqsr/{sample}.bam",
+        bam="results/bqsr/{sample}.bam",
+        bai="results/bqsr/{sample}.bam.bai",
     output:
         "results/alignment_stats/{sample}.txt",
     benchmark:
@@ -157,4 +158,4 @@ rule samtools_stats:
     conda:
         "../envs/bwa_samtools.yaml"
     shell:
-        "samtools stats {input} > {output}"
+        "samtools stats {input.bam} > {output}"
