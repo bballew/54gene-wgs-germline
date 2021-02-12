@@ -17,7 +17,7 @@ rule split_multiallelics:
         index=temp("results/HaplotypeCaller/genotyped/HC_variants_split_multiallelics.vcf.gz.tbi"),
     benchmark:
         "results/performance_benchmarks/split_multiallelics/benchmarks.tsv"
-    threads: nt
+    threads: 8
     conda:
         "../envs/bcftools_tabix.yaml"
     shell:
@@ -43,10 +43,13 @@ rule split_snps:
         "results/performance_benchmarks/split_snps/benchmarks.tsv"
     conda:
         "../envs/gatk.yaml"
+    resources:
+        mem_mb=6000
     shell:
-        "gatk SelectVariants "
+        'export _JAVA_OPTIONS="" && '
+        'gatk --java-options "-Xmx1g" SelectVariants '
         "-V {input.vcf} "
-        "-select-type SNP "
+        "--select-type SNP "
         "-O {output.vcf}"
 
 
@@ -63,10 +66,13 @@ rule split_indels:
         "results/performance_benchmarks/split_indels/benchmarks.tsv"
     conda:
         "../envs/gatk.yaml"
+    resources:
+        mem_mb=6000
     shell:
-        "gatk SelectVariants "
+        'export _JAVA_OPTIONS="" && '
+        'gatk --java-options "-Xmx1g" SelectVariants '
         "-V {input.vcf} "
-        "-select-type INDEL "
+        "--select-type INDEL "
         "-O {output.vcf}"
 
 
@@ -83,8 +89,11 @@ rule hard_filter_snps:
         "results/performance_benchmarks/hard_filter_snps/benchmarks.tsv"
     conda:
         "../envs/gatk.yaml"
+    resources:
+        mem_mb=6000
     shell:
-        "gatk VariantFiltration "
+        'export _JAVA_OPTIONS="" && '
+        'gatk --java-options "-Xmx1g" VariantFiltration '
         "-V {input.vcf} "
         '-filter "QD < 2.0" --filter-name "QD2" '
         '-filter "QUAL < 30.0" --filter-name "QUAL30" '
@@ -109,8 +118,11 @@ rule hard_filter_indels:
         "results/performance_benchmarks/hard_filter_indels/benchmarks.tsv"
     conda:
         "../envs/gatk.yaml"
+    resources:
+        mem_mb=6000
     shell:
-        "gatk VariantFiltration "
+        'export _JAVA_OPTIONS="" && '
+        'gatk --java-options "-Xmx1g" VariantFiltration '
         "-V {input.vcf} "
         '-filter "QD < 2.0" --filter-name "QD2" '
         '-filter "QUAL < 30.0" --filter-name "QUAL30" '
@@ -147,6 +159,8 @@ rule merge_calls:
         "results/performance_benchmarks/merge_calls/benchmarks.tsv"
     conda:
         "../envs/bcftools_tabix.yaml"
+    resources:
+        mem_mb=4000
     shell:
         "bcftools concat -a -Ov {input.snps} {input.indels} | "
         "bcftools sort -T {params.t} -Oz -o {output.vcf} && "
@@ -167,12 +181,17 @@ rule picard_metrics:
     benchmark:
         "results/performance_benchmarks/picard_metrics/benchmarks.tsv"
     params:
-        "results/HaplotypeCaller/filtered/HC",
+        d="results/HaplotypeCaller/filtered/HC",
+        t=tempDir,
     conda:
         "../envs/gatk.yaml"
+    resources:
+        mem_mb=6000
     shell:
-        "gatk CollectVariantCallingMetrics "
+        'export _JAVA_OPTIONS="" && '
+        'gatk --java-options "-Xmx1g" CollectVariantCallingMetrics '
+        "--TMP_DIR {params.t} "
         "-I {input.calls} "
         "--DBSNP {input.dbsnp} "
         "-SD {input.d} "
-        "-O {params}"
+        "-O {params.d}"

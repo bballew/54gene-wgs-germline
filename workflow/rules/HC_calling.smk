@@ -26,7 +26,7 @@ rule split_bed_file:
     benchmark:
         "results/performance_benchmarks/split_bed_file/{chrom}.tsv"
     shell:
-        'grep "^{wildcards.chrom}[[:space:]]" {input} > {output}; '
+        'grep "^{wildcards.chrom}[[:space:]]" {input} > {output};'
         "if [ $? -le 1 ]; then exit 0; else exit 1; fi"
 
 
@@ -56,7 +56,7 @@ rule HC_call_variants:
     resources:
         mem_mb=16000,
     shell:
-        'gatk --java-options "-Xmx8g" HaplotypeCaller '
+        'gatk --java-options "-Xmx4g" HaplotypeCaller '
         "-R {input.r} "
         "-I {input.bam} "
         "-ERC GVCF "
@@ -106,7 +106,9 @@ rule HC_concat_gvcfs:
     resources:
         mem_mb=8000,
     shell:
-        "gatk GatherVcfs -I {params} -O {output}"
+        'gatk --java-options "-XmX4g" GatherVcfs '
+        "-I {params} "
+        "-O {output}"
 
 
 rule HC_index_gvcf:

@@ -28,16 +28,18 @@ rule align_reads:
         sort_order="coordinate",
         rg="{rg}",
         sm=get_sm,
-    threads: nt
+    threads: 24
     conda:
         "../envs/bwa_samtools.yaml"
+    resources:
+        mem_mb=10000
     shell:
         "bwa mem "
         "-K 10000000 -M "
         '-R "@RG\\tCN:54gene\\tID:{params.rg}\\tSM:{params.sm}\\tPL:{params.pl}\\tLB:N/A" '
         "-t {threads} "
         "{input.r} {input.r1} {input.r2} | "
-        "samtools sort -@ 16 -m 3600M -o {output} - " # note - wanted to use bwa-mem2, but doesn't seem to be working via conda
+        "samtools sort -@ 8 -m 3600M -o {output} - " # note - wanted to use bwa-mem2, but doesn't seem to be working via conda
 
 
 rule mark_duplicates:
@@ -62,9 +64,9 @@ rule mark_duplicates:
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=8000,
+        mem_mb=10000,
     shell:
-        'gatk --java-options "-XX:+UseParallelGC -XX:ParallelGCThreads=2" MarkDuplicates '
+        'gatk --java-options "-Xmx2g -XX:+UseParallelGC -XX:ParallelGCThreads=2" MarkDuplicates '
         "TMP_DIR={params.t} "
         "REMOVE_DUPLICATES=true "
         "INPUT={params.l} "
@@ -93,7 +95,7 @@ rule recalibrate_bams:
     resources:
         mem_mb=8000,
     shell:
-        'gatk --java-options "-XX:+UseParallelGC -XX:ParallelGCThreads=20" BaseRecalibrator '
+        'gatk --java-options "-Xmx4g -XX:+UseParallelGC -XX:ParallelGCThreads=20" BaseRecalibrator '
         "--tmp-dir {params.t} "
         "-R {input.r} "
         "-I {input.bam} "
@@ -118,9 +120,9 @@ rule apply_bqsr:
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=8000,
+        mem_mb=20000,
     shell:
-        "gatk ApplyBQSR "
+        'gatk --java-options "-Xmx10g" ApplyBQSR '
         "--tmp-dir {params.t} "
         "-R {input.r} "
         "-I {input.bam} "
