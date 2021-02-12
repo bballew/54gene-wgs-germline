@@ -87,6 +87,8 @@ rule quality_trimming:
     May want to tweak params; possibly put in config.  Could remove
     adapter sequences here if we want to move that downstream at
     some point.
+
+    Adapter sequences are from Illumina's TruSeq adapters.
     """
     input:
         r1=get_read1_fastq,
@@ -104,4 +106,6 @@ rule quality_trimming:
         "fastp -i {input.r1} -I {input.r2} "
         "-o {output.r1_paired} -O {output.r2_paired} "
         "-h {output.h} -j {output.j} "
-        "-A -l 36"
+        "--adapter_sequence=AGATCGGAAGAGCACACGTCTGAACTCCAGTCA "
+        "--adapter_sequence_r2=AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT "
+        "-l 36"
