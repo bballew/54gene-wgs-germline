@@ -122,10 +122,12 @@ def get_batch_limit_number(sampleDict, n):
     """Assign weight of each trimming rule
     Required to avoid hitting throughput limits of fsx; e.g. if there are 20 fastq
     pairs to trim - 20 lines in the manifest, the limit for resources is set to 20
-    in the wrapper script, and the rule weight is set to 20/10 = 2.  So, only 10
-    concurrent trimming jobs will fit under the resource restriction.
+    in the wrapper script, and if n=10, the rule weight is set to 20/10 = 2.  So, max 10
+    concurrent weighted jobs will fit under the resource restriction.
     """
     limit = round(len(sampleDict.keys()) / n)
+    if limit == 0:
+        limit = 1
     return limit
 
 
@@ -133,9 +135,9 @@ sampleDict = read_in_manifest(sampleFile)
 # dict where key is readgroup, values are sample, r1 fastq, r2 fastq
 SAMPLES = create_samples_set(sampleDict) if full else sampleDict.keys()
 # list of unique sample names
-trim_limit = get_batch_limit_number(sampleDict, 3)
+trim_limit = get_batch_limit_number(sampleDict, 10)
 # weight for trimming rule to avoid hitting fsx throughput limit
-fqc_limit = get_batch_limit_number(sampleDict, 3)
+fqc_limit = get_batch_limit_number(sampleDict, 20)
 # weight for fastqc rule to avoid hitting fsx throughput limit
 
 # Previously read from dict, but now that I'm programmatically retrieving

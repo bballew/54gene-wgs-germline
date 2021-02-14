@@ -7,6 +7,9 @@ rule align_reads:
     bams from a single sample will be combined during the dedup step
     below.  This should help modestly speed up alignment, as it's run
     in parallel for each fastq pair.
+
+    Note that the -m flag for samtools specifies memory per thread, and
+    it isn't a hard cap on memory (can go over somewhat).  
     """
     input:
         r="resources/Homo_sapiens_assembly38.fasta",
@@ -28,18 +31,18 @@ rule align_reads:
         sort_order="coordinate",
         rg="{rg}",
         sm=get_sm,
-    threads: 24
+    threads: 16
     conda:
         "../envs/bwa_samtools.yaml"
     resources:
-        mem_mb=10000
+        mem_mb=32000
     shell:
         "bwa mem "
         "-K 10000000 -M "
         '-R "@RG\\tCN:54gene\\tID:{params.rg}\\tSM:{params.sm}\\tPL:{params.pl}\\tLB:N/A" '
         "-t {threads} "
         "{input.r} {input.r1} {input.r2} | "
-        "samtools sort -@ 8 -m 3600M -o {output} - " # note - wanted to use bwa-mem2, but doesn't seem to be working via conda
+        "samtools sort -@ 2 -m 4000M -o {output} - "
 
 
 rule mark_duplicates:
@@ -66,7 +69,7 @@ rule mark_duplicates:
     resources:
         mem_mb=10000,
     shell:
-        'gatk --java-options "-Xmx2g -XX:+UseParallelGC -XX:ParallelGCThreads=2" MarkDuplicates '
+        'gatk --java-options "-Djava.io.tmpdir={params.t} -Xmx2g -XX:+UseParallelGC -XX:ParallelGCThreads=2" MarkDuplicates '
         "TMP_DIR={params.t} "
         "REMOVE_DUPLICATES=true "
         "INPUT={params.l} "

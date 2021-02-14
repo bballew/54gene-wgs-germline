@@ -57,7 +57,7 @@ rule fastqc:
     conda:
         "../envs/fastqc_multiqc.yaml"
     resources:
-        mem_mb=2000,
+        mem_mb=6000,
         batch=fqc_limit,
     shell:
         "fastqc {input.r1} -d {params.t} --quiet -t {threads} --outdir=results/fastqc/ && "
