@@ -110,7 +110,7 @@ rule HC_concat_gvcfs:
     resources:
         mem_mb=8000,
     shell:
-        'gatk --java-options "-XmX4g" GatherVcfs '
+        'gatk --java-options "-Xmx4g" GatherVcfs '
         "--tmp-dir {params.t} "
         "-I {params.l} "
         "-O {output}"

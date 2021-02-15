@@ -19,7 +19,7 @@ snakemake -p \
 	--use-conda \
 	--conda-frontend mamba \
 	--rerun-incomplete \
-	--default-resources mem_mb=256 batch=1 \
+	--default-resources mem_mb=1024 batch=1 \
 	--cluster "qsub -S /bin/bash -V -j y -o logs/ -cwd -pe mpi {threads} -l h_vmem={resources.mem_mb}M" \
 	--resources batch=${b} \
 	--jobs 40 \
