@@ -65,10 +65,9 @@ rule HC_consolidate_gvcfs:
     Snakemake's implicit directory management results in an error when
     DBImport finds that the workspace path already exists (even though it
     seems empty?).  Removing the directory just prior to running DBImport
-    seems to solve this problem, but will be problematic on resuming the
-    pipeline.  Added a datetime stamp (dt) to the dir to help address this.
-    However, this datetime stamp will need to be overridden if the pipeline
-    is stopped and then resumed prior to completion of rule HC_genotypeGVCFs.
+    seems to solve this problem.  Adding the directory as an input ensures
+    that a failed job will clean up after itself, so resumption of the
+    pipeline shouldn't be an issue.
 
     What exactly is GenomicsDB for?  GenotypeGVCFs can only take one single
     input.  GenomicsDB is a method of consolidating gvcfs across samples,
@@ -103,6 +102,7 @@ rule HC_consolidate_gvcfs:
         o2="results/HaplotypeCaller/DBImport/{chrom}/vidmap.json",
         o3="results/HaplotypeCaller/DBImport/{chrom}/callset.json",
         o4="results/HaplotypeCaller/DBImport/{chrom}/__tiledb_workspace.tdb",
+        d=directory("results/HaplotypeCaller/DBImport/{chrom}"),
     benchmark:
         "results/performance_benchmarks/HC_consolidate_gvcfs/{chrom}.tsv"
     params:
@@ -112,17 +112,19 @@ rule HC_consolidate_gvcfs:
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=12000,
+        mem_mb=32000,
     shell:
         'export _JAVA_OPTIONS="" && '
         "rm -r {params.db} && "
-        'gatk --java-options "-Xmx6G" GenomicsDBImport '
-        "--batch-size 50 --disable-bam-index-caching "
+        'gatk --java-options "-Xmx12G" GenomicsDBImport '
+        "--batch-size 25 "
+        "--disable-bam-index-caching "
         "--sample-name-map {input.sampleMap} "
         "--genomicsdb-workspace-path {params.db} "
         "-L {params.interval} "
         "--tmp-dir {params.t} "
-        "--reader-threads 5"
+        "--reader-threads 5 "
+        "--genomicsdb-shared-posixfs-optimizations"
 
 rule HC_genotype_gvcfs:
     """Joint genotyping."""
@@ -173,6 +175,8 @@ rule HC_concat_vcfs_bcftools:
         "results/performance_benchmarks/HC_concat_vcfs_bcftools/benchmarks.tsv"
     conda:
         "../envs/bcftools_tabix.yaml"
+    resources:
+        mem_mb=4000,
     shell:
         "bcftools concat -a {input.vcfList} -Ou | "
         "bcftools sort -T {params.t} -Oz -o {output.projectVCF} && "
