@@ -53,6 +53,10 @@ rule mark_duplicates:
     this step, instead of concatenating them prior to alignment.  This
     is to help maintain some additional parallelization going in to
     alignment.
+
+    Periodically get out of space errors here.  I've redundantly set the
+    temp directory; I wonder if the temp space is running out of inodes?
+    May need to create some subdirectory structure.
     """
     input:
         get_inputs_with_matching_SM,
@@ -68,8 +72,9 @@ rule mark_duplicates:
         "../envs/gatk.yaml"
     resources:
         mem_mb=10000,
+        batch=concurrent_limit,
     shell:
-        'gatk --java-options "-Djava.io.tmpdir={params.t} -Xmx2g -XX:+UseParallelGC -XX:ParallelGCThreads=2" MarkDuplicates '
+        'gatk --java-options "-Xmx2g -XX:+UseParallelGC -XX:ParallelGCThreads=2" MarkDuplicates '
         "TMP_DIR={params.t} "
         "REMOVE_DUPLICATES=true "
         "INPUT={params.l} "
@@ -108,7 +113,9 @@ rule recalibrate_bams:
 
 
 rule apply_bqsr:
-    """Recalibrate bams."""
+    """Apply recalibration to bams.
+    Same periodic out of space errors as mark dups.
+    """
     input:
         bam="results/dedup/{sample}.bam",
         r="resources/Homo_sapiens_assembly38.fasta",
@@ -124,6 +131,7 @@ rule apply_bqsr:
         "../envs/gatk.yaml"
     resources:
         mem_mb=20000,
+        batch=concurrent_limit,
     shell:
         'gatk --java-options "-Xmx10g" ApplyBQSR '
         "--tmp-dir {params.t} "

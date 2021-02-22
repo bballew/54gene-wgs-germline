@@ -58,7 +58,7 @@ rule fastqc:
         "../envs/fastqc_multiqc.yaml"
     resources:
         mem_mb=6000,
-        batch=fqc_limit,
+        batch=concurrent_limit,
     shell:
         "fastqc {input.r1} -d {params.t} --quiet -t {threads} --outdir=results/fastqc/ && "
         "fastqc {input.r2} -d {params.t} --quiet -t {threads} --outdir=results/fastqc/"
@@ -97,8 +97,8 @@ rule quality_trimming:
         r1=get_read1_fastq,
         r2=get_read2_fastq,
     output:
-        r1_paired="results/paired_trimmed_reads/{rg}_r1.fastq.gz",
-        r2_paired="results/paired_trimmed_reads/{rg}_r2.fastq.gz",
+        r1_paired=temp("results/paired_trimmed_reads/{rg}_r1.fastq.gz"),
+        r2_paired=temp("results/paired_trimmed_reads/{rg}_r2.fastq.gz"),
         h="results/paired_trimmed_reads/{rg}_fastp.html",
         j="results/paired_trimmed_reads/{rg}_fastp.json",
     benchmark:
@@ -108,7 +108,7 @@ rule quality_trimming:
         "../envs/fastp.yaml"
     resources:
         mem_mb=4000,
-        batch=trim_limit,
+        batch=concurrent_limit,
     shell:
         "fastp -i {input.r1} -I {input.r2} "
         "-w {threads} "

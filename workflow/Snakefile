@@ -21,7 +21,7 @@ configfile: "config/config.yaml"
 
 # import variables from config
 sampleFile = config["sampleFile"]
-nt = config["threads"]
+jobs = config["jobs"]
 tempDir = config["tempDir"]
 full = config["runType"]["full"]
 jointgeno = config["runType"]["joint_genotyping"]
@@ -118,14 +118,22 @@ def list_markdup_inputs(wildcards):
     return s1
 
 
-def get_batch_limit_number(sampleDict, n):
+def get_batch_limit_number(sampleDict, jobs, n):
     """Assign weight to limit concurrent running rules
-    Required to avoid hitting throughput limits of fsx; e.g. if there are 20 fastq
-    pairs to trim - 20 lines in the manifest, the limit for resources is set to 20
-    in the wrapper script, and if n=10, the rule weight is set to 20/10 = 2.  So, max 10
-    concurrent weighted jobs will fit under the resource restriction.
+    Required to avoid hitting throughput limits of fsx.  The limit for resources 
+    is set to the max number of jobs in the config and wrapper script, and if n=10, 
+    the rule weight is set to max jobs/10.
+
+    Example:
+        max jobs = 1000
+        default batch resource = 1
+        only want to run max 10 at a time
+
+        1000 / 10 = 100 is assigned as the "batch" resource for alignment jobs,
+        so only max 10 will fit under the limit at one time.
+
     """
-    limit = round(len(sampleDict.keys()) / n)
+    limit = round(int(jobs) / n)
     if limit == 0:
         limit = 1
     return limit
@@ -139,8 +147,7 @@ SAMPLES = create_samples_set(sampleDict) if full else sampleDict.keys()
 # weight for trimming and fastqc rules, to avoid hitting fsx throughput limits
 # The Second parameter is the desired max number of concurrently-running jobs of
 # that rule.
-trim_limit = get_batch_limit_number(sampleDict, 10)
-fqc_limit = get_batch_limit_number(sampleDict, 20)
+concurrent_limit = get_batch_limit_number(sampleDict, jobs, 20)
 
 # Previously read from dict, but now that I'm programmatically retrieving
 # the ref genome and index files, it's easier to just have a hard-coded list
@@ -236,7 +243,7 @@ def get_DBImport_path2(wildcards):
 
 TARGETS = []
 if full:
-    TARGETS.append("results/multiqc/multiqc.html")
+#    TARGETS.append("results/multiqc/multiqc.html")
     TARGETS.append("results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics")
     TARGETS.append(expand("results/alignment_stats/{sample}.txt", sample=SAMPLES))
 elif jointgeno:
