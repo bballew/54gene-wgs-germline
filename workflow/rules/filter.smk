@@ -46,7 +46,7 @@ rule split_snps:
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=6000
+        mem_mb=6000,
     shell:
         'export _JAVA_OPTIONS="" && '
         'gatk --java-options "-Xmx1g" SelectVariants '
@@ -72,7 +72,7 @@ rule split_indels:
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=6000
+        mem_mb=6000,
     shell:
         'export _JAVA_OPTIONS="" && '
         'gatk --java-options "-Xmx1g" SelectVariants '
@@ -98,7 +98,7 @@ rule hard_filter_snps:
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=6000
+        mem_mb=6000,
     shell:
         'export _JAVA_OPTIONS="" && '
         'gatk --java-options "-Xmx1g" VariantFiltration '
@@ -130,7 +130,7 @@ rule hard_filter_indels:
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=6000
+        mem_mb=6000,
     shell:
         'export _JAVA_OPTIONS="" && '
         'gatk --java-options "-Xmx1g" VariantFiltration '
@@ -172,7 +172,7 @@ rule merge_calls:
     conda:
         "../envs/bcftools_tabix.yaml"
     resources:
-        mem_mb=4000
+        mem_mb=4000,
     shell:
         "bcftools concat -a -Ov {input.snps} {input.indels} | "
         "bcftools sort -T {params.t} -Oz -o {output.vcf} && "
@@ -198,7 +198,7 @@ rule picard_metrics:
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=6000
+        mem_mb=6000,
     shell:
         'export _JAVA_OPTIONS="" && '
         'gatk --java-options "-Xmx1g" CollectVariantCallingMetrics '

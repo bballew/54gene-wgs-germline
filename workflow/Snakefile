@@ -120,8 +120,8 @@ def list_markdup_inputs(wildcards):
 
 def get_batch_limit_number(sampleDict, jobs, n):
     """Assign weight to limit concurrent running rules
-    Required to avoid hitting throughput limits of fsx.  The limit for resources 
-    is set to the max number of jobs in the config and wrapper script, and if n=10, 
+    Required to avoid hitting throughput limits of fsx.  The limit for resources
+    is set to the max number of jobs in the config and wrapper script, and if n=10,
     the rule weight is set to max jobs/10.
 
     Example:
@@ -206,7 +206,7 @@ def get_DBImport_path2(wildcards):
             "__coords.tdb",
             "DP_FORMAT.tdb",
             "DP.tdb",
-            #"DS.tdb",
+            # "DS.tdb",
             "END.tdb",
             "ExcessHet.tdb",
             "FILTER.tdb",
@@ -243,7 +243,7 @@ def get_DBImport_path2(wildcards):
 
 TARGETS = []
 if full:
-#    TARGETS.append("results/multiqc/multiqc.html")
+    #    TARGETS.append("results/multiqc/multiqc.html")
     TARGETS.append("results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics")
     TARGETS.append(expand("results/alignment_stats/{sample}.txt", sample=SAMPLES))
 elif jointgeno:

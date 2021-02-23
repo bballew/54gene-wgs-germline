@@ -9,7 +9,7 @@ rule align_reads:
     in parallel for each fastq pair.
 
     Note that the -m flag for samtools specifies memory per thread, and
-    it isn't a hard cap on memory (can go over somewhat).  
+    it isn't a hard cap on memory (can go over somewhat).
     """
     input:
         r="resources/Homo_sapiens_assembly38.fasta",
@@ -35,7 +35,7 @@ rule align_reads:
     conda:
         "../envs/bwa_samtools.yaml"
     resources:
-        mem_mb=32000
+        mem_mb=32000,
     shell:
         "bwa mem "
         "-K 10000000 -M "

@@ -126,6 +126,7 @@ rule HC_consolidate_gvcfs:
         "--reader-threads 5 "
         "--genomicsdb-shared-posixfs-optimizations"
 
+
 rule HC_genotype_gvcfs:
     """Joint genotyping."""
     input:
