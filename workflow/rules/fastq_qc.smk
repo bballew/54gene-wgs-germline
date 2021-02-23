@@ -107,7 +107,7 @@ rule quality_trimming:
     conda:
         "../envs/fastp.yaml"
     resources:
-        mem_mb=4000,
+        mem_mb=8000,
         batch=concurrent_limit,
     shell:
         "fastp -i {input.r1} -I {input.r2} "
