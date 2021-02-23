@@ -9,13 +9,8 @@ f=$(awk '($0~/^sampleFile/){print $2}' config/config.yaml | sed "s/['\"]//g")
 j=$(awk '($0~/^jobs/){print $2}' config/config.yaml)
 mkdir -p "${t}"
 export TMPDIR="${t}"
-#export JDK_JAVA_OPTIONS="-Xmx4g -Djava.io.tmpdir=${t} -XX:CompressedClassSpaceSize=200m"
 export _JAVA_OPTIONS="-Djava.io.tmpdir=${t} -XX:CompressedClassSpaceSize=200m"
-# note that setting the temp dir above is required, above and beyond using the --tmp-dir flag in gatk tools
-#export JAVA_OPTS="-Xmx4g -Djava.io.tmpdir=${t} -XX:CompressedClassSpaceSize=200m"
 mkdir -p logs/
-
-#b=$(wc -l "${f}" | cut -d" " -f1) 
 
 snakemake -p \
 	--use-conda \
