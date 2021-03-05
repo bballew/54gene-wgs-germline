@@ -149,10 +149,10 @@ rule HC_genotype_gvcfs:
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=12000,
+        mem_mb=24000,
     shell:
         'export _JAVA_OPTIONS="" && '
-        'gatk --java-options "-Xmx4g" GenotypeGVCFs '
+        'gatk --java-options "-Xmx12g" GenotypeGVCFs '
         "-R {input.r} "
         "-V gendb://{params.db} "
         "-O {output.vcf} "
