@@ -241,15 +241,17 @@ def get_DBImport_path2(wildcards):
     return myList
 
 
-TARGETS = []
-if full:
-    #    TARGETS.append("results/multiqc/multiqc.html")
-    TARGETS.append("results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics")
-    TARGETS.append(expand("results/alignment_stats/{sample}.txt", sample=SAMPLES))
-elif jointgeno:
-    TARGETS.append("results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics")
+TARGETS = [
+    "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
+    "results/bcftools_stats/plots/summary.log",
+    "results/relatedness/somalier.pairs.tsv",
+    "results/sex_check/ploidy.png",
+    expand("results/contamination_check/{sample}.selfSM", sample=SAMPLES),
+]
 
 if full:
+
+    TARGETS.append(expand("results/alignment_stats/{sample}.txt", sample=SAMPLES))
 
     include: "rules/resources.smk"
 
@@ -263,12 +265,16 @@ if full:
 
     include: "rules/filter.smk"
 
+    include: "rules/post_calling_qc.smk"
+
 
 elif jointgeno:
 
     include: "rules/HC_joint_geno.smk"
 
     include: "rules/filter.smk"
+
+    include: "rules/post_calling_qc.smk"
 
 
 wildcard_constraints:
