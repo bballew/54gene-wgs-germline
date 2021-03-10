@@ -94,6 +94,7 @@ rule check_relatedness:
         o4="results/qc/relatedness/somalier.groups.tsv",
     params:
         d="results/qc/relatedness/extracted/",
+        o="results/qc/relatedness/",
     benchmark:
         "results/performance_benchmarks/check_relatedness/check_relatedness.tsv"
     shell:
@@ -104,7 +105,7 @@ rule check_relatedness:
         "-d {params.d} "
         "--sites {output.sites} "
         "-f {input.r} {input.vcf} && "
-        "./results/qc/relatedness/somalier relate {params.d}/*.somalier"
+        "./results/qc/relatedness/somalier relate -o {params.o} {params.d}/*.somalier"
 
 
 # rule per_base_coverage:
@@ -127,7 +128,7 @@ rule sex_check:
         txt="results/qc/sex_check/ploidy.txt",
         png="results/qc/sex_check/ploidy.png",
     params:
-        p="ploidy",
+        p="results/qc/sex_check/ploidy",
     benchmark:
         "results/performance_benchmarks/sex_check/sex_check.tsv"
     conda:
@@ -142,11 +143,27 @@ rule sex_check:
 #     output:
 #     shell:
 
+rule subset_for_contam_check:
+    input:
+        vcf="results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz",
+        i="results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz.tbi",
+    output:
+        vcf=temp("results/qc/contamination_check/chr5_and_10.snps.hardfiltered.vcf.gz"),
+        i=temp("results/qc/contamination_check/chr5_and_10.snps.hardfiltered.vcf.gz.tbi"),
+    benchmark:
+        "results/results/performance_benchmarks/subset_for_contam_check/subset.tsv"
+    threads: 8
+    conda:
+        "../envs/bcftools_tabix.yaml"
+    shell:
+        "bcftools view --threads {threads} -r chr5,chr10 -Oz -o {output.vcf} {input.vcf} && "
+        "tabix -p vcf {output.vcf}"
+
 
 rule contamination_check:
     input:
-        vcf="results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz",
-        i1="results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz.tbi",
+        vcf="results/qc/contamination_check/chr5_and_10.snps.hardfiltered.vcf.gz",
+        i1="results/qc/contamination_check/chr5_and_10.snps.hardfiltered.vcf.gz.tbi",
         bam="results/bqsr/{sample}.bam",
         i2="results/bqsr/{sample}.bam.bai",
     output:
@@ -161,8 +178,11 @@ rule contamination_check:
         "results/performance_benchmarks/contamination_check/{sample}.tsv"
     conda:
         "../envs/verifybamid.yaml"
+    resources:
+        mem_mb=4000,
     shell:
         "verifyBamID "
+        "--best "
         "--vcf {input.vcf} "
         "--bam {input.bam} "
         "--out {params.d}"
