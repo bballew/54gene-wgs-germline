@@ -243,10 +243,10 @@ def get_DBImport_path2(wildcards):
 
 TARGETS = [
     "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
-    "results/bcftools_stats/plots/summary.log",
-    "results/relatedness/somalier.pairs.tsv",
-    "results/sex_check/ploidy.png",
-    expand("results/contamination_check/{sample}.selfSM", sample=SAMPLES),
+    "results/qc/bcftools_stats/plots/summary.log",
+    "results/qc/relatedness/somalier.pairs.tsv",
+    "results/qc/sex_check/ploidy.png",
+    expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES),
 ]
 
 if full:
