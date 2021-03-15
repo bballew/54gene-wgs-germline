@@ -152,6 +152,51 @@ rule hard_filter_indels:
 #     shell:
 
 
+rule subset_for_contam_check:
+    input:
+        vcf="results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz",
+        i="results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz.tbi",
+    output:
+        vcf=temp("results/qc/contamination_check/chr5_and_10.snps.hardfiltered.vcf.gz"),
+        i=temp("results/qc/contamination_check/chr5_and_10.snps.hardfiltered.vcf.gz.tbi"),
+    benchmark:
+        "results/results/performance_benchmarks/subset_for_contam_check/subset.tsv"
+    threads: 8
+    conda:
+        "../envs/bcftools_tabix.yaml"
+    shell:
+        "bcftools view --threads {threads} -r chr5,chr10 -Oz -o {output.vcf} {input.vcf} && "
+        "tabix -p vcf {output.vcf}"
+
+
+rule contamination_check:
+    input:
+        vcf="results/qc/contamination_check/chr5_and_10.snps.hardfiltered.vcf.gz",
+        i1="results/qc/contamination_check/chr5_and_10.snps.hardfiltered.vcf.gz.tbi",
+        bam="results/bqsr/{sample}.bam",
+        i2="results/bqsr/{sample}.bam.bai",
+    output:
+        "results/qc/contamination_check/{sample}.selfSM",
+        "results/qc/contamination_check/{sample}.selfRG",
+        "results/qc/contamination_check/{sample}.log",
+        "results/qc/contamination_check/{sample}.depthSM",
+        "results/qc/contamination_check/{sample}.depthRG",
+    params:
+        d="results/qc/contamination_check/{sample}",
+    benchmark:
+        "results/performance_benchmarks/contamination_check/{sample}.tsv"
+    conda:
+        "../envs/verifybamid.yaml"
+    resources:
+        mem_mb=4000,
+    shell:
+        "verifyBamID "
+        "--best "
+        "--vcf {input.vcf} "
+        "--bam {input.bam} "
+        "--out {params.d}"
+
+
 rule merge_calls:
     """
     Opted for bcftools here, just because it's easy to multithread,
