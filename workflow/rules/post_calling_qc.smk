@@ -51,21 +51,7 @@ rule plot_variant_stats:
         "plot-vcfstats -P -p {params.d} {input}"
 
 
-# assemble and vcftools-plot
 # ID and exclude samples with het/hom above....x?  Make tunable for WGS vs WES?  Use some outlier threshold?
-
-# rule concordance_and_sample_swaps:
-#     input:
-#         vcf="",
-#         i=""
-#     output:
-#     params:
-#     benchmark:
-#     conda:
-#         "../envs/bcftools_tabix.yaml"
-#     resources:
-#     shell:
-#         "bcftools gtcheck -g {input.vcf} {input.vcf}"
 
 
 rule check_relatedness:
@@ -78,7 +64,6 @@ rule check_relatedness:
         o1="results/qc/relatedness/somalier.html",
         o2="results/qc/relatedness/somalier.pairs.tsv",
         o3="results/qc/relatedness/somalier.samples.tsv",
-        #o4="results/qc/relatedness/somalier.groups.tsv",
     params:
         d="results/qc/relatedness/extracted/",
         o="results/qc/relatedness/somalier",
@@ -130,46 +115,37 @@ rule sex_check:
 #     output:
 #     shell:
 
-rule subset_for_contam_check:
+
+rule create_exclude_list:
     input:
-        vcf="results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz",
-        i="results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz.tbi",
+        v = "results/qc/contamination_check/summary.txt",
+        b = "results/qc/bcftools_stats/joint_called_stats.out",
     output:
-        vcf=temp("results/qc/contamination_check/chr5_and_10.snps.hardfiltered.vcf.gz"),
-        i=temp("results/qc/contamination_check/chr5_and_10.snps.hardfiltered.vcf.gz.tbi"),
+        l = "results/post_qc_exclusions/exclude_list.tsv",
+        a = "results/post_qc_exclusions/exclude_list_with_annotation.tsv",
+    params:
+        "results/post_qc_exclusions/exclude_list"
     benchmark:
-        "results/results/performance_benchmarks/subset_for_contam_check/subset.tsv"
-    threads: 8
+        "results/performance_benchmarks/create_exclude_list/create_exclude_list.tsv"
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/create_exclude_list.py {input.b} {params} --verify {input.v}"
+
+
+rule exclude_samples:
+    input:
+        v = "results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
+        i = "results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz.tbi",
+        l = "results/post_qc_exclusions/exclude_list.tsv",
+    output:
+        v = "results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz",
+        i = "results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz.tbi",
+    benchmark:
+        "results/performance_benchmarks/exclude_samples/exclude_samples.tsv"
+    threads: 4
     conda:
         "../envs/bcftools_tabix.yaml"
     shell:
-        "bcftools view --threads {threads} -r chr5,chr10 -Oz -o {output.vcf} {input.vcf} && "
-        "tabix -p vcf {output.vcf}"
-
-
-rule contamination_check:
-    input:
-        vcf="results/qc/contamination_check/chr5_and_10.snps.hardfiltered.vcf.gz",
-        i1="results/qc/contamination_check/chr5_and_10.snps.hardfiltered.vcf.gz.tbi",
-        bam="results/bqsr/{sample}.bam",
-        i2="results/bqsr/{sample}.bam.bai",
-    output:
-        "results/qc/contamination_check/{sample}.selfSM",
-        "results/qc/contamination_check/{sample}.selfRG",
-        "results/qc/contamination_check/{sample}.log",
-        "results/qc/contamination_check/{sample}.depthSM",
-        "results/qc/contamination_check/{sample}.depthRG",
-    params:
-        d="results/qc/contamination_check/{sample}",
-    benchmark:
-        "results/performance_benchmarks/contamination_check/{sample}.tsv"
-    conda:
-        "../envs/verifybamid.yaml"
-    resources:
-        mem_mb=4000,
-    shell:
-        "verifyBamID "
-        "--best "
-        "--vcf {input.vcf} "
-        "--bam {input.bam} "
-        "--out {params.d}"
+        "bcftools view -S ^{input.l} --threads {threads} -Oz -o {output.v} {input.v} && "
+        "tabix -p vcf {output.v}"

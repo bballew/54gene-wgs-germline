@@ -246,6 +246,7 @@ TARGETS = [
     "results/qc/bcftools_stats/plots/plot-vcfstats.log",
     "results/qc/relatedness/somalier.pairs.tsv",
     "results/qc/sex_check/ploidy.png",
+    "results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz",
 ]
 
 if full:

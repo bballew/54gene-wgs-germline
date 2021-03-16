@@ -197,6 +197,16 @@ rule contamination_check:
         "--out {params.d}"
 
 
+rule summarize_contam_check:
+    """This pulls the FREEMIX and depth estimate from the verifyBamID output"""
+    input:
+        expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES)
+    output:
+        "results/qc/contamination_check/summary.txt"
+    shell:
+        "grep -v \"^#\" *selfSM  > {output}"
+
+
 rule merge_calls:
     """
     Opted for bcftools here, just because it's easy to multithread,
