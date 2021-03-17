@@ -200,11 +200,13 @@ rule contamination_check:
 rule summarize_contam_check:
     """This pulls the FREEMIX and depth estimate from the verifyBamID output"""
     input:
-        expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES)
+        expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES),
     output:
-        "results/qc/contamination_check/summary.txt"
+        "results/qc/contamination_check/summary.txt",
+    params:
+        "results/qc/contamination_check/",
     shell:
-        "grep -v \"^#\" *selfSM  > {output}"
+        'grep -v "^#" {params}*selfSM  > {output}'
 
 
 rule merge_calls:
@@ -231,7 +233,8 @@ rule merge_calls:
     shell:
         "bcftools concat -a -Ov {input.snps} {input.indels} | "
         "bcftools sort -T {params.t} -Oz -o {output.vcf} && "
-        "tabix -p vcf {output.vcf}" # 'gatk --java-options "-Xmx4G" GatherVcfs -I {input.snps} -I {input.indels} -O {output}'
+        "tabix -p vcf {output.vcf}"
+        # 'gatk --java-options "-Xmx4G" GatherVcfs -I {input.snps} -I {input.indels} -O {output}'
 
 
 rule picard_metrics:
