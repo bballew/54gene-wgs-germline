@@ -33,14 +33,14 @@ rule plot_variant_stats:
         "results/qc/bcftools_stats/plots/plot.py",
         "results/qc/bcftools_stats/plots/dp_by_sample.0.png",
         "results/qc/bcftools_stats/plots/plot-vcfstats.log",
-        "results/qc/bcftools_stats/plots/tstv_by_qual.0.png",
+        # "results/qc/bcftools_stats/plots/tstv_by_qual.0.png",
         "results/qc/bcftools_stats/plots/tstv_by_sample.0.dat",
         "results/qc/bcftools_stats/plots/hets_by_sample.0.png",
         "results/qc/bcftools_stats/plots/singletons_by_sample.0.png",
         "results/qc/bcftools_stats/plots/hwe.0.dat",
         "results/qc/bcftools_stats/plots/tstv_by_sample.0.png",
         "results/qc/bcftools_stats/plots/snps_by_sample.0.png",
-        "results/qc/bcftools_stats/plots/hwe.0.png",
+        # "results/qc/bcftools_stats/plots/hwe.0.png",
     params:
         d="results/qc/bcftools_stats/plots/",
     benchmark:
@@ -118,29 +118,29 @@ rule sex_check:
 
 rule create_exclude_list:
     input:
-        v = "results/qc/contamination_check/summary.txt",
-        b = "results/qc/bcftools_stats/joint_called_stats.out",
+        v="results/qc/contamination_check/summary.txt",
+        b="results/qc/bcftools_stats/joint_called_stats.out",
     output:
-        l = "results/post_qc_exclusions/exclude_list.tsv",
-        a = "results/post_qc_exclusions/exclude_list_with_annotation.tsv",
+        l="results/post_qc_exclusions/exclude_list.tsv",
+        a="results/post_qc_exclusions/exclude_list_with_annotation.tsv",
     params:
-        "results/post_qc_exclusions/exclude_list"
+        "results/post_qc_exclusions/exclude_list",
     benchmark:
         "results/performance_benchmarks/create_exclude_list/create_exclude_list.tsv"
     conda:
         "../envs/python.yaml"
-    script:
-        "../scripts/create_exclude_list.py {input.b} {params} --verify {input.v}"
+    shell:
+        "python workflow/scripts/create_exclude_list.py {input.b} {params} --verify {input.v}"
 
 
 rule exclude_samples:
     input:
-        v = "results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
-        i = "results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz.tbi",
-        l = "results/post_qc_exclusions/exclude_list.tsv",
+        v="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
+        i="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz.tbi",
+        l="results/post_qc_exclusions/exclude_list.tsv",
     output:
-        v = "results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz",
-        i = "results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz.tbi",
+        v="results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz",
+        i="results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz.tbi",
     benchmark:
         "results/performance_benchmarks/exclude_samples/exclude_samples.tsv"
     threads: 4
