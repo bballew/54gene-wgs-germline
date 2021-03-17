@@ -50,8 +50,11 @@ def exclude_high_het_hom(df):
     """Exclude any samples with a het/hom ratio over 2.5"""
     df.loc[:, "het_hom_ratio"] = df["nHets"] / df["nNonRefHom"]
     df_het = df.loc[(df["het_hom_ratio"] > 2.5)].copy()
-    df_het.loc[:, "exclude_reason"] = "high_het_hom"
-    return df_het[["sample", "exclude_reason"]]
+    if df_het.empty:
+        return
+    else:
+        df_het.loc[:, "exclude_reason"] = "high_het_hom"
+        return df_het[["sample", "exclude_reason"]]
 
 
 def exclude_low_depth(df):
