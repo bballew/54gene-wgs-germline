@@ -115,22 +115,41 @@ rule sex_check:
 #     output:
 #     shell:
 
+if full:
 
-rule create_exclude_list:
-    input:
-        v="results/qc/contamination_check/summary.txt",
-        b="results/qc/bcftools_stats/joint_called_stats.out",
-    output:
-        l="results/post_qc_exclusions/exclude_list.tsv",
-        a="results/post_qc_exclusions/exclude_list_with_annotation.tsv",
-    params:
-        "results/post_qc_exclusions/exclude_list",
-    benchmark:
-        "results/performance_benchmarks/create_exclude_list/create_exclude_list.tsv"
-    conda:
-        "../envs/python.yaml"
-    shell:
-        "python workflow/scripts/create_exclude_list.py {input.b} {params} --verify {input.v}"
+    rule create_exclude_list:
+        input:
+            v="results/qc/contamination_check/summary.txt",
+            b="results/qc/bcftools_stats/joint_called_stats.out",
+        output:
+            l="results/post_qc_exclusions/exclude_list.tsv",
+            a="results/post_qc_exclusions/exclude_list_with_annotation.tsv",
+        params:
+            "results/post_qc_exclusions/exclude_list",
+        benchmark:
+            "results/performance_benchmarks/create_exclude_list/create_exclude_list.tsv"
+        conda:
+            "../envs/python.yaml"
+        shell:
+            "python workflow/scripts/create_exclude_list.py {input.b} {params} --verify {input.v}"
+
+
+else:
+
+    rule create_exclude_list:
+        input:
+            b="results/qc/bcftools_stats/joint_called_stats.out",
+        output:
+            l="results/post_qc_exclusions/exclude_list.tsv",
+            a="results/post_qc_exclusions/exclude_list_with_annotation.tsv",
+        params:
+            "results/post_qc_exclusions/exclude_list",
+        benchmark:
+            "results/performance_benchmarks/create_exclude_list/create_exclude_list.tsv"
+        conda:
+            "../envs/python.yaml"
+        shell:
+            "python workflow/scripts/create_exclude_list.py {input.b} {params}"
 
 
 rule exclude_samples:
