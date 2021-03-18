@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+from typing import Dict, List, Optional, Set, Tuple
 
 import pandas as pd
 
@@ -19,9 +20,9 @@ def get_args():
     return results.bstats, results.outfile, results.verify
 
 
-def read_in_bcftools_PSC(bstats):
+def read_in_bcftools_PSC(bstats: str) -> pd.DataFrame:
     """Read into a dataframe just the PSC portion of bcftools stats output"""
-    skip = [i for i, line in enumerate(open(bstats)) if not line.startswith("PSC")]
+    skip: list[int] = [i for i, line in enumerate(open(bstats)) if not line.startswith("PSC")]
     return pd.read_csv(
         bstats,
         sep="\t",
@@ -46,7 +47,7 @@ def read_in_bcftools_PSC(bstats):
     )
 
 
-def exclude_high_het_hom(df):
+def exclude_high_het_hom(df: pd.DataFrame) -> pd.DataFrame:
     """Exclude any samples with a het/hom ratio over 2.5"""
     df.loc[:, "het_hom_ratio"] = df["nHets"] / df["nNonRefHom"]
     df_het = df.loc[(df["het_hom_ratio"] > 2.5)].copy()
@@ -57,7 +58,7 @@ def exclude_high_het_hom(df):
         return df_het[["sample", "exclude_reason"]]
 
 
-def exclude_low_depth(df):
+def exclude_low_depth(df: pd.DataFrame) -> pd.DataFrame:
     """Setting a 20x avg depth cutoff
 
     This is reported by the lab as well, but this should catch samples
@@ -71,7 +72,7 @@ def exclude_low_depth(df):
         return df_depth[["sample", "exclude_reason"]]
 
 
-def read_in_verifybamid(verify):
+def read_in_verifybamid(verify: str) -> pd.DataFrame:
     """Requires single *.selfSM files to be concatenated without headers"""
     return pd.read_csv(
         verify,
@@ -101,7 +102,7 @@ def read_in_verifybamid(verify):
     )
 
 
-def exclude_contam(df_v):
+def exclude_contam(df_v: pd.DataFrame) -> pd.DataFrame:
     """Setting a 3% contamination threshold"""
     df_contam = df_v.loc[df_v["FREEMIX"] > 0.03].copy()
     if df_contam.empty:
