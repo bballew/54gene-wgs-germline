@@ -320,3 +320,25 @@ def test_exclude_contam_fail():
     test_out = ex.exclude_contam(test_df, 0.03)
     expected_out = pd.DataFrame([("sample-0295", "contamination")], columns=out_cols)
     assert pd.testing.assert_frame_equal(test_out, expected_out) is None
+
+
+def test_combine_exclusions():
+    test_df1 = pd.DataFrame(
+        [("sample-1111", "contamination"), ("sample-2222", "contamination")], columns=out_cols
+    )
+    test_df2 = pd.DataFrame(
+        [("sample-1111", "low_depth"), ("sample-3333", "low_depth")], columns=out_cols
+    )
+    test_df3 = pd.DataFrame(
+        [("sample-1111", "high_het_hom"), ("sample-2222", "high_het_hom")], columns=out_cols
+    )
+    test_out = ex.combine_exclusions([test_df1, test_df2, test_df3])
+    expected_out = pd.DataFrame(
+        [
+            ("sample-1111", "contamination,low_depth,high_het_hom"),
+            ("sample-2222", "contamination,high_het_hom"),
+            ("sample-3333", "low_depth"),
+        ],
+        columns=out_cols,
+    )
+    assert pd.testing.assert_frame_equal(test_out, expected_out) is None

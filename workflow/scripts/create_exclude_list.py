@@ -134,6 +134,12 @@ def exclude_contam(df_v: pd.DataFrame, c: float) -> pd.DataFrame:
         return df_contam[["sample", "exclude_reason"]]
 
 
+def combine_exclusions(df_list: list) -> pd.DataFrame:
+    """"""
+    all_df = pd.concat(df_list).groupby("sample")["exclude_reason"].apply(",".join).reset_index()
+    return all_df
+
+
 if __name__ == "__main__":
     bstats, outfile, verify, r, d, c = get_args()
     df = read_in_bcftools_PSC(bstats)
@@ -142,10 +148,9 @@ if __name__ == "__main__":
     if verify:
         df_v = read_in_verifybamid(verify)
         exclude3 = exclude_contam(df_v, c)
-        exclude_df = pd.concat([exclude1, exclude2, exclude3])
+        exclude_df = combine_exclusions([exclude1, exclude2, exclude3])
     else:
-        exclude_df = pd.concat([exclude1, exclude2])
+        exclude_df = combine_exclusions([exclude1, exclude2])
 
-    exclude_df = exclude_df.groupby("sample")["exclude_reason"].apply(",".join).reset_index()
     exclude_df.to_csv(outfile + "_with_annotation.tsv", sep="\t", header=None, index=None)
     exclude_df[["sample"]].to_csv(outfile + ".tsv", sep="\t", header=None, index=None)
