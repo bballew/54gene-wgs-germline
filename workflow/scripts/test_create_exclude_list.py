@@ -81,7 +81,7 @@ def test_exclude_high_het_hom_pass():
         ],
         columns=bcf_columns,
     )
-    test_out = ex.exclude_high_het_hom(test_df)
+    test_out = ex.exclude_high_het_hom(test_df, 2.5)
     expected_out = None
     assert test_out == expected_out
 
@@ -125,7 +125,7 @@ def test_exclude_high_het_hom_fail():
         ],
         columns=bcf_columns,
     )
-    test_out = ex.exclude_high_het_hom(test_df)
+    test_out = ex.exclude_high_het_hom(test_df, 2.5)
     expected_out = pd.DataFrame([("sample-0049", "high_het_hom")], columns=out_cols)
     assert pd.testing.assert_frame_equal(test_out, expected_out) is None
 
@@ -168,7 +168,7 @@ def test_exclude_depth_pass():
         ],
         columns=bcf_columns,
     )
-    test_out = ex.exclude_low_depth(test_df)
+    test_out = ex.exclude_low_depth(test_df, 20)
     expected_out = None
     assert test_out == expected_out
 
@@ -211,7 +211,7 @@ def test_exclude_depth_fail():
         ],
         columns=bcf_columns,
     )
-    test_out = ex.exclude_low_depth(test_df)
+    test_out = ex.exclude_low_depth(test_df, 20)
     expected_out = pd.DataFrame([("sample-0049", "low_depth")], columns=out_cols)
     assert pd.testing.assert_frame_equal(test_out, expected_out) is None
 
@@ -264,7 +264,7 @@ def test_exclude_contam_pass():
         ],
         columns=verifybamid_cols,
     )
-    test_out = ex.exclude_contam(test_df)
+    test_out = ex.exclude_contam(test_df, 0.03)
     expected_out = None
     assert test_out == expected_out
 
@@ -317,6 +317,6 @@ def test_exclude_contam_fail():
         ],
         columns=verifybamid_cols,
     )
-    test_out = ex.exclude_contam(test_df)
+    test_out = ex.exclude_contam(test_df, 0.03)
     expected_out = pd.DataFrame([("sample-0295", "contamination")], columns=out_cols)
     assert pd.testing.assert_frame_equal(test_out, expected_out) is None

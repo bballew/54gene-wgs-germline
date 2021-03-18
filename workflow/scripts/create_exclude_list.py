@@ -11,13 +11,33 @@ def get_args():
     parser = argparse.ArgumentParser(
         description="Generates a list of samples to exclude based on previously-run QC metrics."
     )
-    parser.add_argument("bstats", help="bcftools stats file name")
-    parser.add_argument("outfile", help="Output file prefix")
+    parser.add_argument("bstats", type=str, help="bcftools stats file name")
+    parser.add_argument("outfile", type=str, help="Output file prefix")
     parser.add_argument(
-        "--verify", type=str, help="concatenated verifyBamID *.selfSM output files", default=False
+        "-v",
+        "--verify",
+        type=str,
+        help="concatenated verifyBamID *.selfSM output files",
+        default=False,
+    )
+    parser.add_argument(
+        "-r", "--ratio", type=float, help="maximum allowed het/hom_alt ratio", default=2.5
+    )
+    parser.add_argument(
+        "-d", "--depth", type=float, help="minimum allowed average depth", default=20.0
+    )
+    parser.add_argument(
+        "-c", "--contam", type=float, help="maximum allowed contamination", default=0.03
     )
     results = parser.parse_args()
-    return results.bstats, results.outfile, results.verify
+    return (
+        results.bstats,
+        results.outfile,
+        results.verify,
+        results.ratio,
+        results.depth,
+        results.contam,
+    )
 
 
 def read_in_bcftools_PSC(bstats: str) -> pd.DataFrame:
@@ -47,10 +67,10 @@ def read_in_bcftools_PSC(bstats: str) -> pd.DataFrame:
     )
 
 
-def exclude_high_het_hom(df: pd.DataFrame) -> pd.DataFrame:
+def exclude_high_het_hom(df: pd.DataFrame, r: float) -> pd.DataFrame:
     """Exclude any samples with a het/hom ratio over 2.5"""
     df.loc[:, "het_hom_ratio"] = df["nHets"] / df["nNonRefHom"]
-    df_het = df.loc[(df["het_hom_ratio"] > 2.5)].copy()
+    df_het = df.loc[(df["het_hom_ratio"] > r)].copy()
     if df_het.empty:
         return
     else:
@@ -58,13 +78,13 @@ def exclude_high_het_hom(df: pd.DataFrame) -> pd.DataFrame:
         return df_het[["sample", "exclude_reason"]]
 
 
-def exclude_low_depth(df: pd.DataFrame) -> pd.DataFrame:
+def exclude_low_depth(df: pd.DataFrame, d: float) -> pd.DataFrame:
     """Setting a 20x avg depth cutoff
 
     This is reported by the lab as well, but this should catch samples
     that are borderline, that were accidentally included despite low
     coverage, or that are from outside collaborators."""
-    df_depth = df.loc[df["average depth"] < 20.0].copy()
+    df_depth = df.loc[df["average depth"] < d].copy()
     if df_depth.empty:
         return
     else:
@@ -102,9 +122,9 @@ def read_in_verifybamid(verify: str) -> pd.DataFrame:
     )
 
 
-def exclude_contam(df_v: pd.DataFrame) -> pd.DataFrame:
+def exclude_contam(df_v: pd.DataFrame, c: float) -> pd.DataFrame:
     """Setting a 3% contamination threshold"""
-    df_contam = df_v.loc[df_v["FREEMIX"] > 0.03].copy()
+    df_contam = df_v.loc[df_v["FREEMIX"] > c].copy()
     if df_contam.empty:
         return
     else:
@@ -115,13 +135,13 @@ def exclude_contam(df_v: pd.DataFrame) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    bstats, outfile, verify = get_args()
+    bstats, outfile, verify, r, d, c = get_args()
     df = read_in_bcftools_PSC(bstats)
-    exclude1 = exclude_high_het_hom(df)
-    exclude2 = exclude_low_depth(df)
+    exclude1 = exclude_high_het_hom(df, r)
+    exclude2 = exclude_low_depth(df, d)
     if verify:
         df_v = read_in_verifybamid(verify)
-        exclude3 = exclude_contam(df_v)
+        exclude3 = exclude_contam(df_v, c)
         exclude_df = pd.concat([exclude1, exclude2, exclude3])
     else:
         exclude_df = pd.concat([exclude1, exclude2])
