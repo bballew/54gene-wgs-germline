@@ -125,13 +125,16 @@ if full:
             l="results/post_qc_exclusions/exclude_list.tsv",
             a="results/post_qc_exclusions/exclude_list_with_annotation.tsv",
         params:
-            "results/post_qc_exclusions/exclude_list",
+            out="results/post_qc_exclusions/exclude_list",
+            r=config["max_het_ratio"],
+            d=config["min_avg_depth"],
+            c=config["max_contam"],
         benchmark:
             "results/performance_benchmarks/create_exclude_list/create_exclude_list.tsv"
         conda:
             "../envs/python.yaml"
         shell:
-            "python workflow/scripts/create_exclude_list.py {input.b} {params} --verify {input.v}"
+            "python workflow/scripts/create_exclude_list.py {input.b} {params.out} --verify {input.v} -r {params.r} -d {params.d} -c {params.c}"
 
 
 else:
@@ -143,13 +146,15 @@ else:
             l="results/post_qc_exclusions/exclude_list.tsv",
             a="results/post_qc_exclusions/exclude_list_with_annotation.tsv",
         params:
-            "results/post_qc_exclusions/exclude_list",
+            out="results/post_qc_exclusions/exclude_list",
+            r=config["max_het_ratio"],
+            d=config["min_avg_depth"],
         benchmark:
             "results/performance_benchmarks/create_exclude_list/create_exclude_list.tsv"
         conda:
             "../envs/python.yaml"
         shell:
-            "python workflow/scripts/create_exclude_list.py {input.b} {params}"
+            "python workflow/scripts/create_exclude_list.py {input.b} {params.out} -r {params.r} -d {params.d}"
 
 
 rule exclude_samples:
