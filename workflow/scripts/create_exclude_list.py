@@ -72,7 +72,7 @@ def exclude_high_het_hom(df: pd.DataFrame, r: float) -> pd.DataFrame:
     df.loc[:, "het_hom_ratio"] = df["nHets"] / df["nNonRefHom"]
     df_het = df.loc[(df["het_hom_ratio"] > r)].copy()
     if df_het.empty:
-        return
+        return pd.DataFrame({"sample": [], "exclude_reason": []})
     else:
         df_het.loc[:, "exclude_reason"] = "high_het_hom"
         return df_het[["sample", "exclude_reason"]]
@@ -86,7 +86,7 @@ def exclude_low_depth(df: pd.DataFrame, d: float) -> pd.DataFrame:
     coverage, or that are from outside collaborators."""
     df_depth = df.loc[df["average depth"] < d].copy()
     if df_depth.empty:
-        return
+        return pd.DataFrame({"sample": [], "exclude_reason": []})
     else:
         df_depth.loc[:, "exclude_reason"] = "low_depth"
         return df_depth[["sample", "exclude_reason"]]
@@ -126,7 +126,7 @@ def exclude_contam(df_v: pd.DataFrame, c: float) -> pd.DataFrame:
     """Setting a 3% contamination threshold"""
     df_contam = df_v.loc[df_v["FREEMIX"] > c].copy()
     if df_contam.empty:
-        return
+        return pd.DataFrame({"sample": [], "exclude_reason": []})
     else:
         df_contam.loc[:, "exclude_reason"] = "contamination"
         t = df_contam["#SEQ_ID"].str.split(":", expand=True)
