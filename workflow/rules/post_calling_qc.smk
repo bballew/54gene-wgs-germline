@@ -171,5 +171,6 @@ rule exclude_samples:
     conda:
         "../envs/bcftools_tabix.yaml"
     shell:
-        "bcftools view -S ^{input.l} --threads {threads} -Oz -o {output.v} {input.v} && "
+        "bcftools view -S ^{input.l} --threads {threads} -Ou {input.v} | "
+        "bcftools annotate --threads {threads} --set-id '%CHROM:%POS:%REF:%ALT' -Oz -o {output.v} && "
         "tabix -p vcf {output.v}"
