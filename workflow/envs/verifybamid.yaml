@@ -2,7 +2,5 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
-  - python
+  - verifybamid
   - matplotlib
-  - bcftools
-  - tabix

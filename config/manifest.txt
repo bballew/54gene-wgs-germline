@@ -1,2 +1,3 @@
-readgroup1 NA12878 /Users/bariballew/fastqs/NA12878_thousand_L001_R1_001.fastq.gz /Users/bariballew/fastqs/NA12878_thousand_L001_R2_001.fastq.gz
-readgroup2 NA12878 /Users/bariballew/fastqs/NA12878_2ndthousand_L001_R1_001.fastq.gz /Users/bariballew/fastqs/NA12878_2ndthousand_L001_R2_001.fastq.gz
+NA12878_A_readgroup1 NA12878_A fastqs/NA12878_thousand_L001_R1_001.fastq.gz fastqs/NA12878_thousand_L001_R2_001.fastq.gz
+NA12878_A_readgroup2 NA12878_A fastqs/NA12878_2ndthousand_L001_R1_001.fastq.gz fastqs/NA12878_2ndthousand_L001_R2_001.fastq.gz
+NA12878_B_readgroup1 NA12878_B fastqs/NA12878_3rdthousand_L001_R1_001.fastq.gz fastqs/NA12878_3rdthousand_L001_R2_001.fastq.gz

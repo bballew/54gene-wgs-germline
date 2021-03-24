@@ -15,6 +15,10 @@ import subprocess
 import glob
 
 
+label = subprocess.check_output(["git", "describe", "--always"]).strip()
+print(f"54gene WGS germline workflow {label}")
+
+
 # reference the config file
 configfile: "config/config.yaml"
 
@@ -241,34 +245,33 @@ def get_DBImport_path2(wildcards):
     return myList
 
 
-TARGETS = []
-if full:
-    #    TARGETS.append("results/multiqc/multiqc.html")
-    TARGETS.append("results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics")
-    TARGETS.append(expand("results/alignment_stats/{sample}.txt", sample=SAMPLES))
-elif jointgeno:
-    TARGETS.append("results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics")
+TARGETS = [
+    "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
+    "results/qc/bcftools_stats/plots/plot-vcfstats.log",
+    "results/qc/relatedness/somalier.pairs.tsv",
+    "results/qc/sex_check/ploidy.png",
+    "results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz",
+]
 
 if full:
+
+    TARGETS.append(expand("results/alignment_stats/{sample}.txt", sample=SAMPLES))
+    TARGETS.append(expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES))
 
     include: "rules/resources.smk"
-
     include: "rules/fastq_qc.smk"
-
     include: "rules/align.smk"
-
     include: "rules/HC_calling.smk"
-
     include: "rules/HC_joint_geno.smk"
-
     include: "rules/filter.smk"
+    include: "rules/post_calling_qc.smk"
 
 
 elif jointgeno:
 
     include: "rules/HC_joint_geno.smk"
-
     include: "rules/filter.smk"
+    include: "rules/post_calling_qc.smk"
 
 
 wildcard_constraints:

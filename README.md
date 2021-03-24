@@ -1,7 +1,6 @@
 # 54gene workflow: 54gene WGS germline
 
-This is the template for a new Snakemake workflow. Replace this text with a comprehensive description covering the purpose and domain.
-Insert your code into the respective folders, i.e. `scripts`, `rules`, and `envs`. Define the entry point of the workflow in the `Snakefile` and the main configuration in the `config.yaml` file.
+This workflow is designed to take either fastqs or gvcfs as input, and emit a joint-called multi-sample VCF.  The pipeline analyzes germline samples only, and does not currently support multiplexed data.  It is optimized for deployment on AWS parallelcluster, which can be set up as described [here](https://gitlab.com/data-analysis5/gds-docs/parallelcluster_docs), though it should run without issue on any HPC system or local machine.
 
 ## Authors
 
@@ -15,26 +14,53 @@ If you use this workflow in a paper, don't forget to give credits to the authors
 
 1. Clone this repository to your local system, into the place where you want to perform the data analysis.
 ```
-    git clone ______
+    git clone git@gitlab.com:data-analysis5/54gene-wgs-germline.git
 ```
 
 ### Step 2: Configure workflow
 
-Configure the workflow according to your needs via editing the files in the `config/` folder. Adjust `config.yaml` to configure the workflow execution, and `manifest.tsv` to specify your sample setup.
+Configure the workflow according to your needs via editing the files in the `config/` folder. Adjust `config.yaml` to configure the workflow execution, and `manifest.txt` to specify your sample setup.
 
-### Step 3: Install Snakemake
+#### A.  Config file
 
-Install Snakemake using [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html):
+This pipeline currently offers two modes.  Please specify the run mode in `config.yaml`.
+- __full__: This mode starts with fastq pairs and emits a joint-called, filtered, multi-sample VCF.
+- __joint_genotyping__: This mode starts with gVCFs and runs joint-calling and filtering, emitting a multi-sample VCF.  The idea here is that samples can be analyzed in batches in the full run mode, and then the batches can be jointly re-genotyped with this mode.
 
-    conda create -c bioconda -c conda-forge -n snakemake snakemake
+After joint-calling the samples listed in the manifest, the pipeline will create a new multi-sample VCF where samples have been automatically removed based on the following thresholds sourced from the config:
+- max_het_ratio (defaults to 2.5): excludes samples with het/hom-alt ratios, as calculated by bcftools stats, that are above the threshold
+- min_avg_depth (defaults to 20.0): excludes samples with average depth of coverage, as calclated by bcftools stats, that are below the threshold
+- max_contam (defaults to 0.03): only applied in __full__ runs; excludes samples with contamination estimates, as calculated by verifyBamID, that are above the threshold
 
-For installation details, see the [instructions in the Snakemake documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html).
+#### B.  Manifest file
+
+You will need to provide a headerless, whitespace-delimited manifest file to run the pipeline.  For __full__ mode:
+- Columns: `readgroup (should be unique)  sample_ID   path/to/r1.fastq    path/to/r2.fastq`
+- `readgroup` values should be unique, e.g. sampleID_flowcellID
+- `sample_ID` should be the same for all fastq pairs from a single sample, and can be different from the fastq filenames
+
+For __joint_genotyping__ mode:
+- Columns: `sample_ID   path/to/file.g.vcf.gz`
+- `sample_ID` values should be unique, and should correspond to the sample IDs in the gvcfs
+- gvcfs should be zipped and indexed
+
+
+### Step 3: Install the run-time environment
+
+If needed, install miniconda by following the steps [here](https://docs.conda.io/en/latest/miniconda.html).
+
+- Create a conda environment with, minimally, the dependencies defined in `environment.yaml`.
+
+```
+# create the env
+conda env create -f environment.yaml
+```
 
 ### Step 4: Execute workflow
 
 Activate the conda environment:
 
-    conda activate snakemake
+    conda activate 54gene-wgs-germline
 
 Test your configuration by performing a dry-run via
 
@@ -44,13 +70,44 @@ Execute the workflow locally via
 
     snakemake --use-conda --cores $N
 
-using `$N` cores or run it in a cluster environment via
+To run the pipeline in a cluster environment, edit `wrapper.sh` as needed for your system, and then run via
+
+    bash run.sh
+
+Alternatively, you may run snakemake pipelines on a cluster via something like this
 
     snakemake --use-conda --cluster qsub --jobs 100
 
-See the [Snakemake documentation](https://snakemake.readthedocs.io/en/stable/executable.html) for further details.
 
 ### Step 5: Investigate results
+
+Upon pipeline completion, verify that all steps have completed without error by checking the top-level log `WGS_<datestamp>.out`.  The bottom few lines of the file should contain something like `nnn of nnn steps (100%) done`.  Additional job logs (when run on a cluster) are stored in the `logs/` directory.
+
+All pipeline results are stored in the `results/` directory.
+
+The hard-filtered, joint-called VCF can be found in `results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz`.
+
+For future joint-calling, the gVCFs are located at `results/HaplotypeCaller/called/<sample>_all_chroms.g.vcf.gz`.
+
+Deduplicated and post-BQSR bams are found at `results/bqsr/<sample>.bam`.
+
+Samples that fail the following thresholds are automatically removed from the above file, and the output is placed in `results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz`.  The record of sample exclusions, along with reasons for exclusion, is found at `results/post_qc_exclusions/exclude_list_with_annotation.tsv`.  Samples are excluded for at least one of the following reasons.  Values listed are defaults, but can be changed in the `config.yaml`.
+- Average depth of coverage <20x
+- Contamination > 3%
+- Het/Hom ratio > 2.5
+
+The following QC metrics are available:
+- fastqc at `results/fastqc/`
+- Trimming stats via fastp at `results/paired_trimmed_reads/`
+- Alignment stats via samtools at `results/alignment_stats/`
+- Recalibration stats from bqsr at `results/bqsr/`
+- Relatedness via somalier at `results/qc/relatedness/`
+- Sample contamination via verifyBamID at `results/qc/contamination_check/` - for full runs; not included in joint-genotyping only
+- Inferred sex via bcftools +guess-ploidy at `results/qc/sex_check/`
+- Picard metrics at `results/HaplotypeCaller/filtered/`
+- bcftools stats at `results/qc/bcftools_stats/`
+- multiqc report at `results/multiqc/` (WIP)
+
 
 ### Step 6: Commit changes
 
@@ -58,6 +115,7 @@ Whenever you change something, don't forget to commit the changes back to your g
 
     git commit -a
     git push
+
 
 ### Step 7: Obtain updates from upstream
 
@@ -81,6 +139,14 @@ In case you have also changed or added steps, please consider contributing them 
 4. Commit and push your changes to your fork.
 5. Create a [pull request](https://help.github.com/en/articles/creating-a-pull-request) against the original repository.
 
+
 ## Testing
 
 Test cases are in the subfolder `tests`. They are automatically executed via continuous integration (TBD).
+
+Unit tests for scripts are found in `workflow/scripts/`.  They can be executed with `pytest`.
+
+Test input data, configs, and example manifests for both pipeline modes can be found [here](https://gitlab.com/data-analysis5/54gene-wgs-test-data).  Note that there are a few important caveats when testing.
+- Somalier doesn't seem to be functional on Mac, so make sure you're in a linux environment or comment out that target from the Snakefile (ugh).  (Using a container for the OS would solve this problem....)
+- Make sure you update the manifests to point to wherever you put the input data
+- You can run tests locally using the script in that same repo, via `bash run_local_test.sh`.

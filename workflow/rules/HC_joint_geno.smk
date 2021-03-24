@@ -9,7 +9,7 @@ if jointgeno:
             gvcf="results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz",
             index="results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz.tbi",
         shell:
-            "ln -s {input.gvcf} {output.gvcf} &&"
+            "ln -s {input.gvcf} {output.gvcf} && "
             "ln -s {input.index} {output.index}"
 
 
