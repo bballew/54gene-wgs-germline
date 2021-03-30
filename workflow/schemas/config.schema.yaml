@@ -28,6 +28,120 @@ properties:
     type: number
   max_contam:
     type: number
+  fastqc:
+    type: object
+    properties:
+      threads:
+        type: number
+      memory:
+        type: number
+  fastp:
+    type: object
+    properties:
+      threads:
+        type: number
+      memory:
+        type: number
+  bwa:
+    type: object
+    properties:
+      threads:
+        type: number
+      memory:
+        type: number
+  samtools_sort:
+    type: object
+    properties:
+      threads:
+        type: number
+      memory:
+        type: number
+  markDuplicates:
+    type: object
+    properties:
+      memory:
+        type: number
+      java_opts:
+        type: string
+  baseRecalibrator:
+    type: object
+    properties:
+      memory:
+        type: number
+      java_opts:
+        type: string
+  applyBQSR:
+    type: object
+    properties:
+      memory:
+        type: number
+      java_opts:
+        type: string
+  haplotypeCaller:
+    type: object
+    properties:
+      memory:
+        type: number
+      java_opts:
+        type: string
+  gatherVcfs:
+    type: object
+    properties:
+      memory:
+        type: number
+      java_opts:
+        type: string
+  genomicsDBImport:
+    type: object
+    properties:
+      memory:
+        type: number
+      java_opts:
+        type: string
+      batch_size:
+        type: number
+      reader_threads:
+        type: number
+  genotypeGVCFs:
+    type: object
+    properties:
+      memory:
+        type: number
+      java_opts:
+        type: string
+  bcftools:
+    type: object
+    properties:
+      memory:
+        type: number
+      threads:
+        type: number
+  selectVariants:
+    type: object
+    properties:
+      memory:
+        type: number
+      java_opts:
+        type: string
+  variantFiltration:
+    type: object
+    properties:
+      memory:
+        type: number
+      java_opts:
+        type: string
+  verifyBamID: 
+    type: object
+    properties:
+      memory:
+        type: number
+  picardCollectVariantCallingMetrics:
+    type: object
+    properties:
+      memory:
+        type: number
+      java_opts:
+        type: string
 
 # entries that have to be in the config file for successful validation
 required:
