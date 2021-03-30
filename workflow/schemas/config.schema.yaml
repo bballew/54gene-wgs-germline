@@ -22,6 +22,12 @@ properties:
     required:
       - full
       - joint_genotyping
+  max_het_ratio:
+    type: number
+  min_avg_depth:
+    type: number
+  max_contam:
+    type: number
 
 # entries that have to be in the config file for successful validation
 required:
