@@ -1,11 +1,6 @@
 sampleFile: "config/manifest.txt"
-jobs: 1000
+jobs: 2
 tempDir: "temp/"
 runType:
   full: yes
   joint_genotyping: no
-
-# QC thresholds for sample removal:
-max_het_ratio: 2.5
-min_avg_depth: 20.0
-max_contam: 0.03  # N/A for joint_genotyping

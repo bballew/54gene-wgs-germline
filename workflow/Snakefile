@@ -13,6 +13,7 @@ and generates QC reports, aligned BAMs, gVCFs, and multi-sample VCFs.
 import os
 import subprocess
 import glob
+from snakemake.utils import validate
 
 
 label = subprocess.check_output(["git", "describe", "--always"]).strip()
@@ -23,7 +24,8 @@ print(f"54gene WGS germline workflow {label}")
 configfile: "config/config.yaml"
 
 
-validate(config, schema="../schemas/config.schema.yaml")
+validate(config, schema="schemas/config.schema.yaml")
+
 
 # import variables from config
 sampleFile = config["sampleFile"]
