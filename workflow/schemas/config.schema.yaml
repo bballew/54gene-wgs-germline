@@ -1,0 +1,37 @@
+$schema: "http://json-schema.org/draft-06/schema#"
+
+description: snakemake configuration file
+
+type: object
+
+# possible entries of the config file and which type they should be
+properties:
+  sampleFile:
+    type: string
+  jobs:
+    type: integer
+  tempDir:
+    type: string
+  runType:
+    type: object
+    properties:
+      full:
+        type: boolean
+      joint_genotyping:
+        type: boolean
+    required:
+      - full
+      - joint_genotyping
+  max_het_ratio:
+    type: number
+  min_avg_depth:
+    type: number
+  max_contam:
+    type: number
+
+# entries that have to be in the config file for successful validation
+required:
+  - sampleFile
+  - jobs
+  - tempDir
+  - runType

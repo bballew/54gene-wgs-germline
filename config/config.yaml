@@ -1,5 +1,5 @@
 sampleFile: "config/manifest.txt"
-jobs: 1000
+jobs: 2
 tempDir: "temp/"
 runType:
   full: yes
