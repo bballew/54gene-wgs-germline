@@ -22,6 +22,8 @@ properties:
     required:
       - full
       - joint_genotyping
+  global_vars:
+    type: string
   max_het_ratio:
     type: number
   min_avg_depth:
@@ -130,7 +132,7 @@ properties:
         type: number
       java_opts:
         type: string
-  verifyBamID: 
+  verifyBamID:
     type: object
     properties:
       memory:

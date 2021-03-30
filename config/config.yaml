@@ -4,6 +4,7 @@ tempDir: "temp/"
 runType:
   full: yes
   joint_genotyping: no
+global_vars: "export _JAVA_OPTIONS=\"-Djava.io.tmpdir=temp/ -XX:CompressedClassSpaceSize=200m\""  # you get TMPDIR set to tempDir for free
 
 # QC thresholds for sample removal:
 max_het_ratio: 2.5

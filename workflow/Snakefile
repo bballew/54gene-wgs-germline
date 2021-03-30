@@ -12,9 +12,9 @@ and generates QC reports, aligned BAMs, gVCFs, and multi-sample VCFs.
 
 import os
 import subprocess
+import pathlib
 import glob
 from snakemake.utils import validate
-
 
 label = subprocess.check_output(["git", "describe", "--always"]).strip()
 print(f"54gene WGS germline workflow {label}")
@@ -26,13 +26,21 @@ configfile: "config/config.yaml"
 
 validate(config, schema="schemas/config.schema.yaml")
 
-
 # import variables from config
 sampleFile = config["sampleFile"]
 jobs = config["jobs"]
 tempDir = config["tempDir"]
 full = config["runType"]["full"]
 jointgeno = config["runType"]["joint_genotyping"]
+global_vars = config["global_vars"]
+
+# create temp and log dirs if needed
+pathlib.Path(tempDir).mkdir(parents=True, exist_ok=True)
+pathlib.Path("logs/").mkdir(parents=True, exist_ok=True)
+
+# configure shell behavior for all rules
+shell.executable("/bin/bash")
+shell.prefix(f"set -euo pipefail; export TMPDIR={tempDir}; {global_vars}; ")
 
 
 bed = "resources/Homo_sapiens_assembly38.bed"  # change if not WGS - put switch in config?
