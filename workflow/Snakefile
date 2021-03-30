@@ -19,6 +19,8 @@ import glob
 configfile: "config/config.yaml"
 
 
+validate(config, schema="../schemas/config.schema.yaml")
+
 # import variables from config
 sampleFile = config["sampleFile"]
 jobs = config["jobs"]
