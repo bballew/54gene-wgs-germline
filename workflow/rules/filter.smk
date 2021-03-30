@@ -50,7 +50,7 @@ rule split_snps:
         mem_mb=config["selectVariants"]["memory"],
     shell:
         'export _JAVA_OPTIONS="" && '
-        "gatk --java-options {params.java_opts} SelectVariants "
+        'gatk --java-options "{params.java_opts}" SelectVariants '
         "--tmp-dir {params.t} "
         "-V {input.vcf} "
         "--select-type SNP "
@@ -77,7 +77,7 @@ rule split_indels:
         mem_mb=config["selectVariants"]["memory"],
     shell:
         'export _JAVA_OPTIONS="" && '
-        "gatk --java-options {params.java_opts} SelectVariants "
+        'gatk --java-options "{params.java_opts}" SelectVariants '
         "--tmp-dir {params.t} "
         "-V {input.vcf} "
         "--select-type INDEL "
@@ -104,7 +104,7 @@ rule hard_filter_snps:
         mem_mb=config["variantFiltration"]["memory"],
     shell:
         'export _JAVA_OPTIONS="" && '
-        "gatk --java-options {params.java_opts} VariantFiltration "
+        'gatk --java-options "{params.java_opts}" VariantFiltration '
         "--tmp-dir {params.t} "
         "-V {input.vcf} "
         '-filter "QD < 2.0" --filter-name "QD2" '
@@ -137,7 +137,7 @@ rule hard_filter_indels:
         mem_mb=config["variantFiltration"]["memory"],
     shell:
         'export _JAVA_OPTIONS="" && '
-        "gatk --java-options {params.java_opts} VariantFiltration "
+        'gatk --java-options "{params.java_opts}" VariantFiltration '
         "--tmp-dir {params.t} "
         "-V {input.vcf} "
         '-filter "QD < 2.0" --filter-name "QD2" '
@@ -263,7 +263,7 @@ rule picard_metrics:
         mem_mb=config["picardCollectVariantCallingMetrics"]["memory"],
     shell:
         'export _JAVA_OPTIONS="" && '
-        "gatk --java-options {params.java_opts} CollectVariantCallingMetrics "
+        'gatk --java-options "{params.java_opts}" CollectVariantCallingMetrics '
         "--TMP_DIR {params.t} "
         "-I {input.calls} "
         "--DBSNP {input.dbsnp} "

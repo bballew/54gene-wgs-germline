@@ -119,7 +119,7 @@ rule HC_consolidate_gvcfs:
     shell:
         'export _JAVA_OPTIONS="" && '
         "rm -r {params.db} && "
-        "gatk --java-options {params.java_opts} GenomicsDBImport "
+        'gatk --java-options "{params.java_opts}" GenomicsDBImport '
         "--batch-size {params.batch_size} "
         "--disable-bam-index-caching "
         "--sample-name-map {input.sampleMap} "
@@ -156,7 +156,7 @@ rule HC_genotype_gvcfs:
         mem_mb=config["genotypeGVCFs"]["memory"],
     shell:
         'export _JAVA_OPTIONS="" && '
-        "gatk --java-options {params.java_opts} GenotypeGVCFs "
+        'gatk --java-options "{params.java_opts}" GenotypeGVCFs '
         "-R {input.r} "
         "-V gendb://{params.db} "
         "-O {output.vcf} "

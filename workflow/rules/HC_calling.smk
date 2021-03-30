@@ -59,7 +59,7 @@ rule HC_call_variants:
     resources:
         mem_mb=config["haplotypeCaller"]["memory"],
     shell:
-        "gatk --java-options {params.java_opts} HaplotypeCaller "
+        'gatk --java-options "{params.java_opts}" HaplotypeCaller '
         "--tmp-dir {params.t} "
         "-R {input.r} "
         "-I {input.bam} "
@@ -112,7 +112,7 @@ rule HC_concat_gvcfs:
     resources:
         mem_mb=config["gatherVcfs"]["memory"],
     shell:
-        "gatk --java-options {params.java_opts} GatherVcfs "
+        'gatk --java-options "{params.java_opts}" GatherVcfs '
         "-I {params.l} "
         "-O {output}"
 

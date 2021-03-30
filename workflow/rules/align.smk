@@ -77,7 +77,7 @@ rule mark_duplicates:
         mem_mb=config["markDuplicates"]["memory"],
         batch=concurrent_limit,
     shell:
-        "gatk --java-options {params.java_opts} MarkDuplicates "
+        'gatk --java-options "{params.java_opts}" MarkDuplicates '
         "TMP_DIR={params.t} "
         "REMOVE_DUPLICATES=true "
         "INPUT={params.l} "
@@ -107,7 +107,7 @@ rule recalibrate_bams:
     resources:
         mem_mb=config["baseRecalibrator"]["memory"],
     shell:
-        "gatk --java-options {params.java_opts} BaseRecalibrator "
+        'gatk --java-options "{params.java_opts}" BaseRecalibrator '
         "--tmp-dir {params.t} "
         "-R {input.r} "
         "-I {input.bam} "
@@ -138,7 +138,7 @@ rule apply_bqsr:
         mem_mb=config["applyBQSR"]["memory"],
         batch=concurrent_limit,
     shell:
-        "gatk --java-options {params.java_opts} ApplyBQSR "
+        'gatk --java-options "{params.java_opts}" ApplyBQSR '
         "--tmp-dir {params.t} "
         "-R {input.r} "
         "-I {input.bam} "
