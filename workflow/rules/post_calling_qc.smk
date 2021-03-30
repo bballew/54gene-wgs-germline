@@ -33,14 +33,12 @@ rule plot_variant_stats:
         "results/qc/bcftools_stats/plots/plot.py",
         "results/qc/bcftools_stats/plots/dp_by_sample.0.png",
         "results/qc/bcftools_stats/plots/plot-vcfstats.log",
-        # "results/qc/bcftools_stats/plots/tstv_by_qual.0.png",
         "results/qc/bcftools_stats/plots/tstv_by_sample.0.dat",
         "results/qc/bcftools_stats/plots/hets_by_sample.0.png",
         "results/qc/bcftools_stats/plots/singletons_by_sample.0.png",
         "results/qc/bcftools_stats/plots/hwe.0.dat",
         "results/qc/bcftools_stats/plots/tstv_by_sample.0.png",
         "results/qc/bcftools_stats/plots/snps_by_sample.0.png",
-        # "results/qc/bcftools_stats/plots/hwe.0.png",
     params:
         d="results/qc/bcftools_stats/plots/",
     benchmark:
@@ -167,7 +165,7 @@ rule exclude_samples:
         i="results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz.tbi",
     benchmark:
         "results/performance_benchmarks/exclude_samples/exclude_samples.tsv"
-    threads: 4
+    threads: config["bcftools"]["threads"]
     conda:
         "../envs/bcftools_tabix.yaml"
     shell:

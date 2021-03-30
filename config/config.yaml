@@ -9,3 +9,53 @@ runType:
 max_het_ratio: 2.5
 min_avg_depth: 20.0
 max_contam: 0.03  # N/A for joint_genotyping
+
+fastqc:
+  threads: 8
+  memory: 6000
+fastp:
+  threads: 4
+  memory: 8000
+bwa:
+  threads: 16
+  memory: 32000  # mb
+samtools_sort:
+  threads: 2
+  memory: 4000
+markDuplicates:
+  memory: 10000
+  java_opts: "-Xmx2g -XX:+UseParallelGC -XX:ParallelGCThreads=2"
+baseRecalibrator:
+  memory: 8000
+  java_opts: "-Xmx4g -XX:+UseParallelGC -XX:ParallelGCThreads=20"
+applyBQSR:
+  memory: 20000
+  java_opts: "-Xmx10g"
+haplotypeCaller:
+  memory: 16000
+  java_opts: "-Xmx4g"
+gatherVcfs:
+  memory: 8000
+  java_opts: "-Djava.io.tmpdir={params.t} -Xmx4g"
+genomicsDBImport:
+  memory: 32000
+  java_opts: "-Xmx12G"
+  batch_size: 25
+  reader_threads: 5
+genotypeGVCFs:
+  memory: 24000
+  java_opts: "-Xmx12g"
+bcftools:
+  memory: 4000
+  threads: 8
+selectVariants:
+  memory: 6000
+  java_opts: "-Xmx1g"
+variantFiltration:
+  memory: 6000
+  java_opts: "-Xmx1g"
+verifyBamID: # only for full runs
+  memory: 4000
+picardCollectVariantCallingMetrics:
+  memory: 6000
+  java_opts: "-Xmx1g"

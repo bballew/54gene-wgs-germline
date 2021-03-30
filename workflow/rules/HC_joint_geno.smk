@@ -109,21 +109,24 @@ rule HC_consolidate_gvcfs:
         interval="{chrom}",
         db="results/HaplotypeCaller/DBImport/{chrom}",
         t=tempDir,
+        java_opts=config["genomicsDBImport"]["java_opts"],
+        batch_size=config["genomicsDBImport"]["batch_size"],
+        reader_threads=config["genomicsDBImport"]["reader_threads"],
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=32000,
+        mem_mb=config["genomicsDBImport"]["memory"],
     shell:
         'export _JAVA_OPTIONS="" && '
         "rm -r {params.db} && "
-        'gatk --java-options "-Xmx12G" GenomicsDBImport '
-        "--batch-size 25 "
+        "gatk --java-options {params.java_opts} GenomicsDBImport "
+        "--batch-size {params.batch_size} "
         "--disable-bam-index-caching "
         "--sample-name-map {input.sampleMap} "
         "--genomicsdb-workspace-path {params.db} "
         "-L {params.interval} "
         "--tmp-dir {params.t} "
-        "--reader-threads 5 "
+        "--reader-threads {params.reader_threads} "
         "--genomicsdb-shared-posixfs-optimizations"
 
 
@@ -146,13 +149,14 @@ rule HC_genotype_gvcfs:
     params:
         db="results/HaplotypeCaller/DBImport/{chrom}",
         t=tempDir,
+        java_opts=config["genotypeGVCFs"]["java_opts"],
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=24000,
+        mem_mb=config["genotypeGVCFs"]["memory"],
     shell:
         'export _JAVA_OPTIONS="" && '
-        'gatk --java-options "-Xmx12g" GenotypeGVCFs '
+        "gatk --java-options {params.java_opts} GenotypeGVCFs "
         "-R {input.r} "
         "-V gendb://{params.db} "
         "-O {output.vcf} "
@@ -177,7 +181,7 @@ rule HC_concat_vcfs_bcftools:
     conda:
         "../envs/bcftools_tabix.yaml"
     resources:
-        mem_mb=4000,
+        mem_mb=config["bcftools"]["memory"],
     shell:
         "bcftools concat -a {input.vcfList} -Ou | "
         "bcftools sort -T {params.t} -Oz -o {output.projectVCF} && "
