@@ -7,8 +7,8 @@ rule symlink_fastqs:
     Note that we're assuming paired end data throughout.
     """
     input:
-        r1=get_read1_fastq,
-        r2=get_read2_fastq,
+        r1=utils.get_read1_fastq,
+        r2=utils.get_read2_fastq,
     output:
         r1="results/input/{rg}_r1.fastq.gz",
         r2="results/input/{rg}_r2.fastq.gz",
@@ -94,8 +94,8 @@ rule quality_trimming:
     Adapter sequences are from Illumina's TruSeq adapters.
     """
     input:
-        r1=get_read1_fastq,
-        r2=get_read2_fastq,
+        r1=utils.get_read1_fastq,
+        r2=utils.get_read2_fastq,
     output:
         r1_paired=temp("results/paired_trimmed_reads/{rg}_r1.fastq.gz"),
         r2_paired=temp("results/paired_trimmed_reads/{rg}_r2.fastq.gz"),

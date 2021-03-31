@@ -3,8 +3,8 @@ if jointgeno:
     rule symlink_gvcfs:
         """"""
         input:
-            gvcf=get_gvcf,
-            index=get_gvcf_index,
+            gvcf=utils.get_gvcf,
+            index=utils.get_gvcf_index,
         output:
             gvcf="results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz",
             index="results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz.tbi",
@@ -139,8 +139,8 @@ rule HC_genotype_gvcfs:
         o2="results/HaplotypeCaller/DBImport/{chrom}/vidmap.json",
         o3="results/HaplotypeCaller/DBImport/{chrom}/callset.json",
         o4="results/HaplotypeCaller/DBImport/{chrom}/__tiledb_workspace.tdb",
-        o5=get_DBImport_path1,
-        o6=get_DBImport_path2,
+        o5=utils.get_DBImport_path1,
+        o6=utils.get_DBImport_path2,
     output:
         vcf=temp("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz"),
         idx=temp("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz.tbi"),

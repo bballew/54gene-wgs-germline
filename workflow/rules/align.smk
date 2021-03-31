@@ -30,7 +30,7 @@ rule align_reads:
         pl="ILLUMINA",
         sort_order="coordinate",
         rg="{rg}",
-        sm=get_sm,
+        sm=utils.get_sm,
         samtools_threads=config["samtools_sort"]["threads"],
         samtools_mem=config["samtools_sort"]["memory"],
     threads: config["bwa"]["threads"]
@@ -61,14 +61,14 @@ rule mark_duplicates:
     May need to create some subdirectory structure.
     """
     input:
-        get_inputs_with_matching_SM,
+        utils.get_inputs_with_matching_SM,
     output:
         bam=temp("results/dedup/{sample}.bam"),
         metrics="results/dedup/{sample}.metrics.txt",
     benchmark:
         "results/performance_benchmarks/mark_duplicates/{sample}.tsv"
     params:
-        l=list_markdup_inputs,
+        l=utils.list_markdup_inputs,
         t=tempDir,
         java_opts=config["markDuplicates"]["java_opts"],
     conda:
