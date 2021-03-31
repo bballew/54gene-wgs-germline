@@ -1,7 +1,7 @@
 from unittest import mock
 
 import pytest
-import scripts.utils as utils
+from scripts import utils
 
 
 def test_read_in_manifest_full():
@@ -48,7 +48,8 @@ def test_create_samples_set():
 
 
 @pytest.mark.parametrize(
-    "test_in, exp_out", [([100, 10], 10), ([1, 20], 1), ([10, 6], 2)],
+    "test_in, exp_out",
+    [([100, 10], 10), ([1, 20], 1), ([10, 6], 2)],
 )
 def test_get_batch_limit_number(test_in, exp_out):
     assert utils.get_batch_limit_number(test_in[0], test_in[1]) == exp_out
