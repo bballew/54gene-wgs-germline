@@ -1,14 +1,14 @@
 from unittest import mock
 
 import pytest
-import utils
+import scripts.utils as utils
 
 
 def test_read_in_manifest_full():
     m = mock.mock_open(
         read_data="rg1\tsample1\tsample1_r1.fq\tsample1_r2.fq\nrg2 sample2 sample2_r1.fq sample2_r2.fq"
     )
-    with mock.patch("utils.open", m):
+    with mock.patch("scripts.utils.open", m):
         test_out = utils.read_in_manifest("file", True)
     exp_dict = {
         "rg1": ("sample1", "sample1_r1.fq", "sample1_r2.fq"),
@@ -56,7 +56,7 @@ def test_get_batch_limit_number(test_in, exp_out):
 
 def test_get_chrom_list():
     m = mock.mock_open(read_data="chr1 123 124\nchr20 456 457\nchr3 123 124\nchrY 123 154")
-    with mock.patch("utils.open", m):
+    with mock.patch("scripts.utils.open", m):
         test_out = utils.get_chrom_list("bed")
     assert test_out == ["chr1", "chr3", "chr20", "chrY"]
 
