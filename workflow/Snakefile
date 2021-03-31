@@ -55,7 +55,7 @@ SAMPLES = utils.create_samples_set(sampleDict) if full else sampleDict.keys()
 # weight for trimming and fastqc rules, to avoid hitting fsx throughput limits
 # The Second parameter is the desired max number of concurrently-running jobs of
 # that rule.
-concurrent_limit = utils.get_batch_limit_number(sampleDict, jobs, 20)
+concurrent_limit = utils.get_batch_limit_number(jobs, 20)
 
 chromList = utils.get_chrom_list(bed)
 
