@@ -7,8 +7,8 @@ rule symlink_fastqs:
     Note that we're assuming paired end data throughout.
     """
     input:
-        r1=get_read1_fastq,
-        r2=get_read2_fastq,
+        r1=utils.get_read1_fastq,
+        r2=utils.get_read2_fastq,
     output:
         r1="results/input/{rg}_r1.fastq.gz",
         r2="results/input/{rg}_r2.fastq.gz",
@@ -53,11 +53,11 @@ rule fastqc:
         "results/performance_benchmarks/fastqc/{rg}.tsv"
     params:
         t=tempDir,
-    threads: 8
+    threads: config["fastqc"]["threads"]
     conda:
         "../envs/fastqc_multiqc.yaml"
     resources:
-        mem_mb=6000,
+        mem_mb=config["fastqc"]["memory"],
         batch=concurrent_limit,
     shell:
         "fastqc {input.r1} -d {params.t} --quiet -t {threads} --outdir=results/fastqc/ && "
@@ -94,8 +94,8 @@ rule quality_trimming:
     Adapter sequences are from Illumina's TruSeq adapters.
     """
     input:
-        r1=get_read1_fastq,
-        r2=get_read2_fastq,
+        r1=utils.get_read1_fastq,
+        r2=utils.get_read2_fastq,
     output:
         r1_paired=temp("results/paired_trimmed_reads/{rg}_r1.fastq.gz"),
         r2_paired=temp("results/paired_trimmed_reads/{rg}_r2.fastq.gz"),
@@ -103,11 +103,11 @@ rule quality_trimming:
         j="results/paired_trimmed_reads/{rg}_fastp.json",
     benchmark:
         "results/performance_benchmarks/quality_trimming/{rg}.tsv"
-    threads: 4
+    threads: config["fastp"]["threads"]
     conda:
         "../envs/fastp.yaml"
     resources:
-        mem_mb=8000,
+        mem_mb=config["fastp"]["memory"],
         batch=concurrent_limit,
     shell:
         "fastp -i {input.r1} -I {input.r2} "
@@ -116,12 +116,4 @@ rule quality_trimming:
         "-h {output.h} -j {output.j} "
         "--adapter_sequence=AGATCGGAAGAGCACACGTCTGAACTCCAGTCA "
         "--adapter_sequence_r2=AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT "
-        "-l 36" # "cutadapt "
-         # "-j {threads} "
-         # "-a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA "
-         # "-A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT "
-         # "--nextseq-trim=15 "
-         # "--minimum-length=36 "
-         # "-o {output.r1_paired} "
-         # "-p {output.r2_paired} "
-         # "{input.r1} {input.r2}"
+        "-l 36"
