@@ -11,6 +11,7 @@ snakemake -p \
 	--use-conda \
 	--conda-frontend mamba \
 	--rerun-incomplete \
+	--restart-times 3 \
 	--default-resources mem_mb=1024 batch=1 \
 	--cluster "${cluster_mode}" \
 	--resources batch=${j} \

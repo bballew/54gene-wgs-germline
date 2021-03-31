@@ -115,11 +115,12 @@ rule HC_consolidate_gvcfs:
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=config["genomicsDBImport"]["memory"],
+        mem_mb=lambda wildcards, attempt: attempt * config["genomicsDBImport"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["genomicsDBImport"]["xmx"],
     shell:
         'export _JAVA_OPTIONS="" && '
         "rm -r {params.db} && "
-        'gatk --java-options "{params.java_opts}" GenomicsDBImport '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" GenomicsDBImport '
         "--batch-size {params.batch_size} "
         "--disable-bam-index-caching "
         "--sample-name-map {input.sampleMap} "
@@ -153,10 +154,11 @@ rule HC_genotype_gvcfs:
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=config["genotypeGVCFs"]["memory"],
+        mem_mb=lambda wildcards, attempt: attempt * config["genotypeGVCFs"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["genotypeGVCFs"]["xmx"],
     shell:
         'export _JAVA_OPTIONS="" && '
-        'gatk --java-options "{params.java_opts}" GenotypeGVCFs '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" GenotypeGVCFs '
         "-R {input.r} "
         "-V gendb://{params.db} "
         "-O {output.vcf} "
@@ -181,7 +183,7 @@ rule HC_concat_vcfs_bcftools:
     conda:
         "../envs/bcftools_tabix.yaml"
     resources:
-        mem_mb=config["bcftools"]["memory"],
+        mem_mb=lambda wildcards, attempt: attempt * config["bcftools"]["memory"],
     shell:
         "bcftools concat -a {input.vcfList} -Ou | "
         "bcftools sort -T {params.t} -Oz -o {output.projectVCF} && "

@@ -57,9 +57,10 @@ rule HC_call_variants:
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=config["haplotypeCaller"]["memory"],
+        mem_mb=lambda wildcards, attempt: attempt * config["haplotypeCaller"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["haplotypeCaller"]["xmx"],
     shell:
-        'gatk --java-options "{params.java_opts}" HaplotypeCaller '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" HaplotypeCaller '
         "--tmp-dir {params.t} "
         "-R {input.r} "
         "-I {input.bam} "
@@ -110,9 +111,10 @@ rule HC_concat_gvcfs:
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=config["gatherVcfs"]["memory"],
+        mem_mb=lambda wildcards, attempt: attempt * config["gatherVcfs"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["gatherVcfs"]["xmx"],
     shell:
-        'gatk --java-options "{params.java_opts}" GatherVcfs '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" GatherVcfs '
         "-I {params.l} "
         "-O {output}"
 

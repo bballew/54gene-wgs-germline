@@ -37,7 +37,7 @@ rule align_reads:
     conda:
         "../envs/bwa_samtools.yaml"
     resources:
-        mem_mb=config["bwa"]["memory"],
+        mem_mb=lambda wildcards, attempt: attempt * config["bwa"]["memory"],
     shell:
         "bwa mem "
         "-K 10000000 -M "
@@ -70,14 +70,16 @@ rule mark_duplicates:
     params:
         l=utils.list_markdup_inputs,
         t=tempDir,
+        # xmx=config["markDuplicates"]["xmx"], #lambda wildcards, attempt: attempt * config["markDuplicates"]["xmx"],
         java_opts=config["markDuplicates"]["java_opts"],
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=config["markDuplicates"]["memory"],
+        mem_mb=lambda wildcards, attempt: attempt * config["markDuplicates"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["markDuplicates"]["xmx"],
         batch=concurrent_limit,
     shell:
-        'gatk --java-options "{params.java_opts}" MarkDuplicates '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" MarkDuplicates '
         "TMP_DIR={params.t} "
         "REMOVE_DUPLICATES=true "
         "INPUT={params.l} "
@@ -105,9 +107,10 @@ rule recalibrate_bams:
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=config["baseRecalibrator"]["memory"],
+        mem_mb=lambda wildcards, attempt: attempt * config["baseRecalibrator"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["baseRecalibrator"]["xmx"],
     shell:
-        'gatk --java-options "{params.java_opts}" BaseRecalibrator '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" BaseRecalibrator '
         "--tmp-dir {params.t} "
         "-R {input.r} "
         "-I {input.bam} "
@@ -135,10 +138,11 @@ rule apply_bqsr:
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=config["applyBQSR"]["memory"],
+        mem_mb=lambda wildcards, attempt: attempt * config["applyBQSR"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["applyBQSR"]["xmx"],
         batch=concurrent_limit,
     shell:
-        'gatk --java-options "{params.java_opts}" ApplyBQSR '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" ApplyBQSR '
         "--tmp-dir {params.t} "
         "-R {input.r} "
         "-I {input.bam} "

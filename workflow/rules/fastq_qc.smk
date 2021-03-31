@@ -57,7 +57,7 @@ rule fastqc:
     conda:
         "../envs/fastqc_multiqc.yaml"
     resources:
-        mem_mb=config["fastqc"]["memory"],
+        mem_mb=lambda wildcards, attempt: attempt * config["fastqc"]["memory"],
         batch=concurrent_limit,
     shell:
         "fastqc {input.r1} -d {params.t} --quiet -t {threads} --outdir=results/fastqc/ && "
@@ -107,7 +107,7 @@ rule quality_trimming:
     conda:
         "../envs/fastp.yaml"
     resources:
-        mem_mb=config["fastp"]["memory"],
+        mem_mb=lambda wildcards, attempt: attempt * config["fastp"]["memory"],
         batch=concurrent_limit,
     shell:
         "fastp -i {input.r1} -I {input.r2} "
