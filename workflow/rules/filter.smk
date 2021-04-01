@@ -41,7 +41,7 @@ rule split_snps:
         index=temp("results/HaplotypeCaller/filtered/snps.all.vcf.gz.tbi"),
     params:
         t=tempDir,
-        java_opts=config["selectVariants"]["java_opts"],
+        java_opts=config["selectVariants"]["java_opts"] if not None else "",
     benchmark:
         "results/performance_benchmarks/split_snps/benchmarks.tsv"
     conda:
@@ -69,7 +69,7 @@ rule split_indels:
         index=temp("results/HaplotypeCaller/filtered/indels.all.vcf.gz.tbi"),
     params:
         t=tempDir,
-        java_opts=config["selectVariants"]["java_opts"],
+        java_opts=config["selectVariants"]["java_opts"] if not None else "",
     benchmark:
         "results/performance_benchmarks/split_indels/benchmarks.tsv"
     conda:
@@ -97,7 +97,7 @@ rule hard_filter_snps:
         index=temp("results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz.tbi"),
     params:
         t=tempDir,
-        java_opts=config["variantFiltration"]["java_opts"],
+        java_opts=config["variantFiltration"]["java_opts"] if not None else "",
     benchmark:
         "results/performance_benchmarks/hard_filter_snps/benchmarks.tsv"
     conda:
@@ -131,7 +131,7 @@ rule hard_filter_indels:
         index=temp("results/HaplotypeCaller/filtered/indels.hardfiltered.vcf.gz.tbi"),
     params:
         t=tempDir,
-        java_opts=config["variantFiltration"]["java_opts"],
+        java_opts=config["variantFiltration"]["java_opts"] if not None else "",
     benchmark:
         "results/performance_benchmarks/hard_filter_indels/benchmarks.tsv"
     conda:
@@ -259,7 +259,7 @@ rule picard_metrics:
     params:
         d="results/HaplotypeCaller/filtered/HC",
         t=tempDir,
-        java_opts=config["picardCollectVariantCallingMetrics"]["java_opts"],
+        java_opts=config["picardCollectVariantCallingMetrics"]["java_opts"] if not None else "",
     conda:
         "../envs/gatk.yaml"
     resources:

@@ -72,7 +72,7 @@ rule mark_duplicates:
         l=utils.list_markdup_inputs,
         t=tempDir,
         # xmx=config["markDuplicates"]["xmx"], #lambda wildcards, attempt: attempt * config["markDuplicates"]["xmx"],
-        java_opts=config["markDuplicates"]["java_opts"],
+        java_opts=config["markDuplicates"]["java_opts"] if not None else "",
     conda:
         "../envs/gatk.yaml"
     resources:
@@ -103,7 +103,7 @@ rule recalibrate_bams:
         table="results/bqsr/{sample}.recal_table",
     params:
         t=tempDir,
-        java_opts=config["baseRecalibrator"]["java_opts"],
+        java_opts=config["baseRecalibrator"]["java_opts"] if not None else "",
     benchmark:
         "results/performance_benchmarks/recalibrate_bams/{sample}.tsv"
     conda:
@@ -135,7 +135,7 @@ rule apply_bqsr:
         bam="results/bqsr/{sample}.bam",
     params:
         t=tempDir,
-        java_opts=config["applyBQSR"]["java_opts"],
+        java_opts=config["applyBQSR"]["java_opts"] if not None else "",
     benchmark:
         "results/performance_benchmarks/apply_bqsr/{sample}.tsv"
     conda:
