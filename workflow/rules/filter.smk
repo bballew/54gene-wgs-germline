@@ -227,8 +227,8 @@ rule merge_calls:
         indels="results/HaplotypeCaller/filtered/indels.hardfiltered.vcf.gz",
         i_index="results/HaplotypeCaller/filtered/indels.hardfiltered.vcf.gz.tbi",
     output:
-        vcf=protected("results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz"),
-        index=protected("results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz.tbi"),
+        vcf="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
+        index="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz.tbi",
     params:
         t=tempDir,
     benchmark:

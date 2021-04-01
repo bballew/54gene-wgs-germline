@@ -59,6 +59,7 @@ rule HC_call_variants:
     resources:
         mem_mb=lambda wildcards, attempt: attempt * config["haplotypeCaller"]["memory"],
         xmx=lambda wildcards, attempt: attempt * config["haplotypeCaller"]["xmx"],
+        queue=config["memory_queue"],
     shell:
         'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" HaplotypeCaller '
         "--tmp-dir {params.t} "
@@ -113,6 +114,7 @@ rule HC_concat_gvcfs:
     resources:
         mem_mb=lambda wildcards, attempt: attempt * config["gatherVcfs"]["memory"],
         xmx=lambda wildcards, attempt: attempt * config["gatherVcfs"]["xmx"],
+        queue=config["compute_queue"],
     shell:
         'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" GatherVcfs '
         "-I {params.l} "

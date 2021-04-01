@@ -117,6 +117,7 @@ rule HC_consolidate_gvcfs:
     resources:
         mem_mb=lambda wildcards, attempt: attempt * config["genomicsDBImport"]["memory"],
         xmx=lambda wildcards, attempt: attempt * config["genomicsDBImport"]["xmx"],
+        queue=config["memory_queue"],
     shell:
         'export _JAVA_OPTIONS="" && '
         "rm -r {params.db} && "
@@ -156,6 +157,7 @@ rule HC_genotype_gvcfs:
     resources:
         mem_mb=lambda wildcards, attempt: attempt * config["genotypeGVCFs"]["memory"],
         xmx=lambda wildcards, attempt: attempt * config["genotypeGVCFs"]["xmx"],
+        queue=config["memory_queue"],
     shell:
         'export _JAVA_OPTIONS="" && '
         'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" GenotypeGVCFs '
@@ -184,6 +186,7 @@ rule HC_concat_vcfs_bcftools:
         "../envs/bcftools_tabix.yaml"
     resources:
         mem_mb=lambda wildcards, attempt: attempt * config["bcftools"]["memory"],
+        queue=config["compute_queue"],
     shell:
         "bcftools concat -a {input.vcfList} -Ou | "
         "bcftools sort -T {params.t} -Oz -o {output.projectVCF} && "

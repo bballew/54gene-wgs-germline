@@ -109,6 +109,7 @@ rule quality_trimming:
     resources:
         mem_mb=lambda wildcards, attempt: attempt * config["fastp"]["memory"],
         batch=concurrent_limit,
+        queue=config["memory_queue"],
     shell:
         "fastp -i {input.r1} -I {input.r2} "
         "-w {threads} "

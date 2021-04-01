@@ -24,6 +24,14 @@ properties:
       - joint_genotyping
   global_vars:
     type: string
+  cluster_mode:
+    type: string
+  default_queue:
+    type: string
+  compute_queue:
+    type: string
+  memory_queue:
+    type: string
   bed:
     type: string
   max_het_ratio:

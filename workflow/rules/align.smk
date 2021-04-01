@@ -38,6 +38,7 @@ rule align_reads:
         "../envs/bwa_samtools.yaml"
     resources:
         mem_mb=lambda wildcards, attempt: attempt * config["bwa"]["memory"],
+        queue=config["memory_queue"],
     shell:
         "bwa mem "
         "-K 10000000 -M "
@@ -77,6 +78,7 @@ rule mark_duplicates:
     resources:
         mem_mb=lambda wildcards, attempt: attempt * config["markDuplicates"]["memory"],
         xmx=lambda wildcards, attempt: attempt * config["markDuplicates"]["xmx"],
+        queue=config["memory_queue"],
         batch=concurrent_limit,
     shell:
         'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" MarkDuplicates '
@@ -109,6 +111,7 @@ rule recalibrate_bams:
     resources:
         mem_mb=lambda wildcards, attempt: attempt * config["baseRecalibrator"]["memory"],
         xmx=lambda wildcards, attempt: attempt * config["baseRecalibrator"]["xmx"],
+        queue=config["memory_queue"],
     shell:
         'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" BaseRecalibrator '
         "--tmp-dir {params.t} "
@@ -140,6 +143,7 @@ rule apply_bqsr:
     resources:
         mem_mb=lambda wildcards, attempt: attempt * config["applyBQSR"]["memory"],
         xmx=lambda wildcards, attempt: attempt * config["applyBQSR"]["xmx"],
+        queue=config["memory_queue"],
         batch=concurrent_limit,
     shell:
         'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" ApplyBQSR '
