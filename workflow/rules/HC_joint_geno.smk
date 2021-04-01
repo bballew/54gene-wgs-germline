@@ -109,7 +109,7 @@ rule HC_consolidate_gvcfs:
         interval="{chrom}",
         db="results/HaplotypeCaller/DBImport/{chrom}",
         t=tempDir,
-        java_opts=config["genomicsDBImport"]["java_opts"] if not None else "",
+        java_opts=utils.allow_blanks(config["genomicsDBImport"]["java_opts"]),
         batch_size=config["genomicsDBImport"]["batch_size"],
         reader_threads=config["genomicsDBImport"]["reader_threads"],
     conda:
@@ -151,7 +151,7 @@ rule HC_genotype_gvcfs:
     params:
         db="results/HaplotypeCaller/DBImport/{chrom}",
         t=tempDir,
-        java_opts=config["genotypeGVCFs"]["java_opts"] if not None else "",
+        java_opts=utils.allow_blanks(config["genotypeGVCFs"]["java_opts"]),
     conda:
         "../envs/gatk.yaml"
     resources:
