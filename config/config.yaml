@@ -5,7 +5,7 @@ runType:
   full: yes
   joint_genotyping: no
 global_vars: "export _JAVA_OPTIONS=\"-Djava.io.tmpdir=temp/ -XX:CompressedClassSpaceSize=200m\""  # you get TMPDIR set to tempDir for free
-cluster_mode: "qsub -S /bin/bash -V -j y -o logs/ -cwd -pe mpi {threads} -l h_vmem={resources.mem_mb}M -q {resources.queue}"
+cluster_mode: "sbatch -o logs/%x.o%j -p {resources.queue} --mem-per-cpu={resources.mem_mb}M -D ./ --cpus-per-task={threads}"
 default_queue: "spot"
 compute_queue: "comp"
 memory_queue: "mem"
