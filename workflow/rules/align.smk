@@ -30,19 +30,22 @@ rule align_reads:
         pl="ILLUMINA",
         sort_order="coordinate",
         rg="{rg}",
-        sm=get_sm,
-    threads: 16
+        sm=utils.get_sm,
+        samtools_threads=config["samtools_sort"]["threads"],
+        samtools_mem=config["samtools_sort"]["memory"],
+    threads: config["bwa"]["threads"]
     conda:
         "../envs/bwa_samtools.yaml"
     resources:
-        mem_mb=32000,
+        mem_mb=lambda wildcards, attempt: attempt * config["bwa"]["memory"],
+        queue=config["memory_queue"],
     shell:
         "bwa mem "
         "-K 10000000 -M "
         '-R "@RG\\tCN:54gene\\tID:{params.rg}\\tSM:{params.sm}\\tPL:{params.pl}\\tLB:N/A" '
         "-t {threads} "
         "{input.r} {input.r1} {input.r2} | "
-        "samtools sort -@ 2 -m 4000M -o {output} - "
+        "samtools sort -@ {params.samtools_threads} -m {params.samtools_mem}M -o {output} - "
 
 
 rule mark_duplicates:
@@ -59,22 +62,26 @@ rule mark_duplicates:
     May need to create some subdirectory structure.
     """
     input:
-        get_inputs_with_matching_SM,
+        utils.get_inputs_with_matching_SM,
     output:
         bam=temp("results/dedup/{sample}.bam"),
         metrics="results/dedup/{sample}.metrics.txt",
     benchmark:
         "results/performance_benchmarks/mark_duplicates/{sample}.tsv"
     params:
-        l=list_markdup_inputs,
+        l=utils.list_markdup_inputs,
         t=tempDir,
+        # xmx=config["markDuplicates"]["xmx"], #lambda wildcards, attempt: attempt * config["markDuplicates"]["xmx"],
+        java_opts=utils.allow_blanks(config["markDuplicates"]["java_opts"]),
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=10000,
+        mem_mb=lambda wildcards, attempt: attempt * config["markDuplicates"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["markDuplicates"]["xmx"],
+        queue=config["memory_queue"],
         batch=concurrent_limit,
     shell:
-        'gatk --java-options "-Xmx2g -XX:+UseParallelGC -XX:ParallelGCThreads=2" MarkDuplicates '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" MarkDuplicates '
         "TMP_DIR={params.t} "
         "REMOVE_DUPLICATES=true "
         "INPUT={params.l} "
@@ -96,14 +103,17 @@ rule recalibrate_bams:
         table="results/bqsr/{sample}.recal_table",
     params:
         t=tempDir,
+        java_opts=utils.allow_blanks(config["baseRecalibrator"]["java_opts"]),
     benchmark:
         "results/performance_benchmarks/recalibrate_bams/{sample}.tsv"
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=8000,
+        mem_mb=lambda wildcards, attempt: attempt * config["baseRecalibrator"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["baseRecalibrator"]["xmx"],
+        queue=config["memory_queue"],
     shell:
-        'gatk --java-options "-Xmx4g -XX:+UseParallelGC -XX:ParallelGCThreads=20" BaseRecalibrator '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" BaseRecalibrator '
         "--tmp-dir {params.t} "
         "-R {input.r} "
         "-I {input.bam} "
@@ -125,15 +135,18 @@ rule apply_bqsr:
         bam="results/bqsr/{sample}.bam",
     params:
         t=tempDir,
+        java_opts=utils.allow_blanks(config["applyBQSR"]["java_opts"]),
     benchmark:
         "results/performance_benchmarks/apply_bqsr/{sample}.tsv"
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=20000,
+        mem_mb=lambda wildcards, attempt: attempt * config["applyBQSR"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["applyBQSR"]["xmx"],
+        queue=config["memory_queue"],
         batch=concurrent_limit,
     shell:
-        'gatk --java-options "-Xmx10g" ApplyBQSR '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" ApplyBQSR '
         "--tmp-dir {params.t} "
         "-R {input.r} "
         "-I {input.bam} "

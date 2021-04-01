@@ -1,6 +1,6 @@
-import create_exclude_list as ex
 import pandas as pd
 import pytest
+from scripts import create_exclude_list as ex
 
 bcf_columns = [
     "PSC",

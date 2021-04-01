@@ -17,7 +17,7 @@ rule split_multiallelics:
         index=temp("results/HaplotypeCaller/genotyped/HC_variants_split_multiallelics.vcf.gz.tbi"),
     benchmark:
         "results/performance_benchmarks/split_multiallelics/benchmarks.tsv"
-    threads: 8
+    threads: config["bcftools"]["threads"]
     conda:
         "../envs/bcftools_tabix.yaml"
     shell:
@@ -41,15 +41,17 @@ rule split_snps:
         index=temp("results/HaplotypeCaller/filtered/snps.all.vcf.gz.tbi"),
     params:
         t=tempDir,
+        java_opts=utils.allow_blanks(config["selectVariants"]["java_opts"]),
     benchmark:
         "results/performance_benchmarks/split_snps/benchmarks.tsv"
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=6000,
+        mem_mb=lambda wildcards, attempt: attempt * config["selectVariants"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["selectVariants"]["xmx"],
     shell:
         'export _JAVA_OPTIONS="" && '
-        'gatk --java-options "-Xmx1g" SelectVariants '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" SelectVariants '
         "--tmp-dir {params.t} "
         "-V {input.vcf} "
         "--select-type SNP "
@@ -67,15 +69,17 @@ rule split_indels:
         index=temp("results/HaplotypeCaller/filtered/indels.all.vcf.gz.tbi"),
     params:
         t=tempDir,
+        java_opts=utils.allow_blanks(config["selectVariants"]["java_opts"]),
     benchmark:
         "results/performance_benchmarks/split_indels/benchmarks.tsv"
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=6000,
+        mem_mb=lambda wildcards, attempt: attempt * config["selectVariants"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["selectVariants"]["xmx"],
     shell:
         'export _JAVA_OPTIONS="" && '
-        'gatk --java-options "-Xmx1g" SelectVariants '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" SelectVariants '
         "--tmp-dir {params.t} "
         "-V {input.vcf} "
         "--select-type INDEL "
@@ -93,15 +97,17 @@ rule hard_filter_snps:
         index=temp("results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz.tbi"),
     params:
         t=tempDir,
+        java_opts=utils.allow_blanks(config["variantFiltration"]["java_opts"]),
     benchmark:
         "results/performance_benchmarks/hard_filter_snps/benchmarks.tsv"
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=6000,
+        mem_mb=lambda wildcards, attempt: attempt * config["variantFiltration"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["variantFiltration"]["xmx"],
     shell:
         'export _JAVA_OPTIONS="" && '
-        'gatk --java-options "-Xmx1g" VariantFiltration '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" VariantFiltration '
         "--tmp-dir {params.t} "
         "-V {input.vcf} "
         '-filter "QD < 2.0" --filter-name "QD2" '
@@ -125,15 +131,17 @@ rule hard_filter_indels:
         index=temp("results/HaplotypeCaller/filtered/indels.hardfiltered.vcf.gz.tbi"),
     params:
         t=tempDir,
+        java_opts=utils.allow_blanks(config["variantFiltration"]["java_opts"]),
     benchmark:
         "results/performance_benchmarks/hard_filter_indels/benchmarks.tsv"
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=6000,
+        mem_mb=lambda wildcards, attempt: attempt * config["variantFiltration"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["variantFiltration"]["xmx"],
     shell:
         'export _JAVA_OPTIONS="" && '
-        'gatk --java-options "-Xmx1g" VariantFiltration '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" VariantFiltration '
         "--tmp-dir {params.t} "
         "-V {input.vcf} "
         '-filter "QD < 2.0" --filter-name "QD2" '
@@ -162,7 +170,7 @@ if full:
             i=temp("results/qc/contamination_check/chr5_and_10.snps.hardfiltered.vcf.gz.tbi"),
         benchmark:
             "results/performance_benchmarks/subset_for_contam_check/subset.tsv"
-        threads: 8
+        threads: config["bcftools"]["threads"]
         conda:
             "../envs/bcftools_tabix.yaml"
         shell:
@@ -188,7 +196,7 @@ if full:
         conda:
             "../envs/verifybamid.yaml"
         resources:
-            mem_mb=4000,
+            mem_mb=lambda wildcards, attempt: attempt * config["verifyBamID"]["memory"],
         shell:
             "verifyBamID "
             "--best "
@@ -219,8 +227,8 @@ rule merge_calls:
         indels="results/HaplotypeCaller/filtered/indels.hardfiltered.vcf.gz",
         i_index="results/HaplotypeCaller/filtered/indels.hardfiltered.vcf.gz.tbi",
     output:
-        vcf=protected("results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz"),
-        index=protected("results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz.tbi"),
+        vcf="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
+        index="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz.tbi",
     params:
         t=tempDir,
     benchmark:
@@ -228,12 +236,11 @@ rule merge_calls:
     conda:
         "../envs/bcftools_tabix.yaml"
     resources:
-        mem_mb=4000,
+        mem_mb=lambda wildcards, attempt: attempt * config["bcftools"]["memory"],
     shell:
         "bcftools concat -a -Ov {input.snps} {input.indels} | "
         "bcftools sort -T {params.t} -Oz -o {output.vcf} && "
         "tabix -p vcf {output.vcf}"
-        # 'gatk --java-options "-Xmx4G" GatherVcfs -I {input.snps} -I {input.indels} -O {output}'
 
 
 rule picard_metrics:
@@ -252,13 +259,20 @@ rule picard_metrics:
     params:
         d="results/HaplotypeCaller/filtered/HC",
         t=tempDir,
+        java_opts=utils.allow_blanks(config["picardCollectVariantCallingMetrics"]["java_opts"]),
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=6000,
+        mem_mb=(
+            lambda wildcards, attempt: attempt
+            * config["picardCollectVariantCallingMetrics"]["memory"]
+        ),
+        xmx=(
+            lambda wildcards, attempt: attempt * config["picardCollectVariantCallingMetrics"]["xmx"]
+        ),
     shell:
         'export _JAVA_OPTIONS="" && '
-        'gatk --java-options "-Xmx1g" CollectVariantCallingMetrics '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" CollectVariantCallingMetrics '
         "--TMP_DIR {params.t} "
         "-I {input.calls} "
         "--DBSNP {input.dbsnp} "

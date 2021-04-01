@@ -12,8 +12,9 @@ and generates QC reports, aligned BAMs, gVCFs, and multi-sample VCFs.
 
 import os
 import subprocess
-import glob
-
+import pathlib
+from snakemake.utils import validate
+from scripts import utils
 
 label = subprocess.check_output(["git", "describe", "--always"]).strip()
 print(f"54gene WGS germline workflow {label}")
@@ -23,227 +24,37 @@ print(f"54gene WGS germline workflow {label}")
 configfile: "config/config.yaml"
 
 
+validate(config, schema="schemas/config.schema.yaml")
+
 # import variables from config
 sampleFile = config["sampleFile"]
 jobs = config["jobs"]
 tempDir = config["tempDir"]
 full = config["runType"]["full"]
 jointgeno = config["runType"]["joint_genotyping"]
+global_vars = config["global_vars"]
+bed = config["bed"]
 
+# create temp and log dirs if needed
+pathlib.Path(tempDir).mkdir(parents=True, exist_ok=True)
+pathlib.Path("logs/").mkdir(parents=True, exist_ok=True)
 
-bed = "resources/Homo_sapiens_assembly38.bed"  # change if not WGS - put switch in config?
+# configure shell behavior for all rules
+shell.executable("/bin/bash")
+shell.prefix(f"set -euo pipefail; export TMPDIR={tempDir}; {global_vars}; ")
 
-# parse manifest file
-# Our lab is not currently splitting samples across lanes,
-# which means we only expect one r1/r2 fastq pair per sample.
-# However, other data may not follow this pattern (e.g. the Yale
-# data).  The pipeline is capable of handling either scenario,
-# as long as the requirements for the input manifest are met.
-
-
-def read_in_manifest(s):
-    """Parse whitespace delimited manifest file.
-    Note the distinct requirements for the two different run types.
-    """
-    d = {}
-    with open(s) as f:
-        for line in f:
-            if full:
-                (rg, sm, read1, read2) = line.split()
-                d[rg] = sm, read1, read2
-            elif jointgeno:
-                (sm, gvcf) = line.split()
-                d[sm] = gvcf
-    return d
-
-
-def create_samples_set(d):
-    """Generate a list of unique sample IDs from the manifest."""
-    sm_set = set()
-    for (key, value) in d.items():
-        sm_set.add(value[0])
-    return list(sm_set)
-
-
-def get_read1_fastq(wildcards):
-    """Return r1 fastq for a given readgroup."""
-    (sm, read1, read2) = sampleDict[wildcards.rg]
-    return read1
-
-
-def get_read2_fastq(wildcards):
-    """Return r2 fastq for a given readgroup."""
-    (sm, read1, read2) = sampleDict[wildcards.rg]
-    return read2
-
-
-def get_gvcf(wildcards):
-    """"""
-    gvcf = sampleDict[wildcards.sample]
-    return gvcf
-
-
-def get_gvcf_index(wildcards):
-    """"""
-    gvcf = sampleDict[wildcards.sample]
-    return gvcf + ".tbi"
-
-
-def get_sm(wildcards):
-    """Return sample name for a given readgroup."""
-    (sm, read1, read2) = sampleDict[wildcards.rg]
-    return sm
-
-
-def get_inputs_with_matching_SM(wildcards):
-    """
-    Lists full path and file name for each readgroup bam that
-    has the same sample name (SM).  Used to generate input list
-    for rule mark_duplicates.
-    """
-    l1 = []
-    for (keys, vals) in sampleDict.items():
-        if wildcards.sample in vals:
-            l1.append("results/mapped/" + keys + ".bam")
-    return l1
-
-
-def list_markdup_inputs(wildcards):
-    """List path and filename for each readgroup bam with the same sample name.
-    Used to create input string for Picard MarkDuplicates (INPUT=/path/to/sample.bam
-    INPUT=/path/to/sample2.bam ...).  This allows merging of bams when there are
-    multiple fastq pairs per sample, resulting in multiple pre-dedup bams per sample.
-    """
-    l1 = []
-    for (keys, vals) in sampleDict.items():
-        if wildcards.sample in vals:
-            l1.append("results/mapped/" + keys + ".bam")
-    s1 = " INPUT=".join(l1)
-    return s1
-
-
-def get_batch_limit_number(sampleDict, jobs, n):
-    """Assign weight to limit concurrent running rules
-    Required to avoid hitting throughput limits of fsx.  The limit for resources
-    is set to the max number of jobs in the config and wrapper script, and if n=10,
-    the rule weight is set to max jobs/10.
-
-    Example:
-        max jobs = 1000
-        default batch resource = 1
-        only want to run max 10 at a time
-
-        1000 / 10 = 100 is assigned as the "batch" resource for alignment jobs,
-        so only max 10 will fit under the limit at one time.
-
-    """
-    limit = round(int(jobs) / n)
-    if limit == 0:
-        limit = 1
-    return limit
-
-
-sampleDict = read_in_manifest(sampleFile)
 # dict where key is readgroup, values are sample, r1 fastq, r2 fastq
-SAMPLES = create_samples_set(sampleDict) if full else sampleDict.keys()
+sampleDict = utils.read_in_manifest(sampleFile, full)
+
 # list of unique sample names
+SAMPLES = utils.create_samples_set(sampleDict) if full else sampleDict.keys()
 
 # weight for trimming and fastqc rules, to avoid hitting fsx throughput limits
 # The Second parameter is the desired max number of concurrently-running jobs of
 # that rule.
-concurrent_limit = get_batch_limit_number(sampleDict, jobs, 20)
+concurrent_limit = utils.get_batch_limit_number(jobs, 20)
 
-# Previously read from dict, but now that I'm programmatically retrieving
-# the ref genome and index files, it's easier to just have a hard-coded list
-# and trade off the flexibility of changing ref genomes
-chromList = [
-    "chr1",
-    "chr2",
-    "chr3",
-    "chr4",
-    "chr5",
-    "chr6",
-    "chr7",
-    "chr8",
-    "chr9",
-    "chr10",
-    "chr11",
-    "chr12",
-    "chr13",
-    "chr14",
-    "chr15",
-    "chr16",
-    "chr17",
-    "chr18",
-    "chr19",
-    "chr20",
-    "chr21",
-    "chr22",
-    "chrX",
-    "chrY",
-]
-
-
-def get_DBImport_path1(wildcards):
-    """Define input files for rule HC_genotype_gvcfs."""
-    return glob.glob(
-        "results/HaplotypeCaller/DBImport/"
-        + wildcards.chrom
-        + "/"
-        + wildcards.chrom
-        + "*/genomicsdb_meta_dir/genomicsdb_meta*.json"
-    )
-
-
-def get_DBImport_path2(wildcards):
-    """Define input files for rule HC_genotype_gvcfs."""
-    path = "".join(glob.glob("results/HaplotypeCaller/DBImport/" + wildcards.chrom + "/*/__*/"))
-    myList = []
-    if os.path.exists(path):
-        myList = [
-            "AD.tdb",
-            "AD_var.tdb",
-            "ALT.tdb",
-            "ALT_var.tdb",
-            "BaseQRankSum.tdb",
-            "__book_keeping.tdb.gz",
-            "__coords.tdb",
-            "DP_FORMAT.tdb",
-            "DP.tdb",
-            # "DS.tdb",
-            "END.tdb",
-            "ExcessHet.tdb",
-            "FILTER.tdb",
-            "FILTER_var.tdb",
-            "GQ.tdb",
-            "GT.tdb",
-            "GT_var.tdb",
-            "ID.tdb",
-            "ID_var.tdb",
-            "InbreedingCoeff.tdb",
-            "MIN_DP.tdb",
-            "MLEAC.tdb",
-            "MLEAC_var.tdb",
-            "MLEAF.tdb",
-            "MLEAF_var.tdb",
-            "MQRankSum.tdb",
-            "PGT.tdb",
-            "PGT_var.tdb",
-            "PID.tdb",
-            "PID_var.tdb",
-            "PL.tdb",
-            "PL_var.tdb",
-            "QUAL.tdb",
-            "RAW_MQandDP.tdb",
-            "ReadPosRankSum.tdb",
-            "REF.tdb",
-            "REF_var.tdb",
-            "SB.tdb",
-            "__tiledb_fragment.tdb",
-        ]
-        myList = [path + file for file in myList]
-    return myList
-
+chromList = utils.get_chrom_list(bed)
 
 TARGETS = [
     "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",

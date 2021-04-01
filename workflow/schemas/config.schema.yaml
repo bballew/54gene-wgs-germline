@@ -1,0 +1,183 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+
+description: snakemake configuration file
+
+type: object
+
+# possible entries of the config file and which type they should be
+properties:
+  sampleFile:
+    type: string
+  jobs:
+    type: integer
+  tempDir:
+    type: string
+  runType:
+    type: object
+    properties:
+      full:
+        type: boolean
+      joint_genotyping:
+        type: boolean
+    required:
+      - full
+      - joint_genotyping
+  global_vars:
+    type: string
+  cluster_mode:
+    type: string
+  default_queue:
+    type: string
+  compute_queue:
+    type: string
+  memory_queue:
+    type: string
+  bed:
+    type: string
+  max_het_ratio:
+    type: number
+  min_avg_depth:
+    type: number
+  max_contam:
+    type: number
+  fastqc:
+    type: object
+    properties:
+      threads:
+        type: number
+      memory:
+        type: number
+  fastp:
+    type: object
+    properties:
+      threads:
+        type: number
+      memory:
+        type: number
+  bwa:
+    type: object
+    properties:
+      threads:
+        type: number
+      memory:
+        type: number
+  samtools_sort:
+    type: object
+    properties:
+      threads:
+        type: number
+      memory:
+        type: number
+  markDuplicates:
+    type: object
+    properties:
+      memory:
+        type: number
+      xmx:
+        type: number
+      java_opts:
+        type: ["string", "null"]
+  baseRecalibrator:
+    type: object
+    properties:
+      memory:
+        type: number
+      xmx:
+        type: number
+      java_opts:
+        type: ["string", "null"]
+  applyBQSR:
+    type: object
+    properties:
+      memory:
+        type: number
+      xmx:
+        type: number
+      java_opts:
+        type: ["string", "null"]
+  haplotypeCaller:
+    type: object
+    properties:
+      memory:
+        type: number
+      xmx:
+        type: number
+      java_opts:
+        type: ["string", "null"]
+  gatherVcfs:
+    type: object
+    properties:
+      memory:
+        type: number
+      xmx:
+        type: number
+      java_opts:
+        type: ["string", "null"]
+  genomicsDBImport:
+    type: object
+    properties:
+      memory:
+        type: number
+      xmx:
+        type: number
+      java_opts:
+        type: ["string", "null"]
+      batch_size:
+        type: number
+      reader_threads:
+        type: number
+  genotypeGVCFs:
+    type: object
+    properties:
+      memory:
+        type: number
+      xmx:
+        type: number
+      java_opts:
+        type: ["string", "null"]
+  bcftools:
+    type: object
+    properties:
+      memory:
+        type: number
+      threads:
+        type: number
+  selectVariants:
+    type: object
+    properties:
+      memory:
+        type: number
+      xmx:
+        type: number
+      java_opts:
+        type: ["string", "null"]
+  variantFiltration:
+    type: object
+    properties:
+      memory:
+        type: number
+      xmx:
+        type: number
+      java_opts:
+        type: ["string", "null"]
+  verifyBamID:
+    type: object
+    properties:
+      memory:
+        type: number
+  picardCollectVariantCallingMetrics:
+    type: object
+    properties:
+      memory:
+        type: number
+      xmx:
+        type: number
+      java_opts:
+        type: ["string", "null"]
+
+# entries that have to be in the config file for successful validation
+required:
+  - sampleFile
+  - jobs
+  - tempDir
+  - runType

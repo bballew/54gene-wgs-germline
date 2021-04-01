@@ -1,11 +1,77 @@
 sampleFile: "config/manifest.txt"
-jobs: 1000
+jobs: 2
 tempDir: "temp/"
 runType:
   full: yes
   joint_genotyping: no
+global_vars: "export _JAVA_OPTIONS=\"-Djava.io.tmpdir=temp/ -XX:CompressedClassSpaceSize=200m\""  # you get TMPDIR set to tempDir for free
+cluster_mode: "sbatch -o logs/%x.o%j -p {resources.queue} --mem-per-cpu={resources.mem_mb}M -D ./ --cpus-per-task={threads}"
+default_queue: "spot"
+compute_queue: "comp"
+memory_queue: "mem"
+bed: "resources/Homo_sapiens_assembly38.bed"
 
 # QC thresholds for sample removal:
 max_het_ratio: 2.5
 min_avg_depth: 20.0
 max_contam: 0.03  # N/A for joint_genotyping
+
+fastqc:
+  threads: 8
+  memory: 6000
+fastp:
+  threads: 4
+  memory: 8000
+bwa:
+  threads: 16
+  memory: 32000  # mb
+samtools_sort:
+  threads: 2
+  memory: 4000
+markDuplicates:
+  memory: 10000
+  xmx: 2000         # mb
+  java_opts: "-XX:+UseParallelGC -XX:ParallelGCThreads=2"
+baseRecalibrator:
+  memory: 8000
+  xmx: 4000
+  java_opts: "-XX:+UseParallelGC -XX:ParallelGCThreads=20"
+applyBQSR:
+  memory: 20000
+  xmx: 10000
+  java_opts:
+haplotypeCaller:
+  memory: 16000
+  xmx: 4000
+  java_opts:
+gatherVcfs:
+  memory: 8000
+  xmx: 4000
+  java_opts: "-Djava.io.tmpdir={params.t}"
+genomicsDBImport:
+  memory: 32000
+  xmx: 12000
+  java_opts:
+  batch_size: 25
+  reader_threads: 5
+genotypeGVCFs:
+  memory: 24000
+  xmx: 12000
+  java_opts:
+bcftools:
+  memory: 4000
+  threads: 8
+selectVariants:
+  memory: 6000
+  xmx: 1000
+  java_opts:
+variantFiltration:
+  memory: 6000
+  xmx: 1000
+  java_opts:
+verifyBamID: # only for full runs
+  memory: 4000
+picardCollectVariantCallingMetrics:
+  memory: 6000
+  xmx: 1000
+  java_opts:
