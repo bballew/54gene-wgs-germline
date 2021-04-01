@@ -51,15 +51,17 @@ rule HC_call_variants:
         idx=temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.idx"),
     params:
         t=tempDir,
-        java_opts=config["haplotypeCaller"]["java_opts"],
+        java_opts=utils.allow_blanks(config["haplotypeCaller"]["java_opts"]),
     benchmark:
         "results/performance_benchmarks/HC_call_variants/{sample}_{chrom}.tsv"
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=config["haplotypeCaller"]["memory"],
+        mem_mb=lambda wildcards, attempt: attempt * config["haplotypeCaller"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["haplotypeCaller"]["xmx"],
+        queue=config["memory_queue"],
     shell:
-        'gatk --java-options "{params.java_opts}" HaplotypeCaller '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" HaplotypeCaller '
         "--tmp-dir {params.t} "
         "-R {input.r} "
         "-I {input.bam} "
@@ -106,13 +108,15 @@ rule HC_concat_gvcfs:
     params:
         l=lambda wildcards, input: " -I ".join(input.vcfList),
         t=tempDir,
-        java_opts=config["gatherVcfs"]["java_opts"],
+        java_opts=utils.allow_blanks(config["gatherVcfs"]["java_opts"]),
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=config["gatherVcfs"]["memory"],
+        mem_mb=lambda wildcards, attempt: attempt * config["gatherVcfs"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["gatherVcfs"]["xmx"],
+        queue=config["compute_queue"],
     shell:
-        'gatk --java-options "{params.java_opts}" GatherVcfs '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" GatherVcfs '
         "-I {params.l} "
         "-O {output}"
 

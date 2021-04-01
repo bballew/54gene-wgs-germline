@@ -37,7 +37,8 @@ rule align_reads:
     conda:
         "../envs/bwa_samtools.yaml"
     resources:
-        mem_mb=config["bwa"]["memory"],
+        mem_mb=lambda wildcards, attempt: attempt * config["bwa"]["memory"],
+        queue=config["memory_queue"],
     shell:
         "bwa mem "
         "-K 10000000 -M "
@@ -70,14 +71,17 @@ rule mark_duplicates:
     params:
         l=utils.list_markdup_inputs,
         t=tempDir,
-        java_opts=config["markDuplicates"]["java_opts"],
+        # xmx=config["markDuplicates"]["xmx"], #lambda wildcards, attempt: attempt * config["markDuplicates"]["xmx"],
+        java_opts=utils.allow_blanks(config["markDuplicates"]["java_opts"]),
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=config["markDuplicates"]["memory"],
+        mem_mb=lambda wildcards, attempt: attempt * config["markDuplicates"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["markDuplicates"]["xmx"],
+        queue=config["memory_queue"],
         batch=concurrent_limit,
     shell:
-        'gatk --java-options "{params.java_opts}" MarkDuplicates '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" MarkDuplicates '
         "TMP_DIR={params.t} "
         "REMOVE_DUPLICATES=true "
         "INPUT={params.l} "
@@ -99,15 +103,17 @@ rule recalibrate_bams:
         table="results/bqsr/{sample}.recal_table",
     params:
         t=tempDir,
-        java_opts=config["baseRecalibrator"]["java_opts"],
+        java_opts=utils.allow_blanks(config["baseRecalibrator"]["java_opts"]),
     benchmark:
         "results/performance_benchmarks/recalibrate_bams/{sample}.tsv"
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=config["baseRecalibrator"]["memory"],
+        mem_mb=lambda wildcards, attempt: attempt * config["baseRecalibrator"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["baseRecalibrator"]["xmx"],
+        queue=config["memory_queue"],
     shell:
-        'gatk --java-options "{params.java_opts}" BaseRecalibrator '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" BaseRecalibrator '
         "--tmp-dir {params.t} "
         "-R {input.r} "
         "-I {input.bam} "
@@ -129,16 +135,18 @@ rule apply_bqsr:
         bam="results/bqsr/{sample}.bam",
     params:
         t=tempDir,
-        java_opts=config["applyBQSR"]["java_opts"],
+        java_opts=utils.allow_blanks(config["applyBQSR"]["java_opts"]),
     benchmark:
         "results/performance_benchmarks/apply_bqsr/{sample}.tsv"
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=config["applyBQSR"]["memory"],
+        mem_mb=lambda wildcards, attempt: attempt * config["applyBQSR"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["applyBQSR"]["xmx"],
+        queue=config["memory_queue"],
         batch=concurrent_limit,
     shell:
-        'gatk --java-options "{params.java_opts}" ApplyBQSR '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" ApplyBQSR '
         "--tmp-dir {params.t} "
         "-R {input.r} "
         "-I {input.bam} "

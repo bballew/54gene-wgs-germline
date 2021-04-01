@@ -197,3 +197,7 @@ def get_DBImport_path2(wildcards):
         ]
         myList = [path + file for file in myList]
     return myList
+
+
+def allow_blanks(c):
+    return c if c is not None else ""

@@ -1,4 +1,4 @@
-$schema: "http://json-schema.org/draft-06/schema#"
+$schema: "http://json-schema.org/draft-07/schema#"
 
 description: snakemake configuration file
 
@@ -23,6 +23,14 @@ properties:
       - full
       - joint_genotyping
   global_vars:
+    type: string
+  cluster_mode:
+    type: string
+  default_queue:
+    type: string
+  compute_queue:
+    type: string
+  memory_queue:
     type: string
   bed:
     type: string
@@ -65,43 +73,55 @@ properties:
     properties:
       memory:
         type: number
+      xmx:
+        type: number
       java_opts:
-        type: string
+        type: ["string", "null"]
   baseRecalibrator:
     type: object
     properties:
       memory:
         type: number
+      xmx:
+        type: number
       java_opts:
-        type: string
+        type: ["string", "null"]
   applyBQSR:
     type: object
     properties:
       memory:
         type: number
+      xmx:
+        type: number
       java_opts:
-        type: string
+        type: ["string", "null"]
   haplotypeCaller:
     type: object
     properties:
       memory:
         type: number
+      xmx:
+        type: number
       java_opts:
-        type: string
+        type: ["string", "null"]
   gatherVcfs:
     type: object
     properties:
       memory:
         type: number
+      xmx:
+        type: number
       java_opts:
-        type: string
+        type: ["string", "null"]
   genomicsDBImport:
     type: object
     properties:
       memory:
         type: number
+      xmx:
+        type: number
       java_opts:
-        type: string
+        type: ["string", "null"]
       batch_size:
         type: number
       reader_threads:
@@ -111,8 +131,10 @@ properties:
     properties:
       memory:
         type: number
+      xmx:
+        type: number
       java_opts:
-        type: string
+        type: ["string", "null"]
   bcftools:
     type: object
     properties:
@@ -125,15 +147,19 @@ properties:
     properties:
       memory:
         type: number
+      xmx:
+        type: number
       java_opts:
-        type: string
+        type: ["string", "null"]
   variantFiltration:
     type: object
     properties:
       memory:
         type: number
+      xmx:
+        type: number
       java_opts:
-        type: string
+        type: ["string", "null"]
   verifyBamID:
     type: object
     properties:
@@ -144,8 +170,10 @@ properties:
     properties:
       memory:
         type: number
+      xmx:
+        type: number
       java_opts:
-        type: string
+        type: ["string", "null"]
 
 # entries that have to be in the config file for successful validation
 required:

@@ -109,17 +109,19 @@ rule HC_consolidate_gvcfs:
         interval="{chrom}",
         db="results/HaplotypeCaller/DBImport/{chrom}",
         t=tempDir,
-        java_opts=config["genomicsDBImport"]["java_opts"],
+        java_opts=utils.allow_blanks(config["genomicsDBImport"]["java_opts"]),
         batch_size=config["genomicsDBImport"]["batch_size"],
         reader_threads=config["genomicsDBImport"]["reader_threads"],
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=config["genomicsDBImport"]["memory"],
+        mem_mb=lambda wildcards, attempt: attempt * config["genomicsDBImport"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["genomicsDBImport"]["xmx"],
+        queue=config["memory_queue"],
     shell:
         'export _JAVA_OPTIONS="" && '
         "rm -r {params.db} && "
-        'gatk --java-options "{params.java_opts}" GenomicsDBImport '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" GenomicsDBImport '
         "--batch-size {params.batch_size} "
         "--disable-bam-index-caching "
         "--sample-name-map {input.sampleMap} "
@@ -149,14 +151,16 @@ rule HC_genotype_gvcfs:
     params:
         db="results/HaplotypeCaller/DBImport/{chrom}",
         t=tempDir,
-        java_opts=config["genotypeGVCFs"]["java_opts"],
+        java_opts=utils.allow_blanks(config["genotypeGVCFs"]["java_opts"]),
     conda:
         "../envs/gatk.yaml"
     resources:
-        mem_mb=config["genotypeGVCFs"]["memory"],
+        mem_mb=lambda wildcards, attempt: attempt * config["genotypeGVCFs"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["genotypeGVCFs"]["xmx"],
+        queue=config["memory_queue"],
     shell:
         'export _JAVA_OPTIONS="" && '
-        'gatk --java-options "{params.java_opts}" GenotypeGVCFs '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" GenotypeGVCFs '
         "-R {input.r} "
         "-V gendb://{params.db} "
         "-O {output.vcf} "
@@ -181,7 +185,8 @@ rule HC_concat_vcfs_bcftools:
     conda:
         "../envs/bcftools_tabix.yaml"
     resources:
-        mem_mb=config["bcftools"]["memory"],
+        mem_mb=lambda wildcards, attempt: attempt * config["bcftools"]["memory"],
+        queue=config["compute_queue"],
     shell:
         "bcftools concat -a {input.vcfList} -Ou | "
         "bcftools sort -T {params.t} -Oz -o {output.projectVCF} && "
