@@ -176,8 +176,8 @@ rule HC_concat_vcfs_bcftools:
         vcfList=expand("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz", chrom=chromList),
         indexList=expand("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz.tbi", chrom=chromList),
     output:
-        projectVCF=protected("results/HaplotypeCaller/genotyped/HC_variants.vcf.gz"),
-        idx=protected("results/HaplotypeCaller/genotyped/HC_variants.vcf.gz.tbi"),
+        projectVCF="results/HaplotypeCaller/genotyped/HC_variants.vcf.gz",
+        idx="results/HaplotypeCaller/genotyped/HC_variants.vcf.gz.tbi",
     params:
         t=tempDir,
     benchmark:
