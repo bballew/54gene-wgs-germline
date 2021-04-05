@@ -38,7 +38,7 @@ rule align_reads:
         "../envs/bwa_samtools.yaml"
     resources:
         mem_mb=lambda wildcards, attempt: attempt * config["bwa"]["memory"],
-        queue=config["memory_queue"],
+        queue=config["compute_queue"],
     shell:
         "bwa mem "
         "-K 10000000 -M "
