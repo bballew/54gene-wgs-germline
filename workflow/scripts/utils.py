@@ -15,6 +15,7 @@ def read_in_manifest(s, full):
     We can handle an arbitrary number of r1/r2 fastq pairs per sample,
     as long as the readgroups are distinct but the sample names are the same.
     """
+    global sampleDict
     with open(s) as f:
         for line in f:
             if full:
@@ -34,57 +35,80 @@ def create_samples_set(d):
     return list(sm_set)
 
 
-def get_read1_fastq(wildcards):
+def _get_dict(**kwargs):
+    """Return test dict for testing or global dict for workflow
+
+    Functions called as snakemake input can't pass more than the wildcards
+    parameter.  To enable testing, use **kwargs to optionally pass in a dict.
+    Otherwise, for use in snakemake rules, use the globally-defined sample
+    dict.
+    """
+    if kwargs:
+        for d in kwargs.values():
+            myDict = d.copy()
+    else:
+        myDict = sampleDict.copy()
+    return myDict
+
+
+def get_read1_fastq(wildcards, **kwargs):
     """Return r1 fastq for a given readgroup."""
-    (sm, read1, read2) = sampleDict[wildcards.rg]
+    myDict = _get_dict(**kwargs)
+    (sm, read1, read2) = myDict[wildcards.rg]
     return read1
 
 
-def get_read2_fastq(wildcards):
+def get_read2_fastq(wildcards, **kwargs):
     """Return r2 fastq for a given readgroup."""
-    (sm, read1, read2) = sampleDict[wildcards.rg]
+    myDict = _get_dict(**kwargs)
+    (sm, read1, read2) = myDict[wildcards.rg]
     return read2
 
 
-def get_gvcf(wildcards):
+def get_gvcf(wildcards, **kwargs):
     """"""
-    gvcf = sampleDict[wildcards.sample]
+    myDict = _get_dict(**kwargs)
+    gvcf = myDict[wildcards.sample]
     return gvcf
 
 
-def get_gvcf_index(wildcards):
+def get_gvcf_index(wildcards, **kwargs):
     """"""
-    gvcf = sampleDict[wildcards.sample]
+    myDict = _get_dict(**kwargs)
+    gvcf = myDict[wildcards.sample]
     return gvcf + ".tbi"
 
 
-def get_sm(wildcards):
+def get_sm(wildcards, **kwargs):
     """Return sample name for a given readgroup."""
-    (sm, read1, read2) = sampleDict[wildcards.rg]
+    myDict = _get_dict(**kwargs)
+    (sm, read1, read2) = myDict[wildcards.rg]
     return sm
 
 
-def get_inputs_with_matching_SM(wildcards):
+def get_inputs_with_matching_SM(wildcards, **kwargs):
     """
     Lists full path and file name for each readgroup bam that
     has the same sample name (SM).  Used to generate input list
     for rule mark_duplicates.
     """
+    myDict = _get_dict(**kwargs)
     l1 = []
-    for (keys, vals) in sampleDict.items():
+    for (keys, vals) in myDict.items():
         if wildcards.sample in vals:
             l1.append("results/mapped/" + keys + ".bam")
     return l1
 
 
-def list_markdup_inputs(wildcards):
+def list_markdup_inputs(wildcards, **kwargs):
     """List path and filename for each readgroup bam with the same sample name.
     Used to create input string for Picard MarkDuplicates (INPUT=/path/to/sample.bam
     INPUT=/path/to/sample2.bam ...).  This allows merging of bams when there are
     multiple fastq pairs per sample, resulting in multiple pre-dedup bams per sample.
     """
+    myDict = _get_dict(**kwargs)
     l1 = []
-    for (keys, vals) in sampleDict.items():
+    for (keys, vals) in myDict.items():
         if wildcards.sample in vals:
             l1.append("results/mapped/" + keys + ".bam")
     s1 = " INPUT=".join(l1)
