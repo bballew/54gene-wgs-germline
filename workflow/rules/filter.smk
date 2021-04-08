@@ -12,6 +12,7 @@ rule split_multiallelics:
         vcf="results/HaplotypeCaller/genotyped/HC_variants.vcf.gz",
         index="results/HaplotypeCaller/genotyped/HC_variants.vcf.gz.tbi",
         ref="resources/Homo_sapiens_assembly38.fasta",
+        fai="resources/Homo_sapiens_assembly38.fasta.fai",
     output:
         vcf=temp("results/HaplotypeCaller/genotyped/HC_variants_split_multiallelics.vcf.gz"),
         index=temp("results/HaplotypeCaller/genotyped/HC_variants_split_multiallelics.vcf.gz.tbi"),
@@ -182,13 +183,15 @@ if full:
             vcf="results/qc/contamination_check/chr5_and_10.snps.hardfiltered.vcf.gz",
             i1="results/qc/contamination_check/chr5_and_10.snps.hardfiltered.vcf.gz.tbi",
             bam="results/bqsr/{sample}.bam",
-            i2="results/bqsr/{sample}.bam.bai",
+            i2="results/bqsr/{sample}.bai",
         output:
             "results/qc/contamination_check/{sample}.selfSM",
             "results/qc/contamination_check/{sample}.selfRG",
             "results/qc/contamination_check/{sample}.log",
             "results/qc/contamination_check/{sample}.depthSM",
             "results/qc/contamination_check/{sample}.depthRG",
+            "results/qc/contamination_check/{sample}.bestSM",
+            "results/qc/contamination_check/{sample}.bestRG",
         params:
             d="results/qc/contamination_check/{sample}",
         benchmark:

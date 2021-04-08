@@ -1,6 +1,7 @@
 rule variant_stats:
     input:
         r="resources/Homo_sapiens_assembly38.fasta",
+        f="resources/Homo_sapiens_assembly38.fasta.fai",
         vcf="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
         i="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz.tbi",
     output:

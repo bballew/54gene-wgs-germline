@@ -94,6 +94,7 @@ rule recalibrate_bams:
     input:
         bam="results/dedup/{sample}.bam",
         r="resources/Homo_sapiens_assembly38.fasta",
+        f="resources/Homo_sapiens_assembly38.fasta.fai",
         d="resources/Homo_sapiens_assembly38.dict",
         snps="resources/Homo_sapiens_assembly38.dbsnp138.vcf",
         s_index="resources/Homo_sapiens_assembly38.dbsnp138.vcf.idx",
@@ -129,10 +130,12 @@ rule apply_bqsr:
     input:
         bam="results/dedup/{sample}.bam",
         r="resources/Homo_sapiens_assembly38.fasta",
+        f="resources/Homo_sapiens_assembly38.fasta.fai",
         d="resources/Homo_sapiens_assembly38.dict",
         recal="results/bqsr/{sample}.recal_table",
     output:
         bam="results/bqsr/{sample}.bam",
+        bai="results/bqsr/{sample}.bai",
     params:
         t=tempDir,
         java_opts=utils.allow_blanks(config["applyBQSR"]["java_opts"]),
@@ -154,27 +157,13 @@ rule apply_bqsr:
         "-O {output.bam}"
 
 
-rule index_bams:
-    """Index post-BQSR bams."""
-    input:
-        "results/bqsr/{sample}.bam",
-    output:
-        "results/bqsr/{sample}.bam.bai",
-    benchmark:
-        "results/performance_benchmarks/index_bams/{sample}.tsv"
-    conda:
-        "../envs/bwa_samtools.yaml"
-    shell:
-        "samtools index {input} {output}"
-
-
 rule samtools_stats:
     """Generate stats for bams.
     May want to do this pre-bqsr too.
     """
     input:
         bam="results/bqsr/{sample}.bam",
-        bai="results/bqsr/{sample}.bam.bai",
+        bai="results/bqsr/{sample}.bai",
     output:
         "results/alignment_stats/{sample}.txt",
     benchmark:

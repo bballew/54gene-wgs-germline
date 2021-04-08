@@ -136,6 +136,8 @@ rule HC_genotype_gvcfs:
     """Joint genotyping."""
     input:
         r="resources/Homo_sapiens_assembly38.fasta",
+        f="resources/Homo_sapiens_assembly38.fasta.fai",
+        d="resources/Homo_sapiens_assembly38.dict",
         bed=bed,
         o1="results/HaplotypeCaller/DBImport/{chrom}/vcfheader.vcf",
         o2="results/HaplotypeCaller/DBImport/{chrom}/vidmap.json",

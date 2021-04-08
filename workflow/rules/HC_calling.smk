@@ -45,7 +45,7 @@ rule HC_call_variants:
         sa="resources/Homo_sapiens_assembly38.fasta.64.sa",
         bed="results/split_regions/{chrom}.bed",
         bam="results/bqsr/{sample}.bam",
-        bai="results/bqsr/{sample}.bam.bai",
+        bai="results/bqsr/{sample}.bai",
     output:
         gvcf=temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf"),
         idx=temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.idx"),
