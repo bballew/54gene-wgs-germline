@@ -1,6 +1,7 @@
 # Project Folders and logs
 temp
-results
+results/*
+!tests/unit/*/results/*
 logs
 WGS*out
 wrapper*
