@@ -78,14 +78,14 @@ rule HC_compress_gvcfs:
         gvcf="results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf",
         idx="results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.idx",
     output:
-        temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.gz"),
-        temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.gz.tbi"),
+        gvcf=temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.gz"),
+        tbi=temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.gz.tbi"),
     benchmark:
         "results/performance_benchmarks/HC_compress_gvcfs/{sample}_{chrom}.tsv"
     conda:
         "../envs/bcftools_tabix.yaml"
     shell:
-        "bgzip {input.gvcf} && "
+        "bgzip -c {input.gvcf} > {output.gvcf} && "
         "tabix -p vcf {input.gvcf}.gz"
 
 
