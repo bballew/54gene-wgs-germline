@@ -1,5 +1,5 @@
 sampleFile: "config/manifest.txt"
-jobs: 2
+jobs: 1000
 tempDir: "temp/"
 runType:
   full: yes
@@ -7,9 +7,10 @@ runType:
 global_vars: "export _JAVA_OPTIONS=\"-Djava.io.tmpdir=temp/ -XX:CompressedClassSpaceSize=200m\""  # you get TMPDIR set to tempDir for free
 cluster_mode: "sbatch -o logs/%x.o%j -p {resources.queue} --mem-per-cpu={resources.mem_mb}M -D ./ --cpus-per-task={threads}"
 default_queue: "spot"
-compute_queue: "comp"
+compute_queue: "spot"
 memory_queue: "mem"
 bed: "resources/Homo_sapiens_assembly38.bed"
+max_concurrent: 40  # max concurrent running jobs for especially high-bandwidth rules, to control hitting the fsx bandwidth cap 
 
 # QC thresholds for sample removal:
 max_het_ratio: 2.5

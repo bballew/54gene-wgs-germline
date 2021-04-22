@@ -34,6 +34,7 @@ full = config["runType"]["full"]
 jointgeno = config["runType"]["joint_genotyping"]
 global_vars = config["global_vars"]
 bed = config["bed"]
+max_concurrent = config["max_concurrent"]
 
 # create temp and log dirs if needed
 pathlib.Path(tempDir).mkdir(parents=True, exist_ok=True)
@@ -52,7 +53,7 @@ SAMPLES = utils.create_samples_set(sampleDict) if full else sampleDict.keys()
 # weight for trimming and fastqc rules, to avoid hitting fsx throughput limits
 # The Second parameter is the desired max number of concurrently-running jobs of
 # that rule.
-concurrent_limit = utils.get_batch_limit_number(jobs, 20)
+concurrent_limit = utils.get_batch_limit_number(jobs, max_concurrent)
 
 chromList = utils.get_chrom_list(bed)
 
