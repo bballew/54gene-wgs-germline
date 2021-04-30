@@ -64,27 +64,6 @@ rule fastqc:
         "fastqc {input.r2} -d {params.t} --quiet -t {threads} --outdir=results/fastqc/"
 
 
-rule multiqc:
-    """Generate one multiQC report for all input fastqs.
-    Should add samtools stats output and possibly others eventually,
-    dedup metrics, ...
-    """
-    input:
-        expand("results/fastqc/{rg}_r1_fastqc.zip", rg=sampleDict.keys()),
-        expand("results/fastqc/{rg}_r2_fastqc.zip", rg=sampleDict.keys()),
-    output:
-        "results/multiqc/multiqc.html",
-    benchmark:
-        "results/performance_benchmarks/multiqc/benchmarks.tsv"
-    params:
-        outDir="results/multiqc/",
-        outName="multiqc.html",
-    conda:
-        "../envs/fastqc_multiqc.yaml"
-    shell:
-        "multiqc --force -o {params.outDir} -n {params.outName} {input}"
-
-
 rule quality_trimming:
     """Quality trimming of read ends.
     May want to tweak params; possibly put in config.  Could remove

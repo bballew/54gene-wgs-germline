@@ -58,11 +58,12 @@ concurrent_limit = utils.get_batch_limit_number(jobs, max_concurrent)
 chromList = utils.get_chrom_list(bed)
 
 TARGETS = [
-    "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
+    # "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
     "results/qc/bcftools_stats/plots/plot-vcfstats.log",
-    "results/qc/relatedness/somalier.pairs.tsv",
-    "results/qc/sex_check/ploidy.png",
+    # "results/qc/relatedness/somalier.pairs.tsv",
+    # "results/qc/sex_check/ploidy.png",
     "results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz",
+    "results/multiqc/multiqc.html",
 ]
 
 if full:

@@ -173,3 +173,35 @@ rule exclude_samples:
         "bcftools view -S ^{input.l} --threads {threads} -Ou {input.v} | "
         "bcftools annotate --threads {threads} --set-id '%CHROM:%POS:%REF:%ALT' -Oz -o {output.v} && "
         "tabix -p vcf {output.v}"
+
+
+rule multiqc:
+    """Generate one multiQC report for all input fastqs.
+    Should add samtools stats output and possibly others eventually,
+    dedup metrics, ...
+    """
+    input:
+        expand("results/fastqc/{rg}_r1_fastqc.zip", rg=sampleDict.keys()),
+        expand("results/fastqc/{rg}_r2_fastqc.zip", rg=sampleDict.keys()),
+        "results/qc/sex_check/ploidy.txt",
+        "results/qc/relatedness/somalier.pairs.tsv",
+        "results/qc/bcftools_stats/joint_called_stats.out",
+        expand("results/paired_trimmed_reads/{rg}_fastp.json", rg=sampleDict.keys()),
+        expand("results/dedup/{sample}.metrics.txt", sample=SAMPLES),
+        expand("results/bqsr/{sample}.recal_table",sample=SAMPLES),
+        expand("results/alignment_stats/{sample}.txt", sample=SAMPLES),
+        # expand("results/qc/contamination_check/{sample}.selfSM"), sample=SAMPLES,  # only if full mode
+        "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
+        "results/HaplotypeCaller/filtered/HC.variant_calling_summary_metrics",
+    output:
+        "results/multiqc/multiqc.html",
+    benchmark:
+        "results/performance_benchmarks/multiqc/benchmarks.tsv"
+    params:
+        outDir="results/multiqc/",
+        outName="multiqc.html",
+        inDirs="results/fastqc results/qc results/paired_trimmed_reads results/dedup results/bqsr results/alignment_stats results/HaplotypeCaller/filtered",
+    conda:
+        "../envs/fastqc_multiqc.yaml"
+    shell:
+        "multiqc --force -o {params.outDir} -n {params.outName} {params.inDirs}"
