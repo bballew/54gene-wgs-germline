@@ -34,6 +34,8 @@ properties:
     type: string
   bed:
     type: string
+  max_concurrent:
+    type: number
   max_het_ratio:
     type: number
   min_avg_depth:
