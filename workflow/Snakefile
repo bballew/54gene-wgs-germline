@@ -82,6 +82,7 @@ if full:
 
 elif jointgeno:
 
+    include: "rules/resources.smk"
     include: "rules/HC_joint_geno.smk"
     include: "rules/filter.smk"
     include: "rules/post_calling_qc.smk"
