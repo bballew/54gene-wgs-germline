@@ -167,16 +167,16 @@ def get_DBImport_path1(wildcards):
     """Define input files for rule HC_genotype_gvcfs."""
     return glob.glob(
         "results/HaplotypeCaller/DBImport/"
-        + wildcards.chrom
+        + wildcards.directory
         + "/"
-        + wildcards.chrom
+        + wildcards.directory
         + "*/genomicsdb_meta_dir/genomicsdb_meta*.json"
     )
 
 
 def get_DBImport_path2(wildcards):
     """Define input files for rule HC_genotype_gvcfs."""
-    path = "".join(glob.glob("results/HaplotypeCaller/DBImport/" + wildcards.chrom + "/*/__*/"))
+    path = "".join(glob.glob("results/HaplotypeCaller/DBImport/" + wildcards.directory + "/*/__*/"))
     myList = []
     if os.path.exists(path):
         myList = [

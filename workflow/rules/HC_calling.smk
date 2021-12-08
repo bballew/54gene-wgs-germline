@@ -1,38 +1,41 @@
-rule split_bed_file:
-    """Separates bed regions by chromosome.
+INTERVALS = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
+21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50]
 
-    For DV:
-    If you're not assigning a number of shards by which to divide
-    and parallelize, then the pipeline will parallelize by chrom.
-    To do this, we take the bed file (e.g. exome capture region)
-    and split the regions by chromosome.  Subsequent steps are run
-    concurrently on each of the single-chromosome bed files.
+# rule split_bed_file:
+#     """Separates bed regions by chromosome.
 
-    For GATK:
-    HaplotypeCaller can't be parallelized per task (e.g. threads),
-    so must be run over sub-regions if you want parallelization.
-    **Do we want to use the old 4000-region bed file, or is by-chrom
-    sufficient?
+#     For DV:
+#     If you're not assigning a number of shards by which to divide
+#     and parallelize, then the pipeline will parallelize by chrom.
+#     To do this, we take the bed file (e.g. exome capture region)
+#     and split the regions by chromosome.  Subsequent steps are run
+#     concurrently on each of the single-chromosome bed files.
 
-    Note that grep exits with 0 if a match is found, 1 if no match,
-    and 2 if error.  Snakemake looks for exit codes of 0 to determine
-    that a job finished successfully.  No match is an acceptable outcome
-    here, so the shell command below should allow match or no match.
-    """
-    input:
-        bed,
-    output:
-        temp("results/split_regions/{chrom}.bed"),
-    benchmark:
-        "results/performance_benchmarks/split_bed_file/{chrom}.tsv"
-    shell:
-        'grep "^{wildcards.chrom}[[:space:]]" {input} > {output};'
-        "if [ $? -le 1 ]; then exit 0; else exit 1; fi"
+#     For GATK:
+#     HaplotypeCaller can't be parallelized per task (e.g. threads),
+#     so must be run over sub-regions if you want parallelization.
+#     **Do we want to use the old 4000-region bed file, or is by-chrom
+#     sufficient?
+
+#     Note that grep exits with 0 if a match is found, 1 if no match,
+#     and 2 if error.  Snakemake looks for exit codes of 0 to determine
+#     that a job finished successfully.  No match is an acceptable outcome
+#     here, so the shell command below should allow match or no match.
+#     """
+#     input:
+#         bed,
+#     output:
+#         temp("results/split_regions/{chrom}.bed"),
+#     benchmark:
+#         "results/performance_benchmarks/split_bed_file/{chrom}.tsv"
+#     shell:
+#         'grep "^{wildcards.chrom}[[:space:]]" {input} > {output};'
+#         "if [ $? -le 1 ]; then exit 0; else exit 1; fi"
 
 
 rule HC_call_variants:
     """Call gVCFs with GATK4.
-    Runs over each chrom in parallel.
+    Runs over each interval in parallel.
     """
     input:
         r="resources/Homo_sapiens_assembly38.fasta",
@@ -43,17 +46,18 @@ rule HC_call_variants:
         bwt="resources/Homo_sapiens_assembly38.fasta.64.bwt",
         pac="resources/Homo_sapiens_assembly38.fasta.64.pac",
         sa="resources/Homo_sapiens_assembly38.fasta.64.sa",
-        bed="results/split_regions/{chrom}.bed",
+        # bed="results/split_regions/{chrom}.bed",
         bam="results/bqsr/{sample}.bam",
         bai="results/bqsr/{sample}.bai",
+        intervals="resources/scattered_calling_intervals/{directory}_of_50/scattered.interval_list"
     output:
-        gvcf=temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf"),
-        idx=temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.idx"),
+        gvcf=temp("results/HaplotypeCaller/called/interval_{directory}/{sample}.g.vcf"),
+        idx=temp("results/HaplotypeCaller/called/interval_{directory}/{sample}.g.vcf.idx"),
     params:
         t=tempDir,
         java_opts=utils.allow_blanks(config["haplotypeCaller"]["java_opts"]),
     benchmark:
-        "results/performance_benchmarks/HC_call_variants/{sample}_{chrom}.tsv"
+        "results/performance_benchmarks/HC_call_variants/{sample}_interval_{directory}.tsv"
     conda:
         "../envs/gatk.yaml"
     resources:
@@ -66,7 +70,7 @@ rule HC_call_variants:
         "-R {input.r} "
         "-I {input.bam} "
         "-ERC GVCF "
-        "-L {input.bed} "
+        "-L {input.intervals} "
         "-O {output.gvcf} "
         "-G StandardAnnotation "
         "-G StandardHCAnnotation"
@@ -75,13 +79,13 @@ rule HC_call_variants:
 rule HC_compress_gvcfs:
     """Zip and index gVCFs."""
     input:
-        gvcf="results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf",
-        idx="results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.idx",
+        gvcf="results/HaplotypeCaller/called/interval_{directory}/{sample}.g.vcf",
+        idx="results/HaplotypeCaller/called/interval_{directory}/{sample}.g.vcf.idx",
     output:
-        gvcf=temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.gz"),
-        tbi=temp("results/HaplotypeCaller/called/{chrom}/{sample}.g.vcf.gz.tbi"),
+        gvcf=temp("results/HaplotypeCaller/called/interval_{directory}/{sample}.g.vcf.gz"),
+        tbi=temp("results/HaplotypeCaller/called/interval_{directory}/{sample}.g.vcf.gz.tbi"),
     benchmark:
-        "results/performance_benchmarks/HC_compress_gvcfs/{sample}_{chrom}.tsv"
+        "results/performance_benchmarks/HC_compress_gvcfs/{sample}_interval_{directory}.tsv"
     conda:
         "../envs/bcftools_tabix.yaml"
     shell:
@@ -96,13 +100,13 @@ rule HC_concat_gvcfs:
     """
     input:
         vcfList=expand(
-            "results/HaplotypeCaller/called/{chrom}/{{sample}}.g.vcf.gz", chrom=chromList
+            "results/HaplotypeCaller/called/interval_{directory}/{{sample}}.g.vcf.gz", directory=INTERVALS
         ),
         indexList=expand(
-            "results/HaplotypeCaller/called/{chrom}/{{sample}}.g.vcf.gz.tbi", chrom=chromList
+            "results/HaplotypeCaller/called/interval_{directory}/{{sample}}.g.vcf.gz.tbi", directory=INTERVALS
         ),
     output:
-        "results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz",
+        "results/HaplotypeCaller/called/{sample}_all_regions.g.vcf.gz",
     benchmark:
         "results/performance_benchmarks/HC_concat_gvcfs/{sample}.tsv"
     params:
@@ -124,9 +128,9 @@ rule HC_concat_gvcfs:
 rule HC_index_gvcf:
     """index per-sample gvcfs."""
     input:
-        "results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz",
+        "results/HaplotypeCaller/called/{sample}_all_regions.g.vcf.gz",
     output:
-        "results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz.tbi",
+        "results/HaplotypeCaller/called/{sample}_all_regions.g.vcf.gz.tbi",
     benchmark:
         "results/performance_benchmarks/HC_index_gvcf/{sample}.tsv"
     conda:

@@ -6,8 +6,8 @@ if jointgeno:
             gvcf=utils.get_gvcf,
             index=utils.get_gvcf_index,
         output:
-            gvcf="results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz",
-            index="results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz.tbi",
+            gvcf="results/HaplotypeCaller/called/{sample}_all_regions.g.vcf.gz",
+            index="results/HaplotypeCaller/called/{sample}_all_regions.g.vcf.gz.tbi",
         shell:
             "ln -s {input.gvcf} {output.gvcf} && "
             "ln -s {input.index} {output.index}"
@@ -25,8 +25,8 @@ rule HC_create_each_sample_map_file:
     See GATK's documentation for additional details.
     """
     input:
-        gvcf="results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz",
-        index="results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz.tbi",
+        gvcf="results/HaplotypeCaller/called/{sample}_all_regions.g.vcf.gz",
+        index="results/HaplotypeCaller/called/{sample}_all_regions.g.vcf.gz.tbi",
     output:
         temp("results/HaplotypeCaller/DBImport/{sample}.map"),
     benchmark:
@@ -53,7 +53,7 @@ rule HC_create_cohort_map_file:
 
 
 rule HC_consolidate_gvcfs:
-    """Split DBimport databases by chromosome.
+    """Split DBimport databases by intervals.
 
     The output of this step includes some files that are in subdirectories
     with unpredictable names.  I've attempted to include them in the input
@@ -92,22 +92,22 @@ rule HC_consolidate_gvcfs:
     input:
         sampleMap="results/HaplotypeCaller/DBImport/cohort.sample_map",
         gvcfList=expand(
-            "results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz", sample=SAMPLES
+            "results/HaplotypeCaller/called/{sample}_all_regions.g.vcf.gz", sample=SAMPLES
         ),
         indexList=expand(
-            "results/HaplotypeCaller/called/{sample}_all_chroms.g.vcf.gz.tbi", sample=SAMPLES
+            "results/HaplotypeCaller/called/{sample}_all_regions.g.vcf.gz.tbi", sample=SAMPLES
         ),
     output:
-        o1="results/HaplotypeCaller/DBImport/{chrom}/vcfheader.vcf",
-        o2="results/HaplotypeCaller/DBImport/{chrom}/vidmap.json",
-        o3="results/HaplotypeCaller/DBImport/{chrom}/callset.json",
-        o4="results/HaplotypeCaller/DBImport/{chrom}/__tiledb_workspace.tdb",
-        d=directory("results/HaplotypeCaller/DBImport/{chrom}"),
+        o1="results/HaplotypeCaller/DBImport/interval_{directory}/vcfheader.vcf",
+        o2="results/HaplotypeCaller/DBImport/interval_{directory}/vidmap.json",
+        o3="results/HaplotypeCaller/DBImport/interval_{directory}/callset.json",
+        o4="results/HaplotypeCaller/DBImport/interval_{directory}/__tiledb_workspace.tdb",
+        d=directory("results/HaplotypeCaller/DBImport/interval_{directory}"),
     benchmark:
-        "results/performance_benchmarks/HC_consolidate_gvcfs/{chrom}.tsv"
+        "results/performance_benchmarks/HC_consolidate_gvcfs/interval_{directory}.tsv"
     params:
-        interval="{chrom}",
-        db="results/HaplotypeCaller/DBImport/{chrom}",
+        intervals="resources/scattered_calling_intervals/{directory}_of_50/scattered.interval_list",
+        db="results/HaplotypeCaller/DBImport/interval_{directory}",
         t=tempDir,
         java_opts=utils.allow_blanks(config["genomicsDBImport"]["java_opts"]),
         batch_size=config["genomicsDBImport"]["batch_size"],
@@ -126,7 +126,7 @@ rule HC_consolidate_gvcfs:
         "--disable-bam-index-caching "
         "--sample-name-map {input.sampleMap} "
         "--genomicsdb-workspace-path {params.db} "
-        "-L {params.interval} "
+        "-L {params.intervals} "
         "--tmp-dir {params.t} "
         "--reader-threads {params.reader_threads} "
         "--genomicsdb-shared-posixfs-optimizations"
@@ -138,20 +138,20 @@ rule HC_genotype_gvcfs:
         r="resources/Homo_sapiens_assembly38.fasta",
         f="resources/Homo_sapiens_assembly38.fasta.fai",
         d="resources/Homo_sapiens_assembly38.dict",
-        bed=bed,
-        o1="results/HaplotypeCaller/DBImport/{chrom}/vcfheader.vcf",
-        o2="results/HaplotypeCaller/DBImport/{chrom}/vidmap.json",
-        o3="results/HaplotypeCaller/DBImport/{chrom}/callset.json",
-        o4="results/HaplotypeCaller/DBImport/{chrom}/__tiledb_workspace.tdb",
+        # bed=bed,
+        o1="results/HaplotypeCaller/DBImport/interval_{directory}/vcfheader.vcf",
+        o2="results/HaplotypeCaller/DBImport/interval_{directory}/vidmap.json",
+        o3="results/HaplotypeCaller/DBImport/interval_{directory}/callset.json",
+        o4="results/HaplotypeCaller/DBImport/interval_{directory}/__tiledb_workspace.tdb",
         o5=utils.get_DBImport_path1,
         o6=utils.get_DBImport_path2,
     output:
-        vcf=temp("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz"),
-        idx=temp("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz.tbi"),
+        vcf=temp("results/HaplotypeCaller/genotyped/interval_{directory}.vcf.gz"),
+        idx=temp("results/HaplotypeCaller/genotyped/interval_{directory}.vcf.gz.tbi"),
     benchmark:
-        "results/performance_benchmarks/HC_genotype_gvcfs/{chrom}.tsv"
+        "results/performance_benchmarks/HC_genotype_gvcfs/interval_{directory}.tsv"
     params:
-        db="results/HaplotypeCaller/DBImport/{chrom}",
+        db="results/HaplotypeCaller/DBImport/interval_{directory}",
         t=tempDir,
         java_opts=utils.allow_blanks(config["genotypeGVCFs"]["java_opts"]),
     conda:
@@ -175,8 +175,8 @@ rule HC_genotype_gvcfs:
 rule HC_concat_vcfs_bcftools:
     """Combine per-chromosome joint-called multi-sample VCFs."""
     input:
-        vcfList=expand("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz", chrom=chromList),
-        indexList=expand("results/HaplotypeCaller/genotyped/{chrom}.vcf.gz.tbi", chrom=chromList),
+        vcfList=expand("results/HaplotypeCaller/genotyped/interval_{directory}.vcf.gz", directory=INTERVALS),
+        indexList=expand("results/HaplotypeCaller/genotyped/interval_{directory}.vcf.gz.tbi", directory=INTERVALS),
     output:
         projectVCF="results/HaplotypeCaller/genotyped/HC_variants.vcf.gz",
         idx="results/HaplotypeCaller/genotyped/HC_variants.vcf.gz.tbi",

@@ -50,12 +50,16 @@ sampleDict = utils.read_in_manifest(sampleFile, full)
 # list of unique sample names
 SAMPLES = utils.create_samples_set(sampleDict) if full else sampleDict.keys()
 
+# list of intervals
+INTERVALS = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
+21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50]
+
 # weight for trimming and fastqc rules, to avoid hitting fsx throughput limits
 # The Second parameter is the desired max number of concurrently-running jobs of
 # that rule.
 concurrent_limit = utils.get_batch_limit_number(jobs, max_concurrent)
 
-chromList = utils.get_chrom_list(bed)
+# chromList = utils.get_chrom_list(bed)
 
 TARGETS = [
     # "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
@@ -86,13 +90,13 @@ elif jointgeno:
     include: "rules/filter.smk"
     include: "rules/post_calling_qc.smk"
 
-
 wildcard_constraints:
     sample="|".join(SAMPLES),
     rg="|".join(sampleDict.keys()),
-    chrom="|".join(chromList),
+    # chrom="|".join(chromList),
 
 
 rule all:
     input:
         TARGETS,
+        expand("resources/scattered_calling_intervals/{directory}_of_50/scattered.interval_list", directory=INTERVALS),
