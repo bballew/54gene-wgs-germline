@@ -53,7 +53,9 @@ rule HC_create_cohort_map_file:
 
 
 rule HC_consolidate_gvcfs:
-    """Split DBimport databases by intervals.
+    """Split DBimport databases by intervals for faster import.
+    A database will be created for each interval which will allow for faster
+    iteration over the intervals during the joint genotyping step that proceeds.
 
     The output of this step includes some files that are in subdirectories
     with unpredictable names.  I've attempted to include them in the input
@@ -173,7 +175,7 @@ rule HC_genotype_gvcfs:
 
 
 rule HC_concat_vcfs_bcftools:
-    """Combine per-chromosome joint-called multi-sample VCFs."""
+    """Combine per-interval joint-called multi-sample VCFs."""
     input:
         vcfList=expand("results/HaplotypeCaller/genotyped/interval_{directory}.vcf.gz", directory=INTERVALS),
         indexList=expand("results/HaplotypeCaller/genotyped/interval_{directory}.vcf.gz.tbi", directory=INTERVALS),

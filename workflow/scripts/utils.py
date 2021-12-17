@@ -135,19 +135,7 @@ def get_batch_limit_number(jobs, n):
         limit = 1
     return limit
 
-
-def get_chrom_list(bed):
-    """Retrieve list of chromosomes from bed file in config
-
-    The user provides a bed file (e.g. each chromosome's start and end for
-    WGS, or a list of targeted regions for WES).  This function returns a
-    list of unique chromosomes included in the bed for parallelization.
-    """
-    with open(bed) as file:
-        chromList = list(set([line.split()[0] for line in file]))
-    return sorted(chromList, key=_karyotypic_sort)
-
-
+i"""Removed get_chrom_list function for interval testing """
 def _karyotypic_sort(c):
     """"""
     c = c.replace("chr", "")
