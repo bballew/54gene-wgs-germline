@@ -1,3 +1,5 @@
+localrules: symlink_fastqs
+
 rule symlink_fastqs:
     """Create symbolic links with a different naming scheme.
     FastQC doesn't allow you to change the output file names, so
@@ -12,8 +14,6 @@ rule symlink_fastqs:
     output:
         r1="results/input/{rg}_r1.fastq.gz",
         r2="results/input/{rg}_r2.fastq.gz",
-    group:
-        "symlink_group"
     benchmark:
         "results/performance_benchmarks/symlink_fastqs/{rg}.tsv"
     shell:
@@ -21,27 +21,9 @@ rule symlink_fastqs:
         "ln -s {input.r2} {output.r2}"
 
 
-rule group_symlinks:
-    """
-    This is a dummy rule to facilitate grouping of the upstream symlink
-    rule.  The group will ensure that all symlink jobs will be submitted
-    at once to one node, to save queuing and execution time.
-    """
-    input:
-        r1=expand("results/input/{rg}_r1.fastq.gz", rg=sampleDict.keys()),
-        r2=expand("results/input/{rg}_r2.fastq.gz", rg=sampleDict.keys()),
-    output:
-        temp("results/input/grouped.out"),
-    group:
-        "symlink_group"
-    shell:
-        "sleep 10 && touch {output}"
-
-
 rule fastqc:
     """Generate FastQC reports for all input fastqs."""
     input:
-        t="results/input/grouped.out",
         r1="results/input/{rg}_r1.fastq.gz",
         r2="results/input/{rg}_r2.fastq.gz",
     output:
