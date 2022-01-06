@@ -35,6 +35,7 @@ jointgeno = config["runType"]["joint_genotyping"]
 global_vars = config["global_vars"]
 bed = config["bed"]
 max_concurrent = config["max_concurrent"]
+bench_rules = config["benchmark"]
 
 # create temp and log dirs if needed
 pathlib.Path(tempDir).mkdir(parents=True, exist_ok=True)
