@@ -1,3 +1,1 @@
-NA12878_A_readgroup1 NA12878_A fastqs/NA12878_thousand_L001_R1_001.fastq.gz fastqs/NA12878_thousand_L001_R2_001.fastq.gz
-NA12878_A_readgroup2 NA12878_A fastqs/NA12878_2ndthousand_L001_R1_001.fastq.gz fastqs/NA12878_2ndthousand_L001_R2_001.fastq.gz
-NA12878_B_readgroup1 NA12878_B fastqs/NA12878_3rdthousand_L001_R1_001.fastq.gz fastqs/NA12878_3rdthousand_L001_R2_001.fastq.gz
+21small 21small /home/ec2-user/pipelines/20211208_subset_test/54gene-wgs-germline/fastqs/21small_R1.fq.gz /home/ec2-user/pipelines/20211208_subset_test/54gene-wgs-germline/fastqs/21small_R2.fq.gz

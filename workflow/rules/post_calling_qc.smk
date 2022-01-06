@@ -114,6 +114,22 @@ rule sex_check:
 #     output:
 #     shell:
 
+rule combine_benchmarks:
+    input:
+        tsv=expand("results/performance_benchmarks/{rule}/*.tsv",rule=bench_rules),
+    output: 
+        "results/performance_benchmarks/combined_benchmarks.tsv"
+    script:
+        "scripts/combine_benchmarks.R"
+
+rule benchmarking_report:
+    input:
+        benchmarks="results/performance_benchmarks/combined_benchmarks.tsv"
+    output: 
+        "results/performance_benchmarks/benchmarking_report.html"
+    script:
+        "scripts/create_benchmarking_report.Rmd"
+
 if full:
 
     rule create_exclude_list:
@@ -173,7 +189,6 @@ rule exclude_samples:
         "bcftools view -S ^{input.l} --threads {threads} -Ou {input.v} | "
         "bcftools annotate --threads {threads} --set-id '%CHROM:%POS:%REF:%ALT' -Oz -o {output.v} && "
         "tabix -p vcf {output.v}"
-
 
 if full:
     rule multiqc:

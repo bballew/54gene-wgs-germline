@@ -1,0 +1,111 @@
+---
+title: "Benchmarking Report"
+author: "Esha Joshi"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+params:
+   rmd: "create_benchmarking_report.Rmd"
+output:
+  html_document:
+  highlight: tango
+  number_sections: no
+  theme: default
+  toc: yes
+  toc_depth: 3
+  toc_float:
+    collapsed: no
+    smooth_scroll: yes
+---
+
+```{r setup, include=FALSE}
+
+# Load required packages
+knitr::opts_chunk$set(echo = TRUE)
+require(knitr, quietly = TRUE)
+require(ggplot2, quietly=TRUE)
+require(RColorBrewer, quietly=TRUE)
+require(lubridate, quietly = T)
+
+# set input variable from snakemake
+dataset <- snakemake@input[["benchmarks"]]
+
+# some light date/time manipulation for ease in plotting
+dataset$times <- hms(dataset$h.m.s)
+d.lub <- hour(dataset$times) + minute(dataset$times)/60
+dataset$walltime <- d.lub
+```
+
+This is an R Markdown report that can generated for the pipeline with visualizations for the specified rules and their performance benchmarks.
+
+## Resource Usage and Run Statistics
+
+### Execution time 
+
+```{r execution_time, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+# plot the total wall time
+exec.time <- ggplot(dataset, aes(x=rule, y=walltime, colour=process)) +
+  geom_point(position="identity", show.legend = FALSE) +
+  ylim(0,8) +
+  labs(x="Rule", y="Walltime in hours") +
+  theme(axis.text.x=element_text(angle = 90, vjust=0.5, hjust=1))
+exec.time
+
+```
+
+### Memory  
+```{r memory_usage, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+# plot the memory usage
+mem.usage <- ggplot(dataset, aes(x=rule, y=max_pss, colour=process)) +
+  scale_y_continuous(n.breaks=12) +
+  geom_point(position="identity", show.legend = FALSE, alpha=1/2) +
+  labs(x="Rule", y="Memory usage (max_pss) in MB") +
+  theme(axis.text.x=element_text(angle = 90, vjust=0.5, hjust=1))
+mem.usage
+```
+
+## I/O {.tabset}
+
+### Read
+```{r, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+# plot the io read
+io.read <- ggplot(dataset, aes(x=rule, y=io_in, colour=process)) +
+  geom_point(position="identity", show.legend=FALSE, alpha=1/2) +
+  labs(x="Rule", y="Cumulative MB Read") +
+  theme(axis.text.x=element_text(angle = 90, vjust=0.5, hjust=1))
+io.read
+```
+
+
+### Write
+```{r, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+# plot io write
+io.write <- ggplot(dataset, aes(x=rule, y=io_out, colour=process)) +
+  geom_point(position="identity", show.legend=FALSE, alpha=1/2) +
+  labs(x="Rule", y="Cumulative MB Written") +
+  theme(axis.text.x=element_text(angle = 90, vjust=0.5, hjust=1))
+io.write 
+```
+
+## CPU Time {.tabset}
+
+### Total CPU time
+```{r, cpu_time, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+# plot the CPU time in hours 
+dataset$cpu_time_hrs <- dataset$cpu_time / 3600
+cpu.time <- ggplot(dataset, aes(x=rule, y=cpu_time_hrs, colour=process)) +
+  geom_point(position="identity", show.legend=FALSE, alpha=1/2) +
+  labs(x="Rule", y="CPU time in hours") +
+  theme(axis.text.x=element_text(angle=90, vjust=0.5, hjust=1))
+cpu.time
+```
+
+### CPU to Walltime Ratio
+```{r, cputowalltime, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+# plot cpu to walltime ratio (i.e. CPU/s)
+dataset$cpuwall_ratio <- (dataset$cpu_time / dataset$s)
+cpuwall.ratio <- ggplot(dataset, aes(x=rule, y=cpuwall_ratio, colour=process)) +
+  geom_point(position="identity", show.legend = FALSE, alpha=1/2) +
+  labs(x="Rule", y="CPU/second") +
+  theme(axis.text.x=element_text(angle=90, vjust=0.5, hjust=1))
+cpuwall.ratio
+```
+

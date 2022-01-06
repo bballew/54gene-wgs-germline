@@ -1,5 +1,5 @@
 sampleFile: "config/manifest.txt"
-jobs: 1000
+jobs: 2
 tempDir: "temp/"
 runType:
   full: yes
@@ -11,7 +11,6 @@ compute_queue: "spot"
 memory_queue: "mem"
 bed: "resources/Homo_sapiens_assembly38.bed"
 max_concurrent: 40  # max concurrent running jobs for especially high-bandwidth rules, to control hitting the fsx bandwidth cap 
-
 # QC thresholds for sample removal:
 max_het_ratio: 2.5
 min_avg_depth: 20.0
@@ -76,3 +75,5 @@ picardCollectVariantCallingMetrics:
   memory: 6000
   xmx: 1000
   java_opts:
+          
+benchmark: ["fastqc", "align_reads", "HC_call_variants", "HC_genotype_gvcfs"]
