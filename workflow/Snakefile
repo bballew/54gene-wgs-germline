@@ -65,6 +65,7 @@ TARGETS = [
     # "results/qc/sex_check/ploidy.png",
     "results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz",
     "results/multiqc/multiqc.html",
+    "results/performance_benchmarks/benchmarking_report.html"
 ]
 
 if full:
@@ -72,7 +73,7 @@ if full:
     TARGETS.append(expand("results/alignment_stats/{sample}.txt", sample=SAMPLES))
     TARGETS.append(expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES))
 
-    include: "rules/resources.smk"
+#    include: "rules/resources.smk"
     include: "rules/fastq_qc.smk"
     include: "rules/align.smk"
     include: "rules/HC_calling.smk"
@@ -93,7 +94,6 @@ wildcard_constraints:
     sample="|".join(SAMPLES),
     rg="|".join(sampleDict.keys()),
     chrom="|".join(chromList),
-
 
 rule all:
     input:

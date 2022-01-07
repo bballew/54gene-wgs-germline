@@ -1,3 +1,5 @@
+from glob import glob 
+
 rule variant_stats:
     input:
         r="resources/Homo_sapiens_assembly38.fasta",
@@ -113,22 +115,6 @@ rule sex_check:
 #     input:
 #     output:
 #     shell:
-
-rule combine_benchmarks:
-    input:
-        tsv=expand("results/performance_benchmarks/{rule}/*.tsv",rule=bench_rules),
-    output: 
-        "results/performance_benchmarks/combined_benchmarks.tsv"
-    script:
-        "scripts/combine_benchmarks.R"
-
-rule benchmarking_report:
-    input:
-        benchmarks="results/performance_benchmarks/combined_benchmarks.tsv"
-    output: 
-        "results/performance_benchmarks/benchmarking_report.html"
-    script:
-        "scripts/create_benchmarking_report.Rmd"
 
 if full:
 
@@ -246,3 +232,33 @@ if jointgeno:
             "../envs/fastqc_multiqc.yaml"
         shell:
             "multiqc --force -o {params.outDir} -n {params.outName} {params.inDirs}"
+
+# TODO: There is likely a much more elegant and better solution to the way
+# I have expanded on the tsv files for the specified rules. Need to clean this.
+
+rule combine_benchmarks:
+    """"Create a concatenated file with all the benchmarking stats I want for
+    a specified set of rules defined in the config as 'benchmarks'.
+    """"
+    input:
+        tsv=[j for i in expand("results/performance_benchmarks/{rule}/*.tsv", rule=bench_rules) for j in glob(i)]
+    output: 
+        benchmarks="results/performance_benchmarks/combined_benchmarks.tsv"
+    conda:
+        "../envs/r.yaml"
+    script:
+        "../scripts/combine_benchmarks.R"
+
+rule benchmarking_report:
+    """"Take the concatenated benchmark file and generate a standard report for it
+    with plots for each metric. This report is definitely a work in progress and
+    there is plenty of room for improvement in the visualizations.
+    """"
+    input:
+        benchmarks="results/performance_benchmarks/combined_benchmarks.tsv"
+    output: 
+        "results/performance_benchmarks/benchmarking_report.html"
+    conda:
+        "../envs/r.yaml"
+    script:
+        "../scripts/create_benchmarking_report.Rmd"
