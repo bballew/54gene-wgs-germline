@@ -1,4 +1,6 @@
-localrules: symlink_fastqs
+localrules:
+    symlink_fastqs,
+
 
 rule symlink_fastqs:
     """Create symbolic links with a different naming scheme.
@@ -35,6 +37,7 @@ rule fastqc:
         "results/performance_benchmarks/fastqc/{rg}.tsv"
     params:
         t=tempDir,
+        o="results/fastqc/",
     threads: config["fastqc"]["threads"]
     conda:
         "../envs/fastqc_multiqc.yaml"
@@ -42,8 +45,8 @@ rule fastqc:
         mem_mb=lambda wildcards, attempt: attempt * config["fastqc"]["memory"],
         batch=concurrent_limit,
     shell:
-        "fastqc {input.r1} -d {params.t} --quiet -t {threads} --outdir=results/fastqc/ && "
-        "fastqc {input.r2} -d {params.t} --quiet -t {threads} --outdir=results/fastqc/"
+        "fastqc {input.r1} -d {params.t} --quiet -t {threads} --outdir={params.o} && "
+        "fastqc {input.r2} -d {params.t} --quiet -t {threads} --outdir={params.o}"
 
 
 rule quality_trimming:
@@ -79,3 +82,19 @@ rule quality_trimming:
         "--adapter_sequence=AGATCGGAAGAGCACACGTCTGAACTCCAGTCA "
         "--adapter_sequence_r2=AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT "
         "-l 36"
+
+
+use rule fastqc as post_trimming_fastqc with:
+    input:
+        r1="results/paired_trimmed_reads/{rg}_r1.fastq.gz",
+        r2="results/paired_trimmed_reads/{rg}_r2.fastq.gz",
+    output:
+        html1="results/post_trimming_fastqc/{rg}_r1_fastqc.html",
+        zip1="results/post_trimming_fastqc/{rg}_r1_fastqc.zip",
+        html2="results/post_trimming_fastqc/{rg}_r2_fastqc.html",
+        zip2="results/post_trimming_fastqc/{rg}_r2_fastqc.zip",
+    benchmark:
+        "results/performance_benchmarks/post_trimming_fastqc/{rg}.tsv"
+    params:
+        t=tempDir,
+        o="results/post_trimming_fastqc/",

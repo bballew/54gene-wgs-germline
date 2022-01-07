@@ -1,5 +1,8 @@
 if jointgeno:
 
+    localrules:
+        symlink_gvcfs,
+
     rule symlink_gvcfs:
         """"""
         input:
