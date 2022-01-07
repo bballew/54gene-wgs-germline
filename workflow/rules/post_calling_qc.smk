@@ -191,7 +191,7 @@ if full:
             expand("results/dedup/{sample}.metrics.txt", sample=SAMPLES),
             expand("results/bqsr/{sample}.recal_table",sample=SAMPLES),
             expand("results/alignment_stats/{sample}.txt", sample=SAMPLES),
-            # expand("results/qc/contamination_check/{sample}.selfSM"), sample=SAMPLES,  # only if full mode
+            expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES),
             "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
             "results/HaplotypeCaller/filtered/HC.variant_calling_summary_metrics",
         output:
