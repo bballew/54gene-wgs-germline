@@ -234,12 +234,12 @@ if jointgeno:
             "multiqc --force -o {params.outDir} -n {params.outName} {params.inDirs}"
 
 # TODO: There is likely a much more elegant and better solution to the way
-# I have expanded on the tsv files for the specified rules. Need to clean this.
+# I have expanded on the tsv files for the specified rules. Need to improve this.
 
 rule combine_benchmarks:
-    """"Create a concatenated file with all the benchmarking stats I want for
+    """Create a concatenated file with all the benchmarking stats I want for
     a specified set of rules defined in the config as 'benchmarks'.
-    """"
+    """
     input:
         tsv=[j for i in expand("results/performance_benchmarks/{rule}/*.tsv", rule=bench_rules) for j in glob(i)]
     output: 
@@ -250,10 +250,10 @@ rule combine_benchmarks:
         "../scripts/combine_benchmarks.R"
 
 rule benchmarking_report:
-    """"Take the concatenated benchmark file and generate a standard report for it
+    """Take the concatenated benchmark file and generate a standard report for it
     with plots for each metric. This report is definitely a work in progress and
     there is plenty of room for improvement in the visualizations.
-    """"
+    """
     input:
         benchmarks="results/performance_benchmarks/combined_benchmarks.tsv"
     output: 

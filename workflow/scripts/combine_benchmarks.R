@@ -15,4 +15,4 @@ dataset <- snakemake@input[["tsv"]] %>%
   lapply(read_benchmarks) %>%
   bind_rows()
 head(dataset)
-write_tsv(dataset, snakemake@output
+write_tsv(dataset, snakemake@output[['benchmarks']])

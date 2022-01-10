@@ -6,7 +6,6 @@ params:
    rmd: "create_benchmarking_report.Rmd"
 output:
   html_document:
-  highlight: tango
   number_sections: no
   theme: default
   toc: yes
@@ -23,15 +22,19 @@ knitr::opts_chunk$set(echo = TRUE)
 require(knitr, quietly = TRUE)
 require(ggplot2, quietly=TRUE)
 require(RColorBrewer, quietly=TRUE)
-require(lubridate, quietly = T)
+require(lubridate, quietly = TRUE)
+```
 
+```{r data_setup, include=TRUE, eval=TRUE}
 # set input variable from snakemake
-dataset <- snakemake@input[["benchmarks"]]
+table <- snakemake@input[["benchmarks"]]
 
-# some light date/time manipulation for ease in plotting
+# read in tsv
+dataset <- read.csv(table, header=TRUE, sep="\t)
+
+# some minor date/time manipulation using lubridate for ease in plotting time
 dataset$times <- hms(dataset$h.m.s)
-d.lub <- hour(dataset$times) + minute(dataset$times)/60
-dataset$walltime <- d.lub
+dataset$walltime <- hour(dataset$times) + minute(dataset$times)/60
 ```
 
 This is an R Markdown report that can generated for the pipeline with visualizations for the specified rules and their performance benchmarks.
@@ -42,13 +45,12 @@ This is an R Markdown report that can generated for the pipeline with visualizat
 
 ```{r execution_time, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
 # plot the total wall time
-exec.time <- ggplot(dataset, aes(x=rule, y=walltime, colour=process)) +
+exec.time <- ggplot(dataset, aes(x=rule, y=s, colour=process)) +
   geom_point(position="identity", show.legend = FALSE) +
   ylim(0,8) +
   labs(x="Rule", y="Walltime in hours") +
   theme(axis.text.x=element_text(angle = 90, vjust=0.5, hjust=1))
 exec.time
-
 ```
 
 ### Memory  
@@ -65,7 +67,7 @@ mem.usage
 ## I/O {.tabset}
 
 ### Read
-```{r, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+```{r, echo=FALSE, eval=TRUE, fig.align='center', message=FALSE, warning=FALSE}
 # plot the io read
 io.read <- ggplot(dataset, aes(x=rule, y=io_in, colour=process)) +
   geom_point(position="identity", show.legend=FALSE, alpha=1/2) +
@@ -76,7 +78,7 @@ io.read
 
 
 ### Write
-```{r, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+```{r, echo=FALSE, eval=TRUE, fig.align='center', message=FALSE, warning=FALSE}
 # plot io write
 io.write <- ggplot(dataset, aes(x=rule, y=io_out, colour=process)) +
   geom_point(position="identity", show.legend=FALSE, alpha=1/2) +
@@ -88,8 +90,9 @@ io.write
 ## CPU Time {.tabset}
 
 ### Total CPU time
-```{r, cpu_time, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
-# plot the CPU time in hours 
+```{r, cpu_time, eval=TRUE, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+# plot the CPU time in hours
+# TODO: Ideally we can include boxplots for this set of visualizations
 dataset$cpu_time_hrs <- dataset$cpu_time / 3600
 cpu.time <- ggplot(dataset, aes(x=rule, y=cpu_time_hrs, colour=process)) +
   geom_point(position="identity", show.legend=FALSE, alpha=1/2) +
@@ -99,7 +102,7 @@ cpu.time
 ```
 
 ### CPU to Walltime Ratio
-```{r, cputowalltime, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+```{r, cputowalltime, eval=TRUE, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
 # plot cpu to walltime ratio (i.e. CPU/s)
 dataset$cpuwall_ratio <- (dataset$cpu_time / dataset$s)
 cpuwall.ratio <- ggplot(dataset, aes(x=rule, y=cpuwall_ratio, colour=process)) +
