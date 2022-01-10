@@ -233,12 +233,13 @@ if jointgeno:
         shell:
             "multiqc --force -o {params.outDir} -n {params.outName} {params.inDirs}"
 
-# TODO: There is likely a much more elegant and better solution to the way
+# TODO: (EJ) There is likely a much more elegant and better solution to the way
 # I have expanded on the tsv files for the specified rules. Need to improve this.
 
 rule combine_benchmarks:
-    """Create a concatenated file with all the benchmarking stats I want for
-    a specified set of rules defined in the config as 'benchmarks'.
+    """Create a concatenated file with all the benchmarking stats generated for
+    a specified set of rules defined in a list within the config as 'benchmarks',
+    and append the rule name and process (i.e. sample name) to the file as columns.
     """
     input:
         tsv=[j for i in expand("results/performance_benchmarks/{rule}/*.tsv", rule=bench_rules) for j in glob(i)]
@@ -250,9 +251,11 @@ rule combine_benchmarks:
         "../scripts/combine_benchmarks.R"
 
 rule benchmarking_report:
-    """Take the concatenated benchmark file and generate a standard report for it
-    with plots for each metric. This report is definitely a work in progress and
-    there is plenty of room for improvement in the visualizations.
+    """Take the concatenated benchmark file and generate a standard HTML report for it
+    with standard plots for each metric. This report is definitely a work in progress 
+    and there is plenty of room for improvement in the visualizations. 
+    
+    The concatenated benchmark file is passed as an input using the snakemake object in R.
     """
     input:
         benchmarks="results/performance_benchmarks/combined_benchmarks.tsv"

@@ -6,13 +6,9 @@ params:
    rmd: "create_benchmarking_report.Rmd"
 output:
   html_document:
-  number_sections: no
-  theme: default
-  toc: yes
-  toc_depth: 3
-  toc_float:
-    collapsed: no
-    smooth_scroll: yes
+    theme: default
+    toc: yes
+    toc_depth: 3
 ---
 
 ```{r setup, include=FALSE}
@@ -37,7 +33,7 @@ dataset$times <- hms(dataset$h.m.s)
 dataset$walltime <- hour(dataset$times) + minute(dataset$times)/60
 ```
 
-This is an R Markdown report that can generated for the pipeline with visualizations for the specified rules and their performance benchmarks.
+This is a (development version) R Markdown report that can generated for the pipeline with visualizations for the specified rules and their performance benchmarks.
 
 ## Resource Usage and Run Statistics
 
@@ -64,7 +60,7 @@ mem.usage <- ggplot(dataset, aes(x=rule, y=max_pss, colour=process)) +
 mem.usage
 ```
 
-## I/O {.tabset}
+## I/O {.tabset .tabset-pills}
 
 ### Read
 ```{r, echo=FALSE, eval=TRUE, fig.align='center', message=FALSE, warning=FALSE}
@@ -87,7 +83,7 @@ io.write <- ggplot(dataset, aes(x=rule, y=io_out, colour=process)) +
 io.write 
 ```
 
-## CPU Time {.tabset}
+## CPU Time {.tabset .tabset-pills}
 
 ### Total CPU time
 ```{r, cpu_time, eval=TRUE, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
