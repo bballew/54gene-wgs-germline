@@ -156,6 +156,7 @@ rule HC_genotype_gvcfs:
     params:
         db="results/HaplotypeCaller/DBImport/{chrom}",
         t=tempDir,
+        m=config["genotypeGVCFs"]["max_alt_alleles"],
         java_opts=utils.allow_blanks(config["genotypeGVCFs"]["java_opts"]),
     conda:
         "../envs/gatk.yaml"
@@ -170,6 +171,7 @@ rule HC_genotype_gvcfs:
         "-V gendb://{params.db} "
         "-O {output.vcf} "
         "--tmp-dir {params.t} "
+        "--max-alternate-alleles {params.m} "
         "-stand-call-conf 30 "
         "-G StandardAnnotation "
         "-G StandardHCAnnotation"
