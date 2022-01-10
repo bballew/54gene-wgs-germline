@@ -1,1 +1,0 @@
-21small 21small /home/ec2-user/pipelines/20211208_subset_test/54gene-wgs-germline/fastqs/21small_R1.fq.gz /home/ec2-user/pipelines/20211208_subset_test/54gene-wgs-germline/fastqs/21small_R2.fq.gz
