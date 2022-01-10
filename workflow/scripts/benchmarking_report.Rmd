@@ -3,7 +3,7 @@ title: "Benchmarking Report"
 author: "Esha Joshi"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 params:
-   rmd: "create_benchmarking_report.Rmd"
+   rmd: "benchmarking_report.Rmd"
 output:
   html_document:
     theme: default
@@ -98,6 +98,7 @@ cpu.time
 ```
 
 ### CPU to Walltime Ratio
+Note: Multi-threaded processes will have values greater than 1 where the CPU/s is a function of the number of threads / total walltime.
 ```{r, cputowalltime, eval=TRUE, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
 # plot cpu to walltime ratio (i.e. CPU/s)
 dataset$cpuwall_ratio <- (dataset$cpu_time / dataset$s)

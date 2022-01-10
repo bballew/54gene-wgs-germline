@@ -264,4 +264,4 @@ rule benchmarking_report:
     conda:
         "../envs/r.yaml"
     script:
-        "../scripts/create_benchmarking_report.Rmd"
+        "../scripts/benchmarking_report.Rmd"
