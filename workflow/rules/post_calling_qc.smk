@@ -202,7 +202,7 @@ if full:
         params:
             outDir="results/multiqc/",
             outName="multiqc.html",
-            inDirs="results/fastqc results/qc results/paired_trimmed_reads results/dedup results/bqsr results/alignment_stats results/HaplotypeCaller/filtered",
+            inDirs="results/post_trimming_fastqc results/qc results/paired_trimmed_reads results/dedup results/bqsr results/alignment_stats results/HaplotypeCaller/filtered",
         conda:
             "../envs/fastqc_multiqc.yaml"
         shell:
@@ -217,7 +217,7 @@ if full:
         benchmark:
             "results/performance_benchmarks/input_multiqc/benchmarks.tsv"
         params:
-            outDir="reuslts/input_multiqc",
+            outDir="results/input_multiqc",
             outName="multiqc.html",
             inDirs="results/fastqc",
 

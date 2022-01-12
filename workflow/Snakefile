@@ -70,6 +70,7 @@ if full:
 
     TARGETS.append(expand("results/alignment_stats/{sample}.txt", sample=SAMPLES))
     TARGETS.append(expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES))
+    TARGETS.append("results/input_multiqc/multiqc.html")
 
     include: "rules/resources.smk"
     include: "rules/fastq_qc.smk"
