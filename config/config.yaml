@@ -59,6 +59,7 @@ genotypeGVCFs:
   memory: 24000
   xmx: 12000
   max_alt_alleles: 50
+  max_genotype_count: 5000
   java_opts:
 bcftools:
   memory: 4000
