@@ -74,6 +74,8 @@ variantFiltration:
   java_opts:
 verifyBamID: # only for full runs
   memory: 4000
+  region:
+    - chr21
 picardCollectVariantCallingMetrics:
   memory: 6000
   xmx: 1000
