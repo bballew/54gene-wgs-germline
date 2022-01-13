@@ -2,7 +2,7 @@
 rule HC_call_variants:
     """Call gVCFs with GATK4.
     Runs over each interval in a list of 50 (obtained from resources provided by GATK
-    in parallel. This is based on the GRCH38 build. 
+    in parallel. This is based on the GRCH38 build.
     """
     input:
         r="resources/Homo_sapiens_assembly38.fasta",
@@ -15,7 +15,7 @@ rule HC_call_variants:
         sa="resources/Homo_sapiens_assembly38.fasta.64.sa",
         bam="results/bqsr/{sample}.bam",
         bai="results/bqsr/{sample}.bai",
-        intervals="resources/{intervals}_of_50/scattered.interval_list"
+        intervals="resources/{intervals}_of_50/scattered.interval_list",
     output:
         gvcf=temp("results/HaplotypeCaller/called/interval_{intervals}/{sample}.g.vcf"),
         idx=temp("results/HaplotypeCaller/called/interval_{intervals}/{sample}.g.vcf.idx"),
@@ -68,10 +68,12 @@ rule HC_concat_gvcfs:
     """
     input:
         vcfList=expand(
-            "results/HaplotypeCaller/called/interval_{intervals}/{{sample}}.g.vcf.gz", intervals=INTERVALS,
+            "results/HaplotypeCaller/called/interval_{intervals}/{{sample}}.g.vcf.gz",
+            intervals=INTERVALS,
         ),
         indexList=expand(
-            "results/HaplotypeCaller/called/interval_{intervals}/{{sample}}.g.vcf.gz.tbi", intervals=INTERVALS,
+            "results/HaplotypeCaller/called/interval_{intervals}/{{sample}}.g.vcf.gz.tbi",
+            intervals=INTERVALS,
         ),
     output:
         "results/HaplotypeCaller/called/{sample}_all_regions.g.vcf.gz",

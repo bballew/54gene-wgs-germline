@@ -181,8 +181,14 @@ if full:
         """Generate one multiQC report for all input fastqs.
         Should add samtools stats output and possibly others eventually,
         dedup metrics, ...
+
+        update 13jan2022: combine previously split out pre-trimming qc
+        data into the same report, in a second fastqc processing pass,
+        and inform multiqc of how to handle this using a config yaml.
         """
         input:
+            expand("results/fastqc/{rg}_r1_fastqc.zip", rg=sampleDict.keys()),
+            expand("results/fastqc/{rg}_r2_fastqc.zip", rg=sampleDict.keys()),
             expand("results/post_trimming_fastqc/{rg}_r1_fastqc.zip", rg=sampleDict.keys()),
             expand("results/post_trimming_fastqc/{rg}_r2_fastqc.zip", rg=sampleDict.keys()),
             "results/qc/sex_check/ploidy.txt",
@@ -195,6 +201,7 @@ if full:
             expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES),
             "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
             "results/HaplotypeCaller/filtered/HC.variant_calling_summary_metrics",
+            mqc_config="config/multiqc.yaml",
         output:
             "results/multiqc/multiqc.html",
         benchmark:
@@ -202,24 +209,11 @@ if full:
         params:
             outDir="results/multiqc/",
             outName="multiqc.html",
-            inDirs="results/post_trimming_fastqc results/qc results/paired_trimmed_reads results/dedup results/bqsr results/alignment_stats results/HaplotypeCaller/filtered",
+            inDirs="results/fastqc results/post_trimming_fastqc results/qc results/paired_trimmed_reads results/dedup results/bqsr results/alignment_stats results/HaplotypeCaller/filtered",
         conda:
             "../envs/fastqc_multiqc.yaml"
         shell:
-            "multiqc --force -o {params.outDir} -n {params.outName} {params.inDirs}"
-
-    use rule multiqc as input_multiqc with:
-        input:
-            expand("results/fastqc/{rg}_r1_fastqc.zip", rg=sampleDict.keys()),
-            expand("results/fastqc/{rg}_r2_fastqc.zip", rg=sampleDict.keys()),
-        output:
-            "results/input_multiqc/multiqc.html",
-        benchmark:
-            "results/performance_benchmarks/input_multiqc/benchmarks.tsv"
-        params:
-            outDir="results/input_multiqc",
-            outName="multiqc.html",
-            inDirs="results/fastqc",
+            "multiqc --force -o {params.outDir} -n {params.outName} --config {input.mqc_config} {params.inDirs}"
 
 
 if jointgeno:
@@ -228,6 +222,11 @@ if jointgeno:
         """Generate one multiQC report for all input fastqs.
         Should add samtools stats output and possibly others eventually,
         dedup metrics, ...
+
+        note that the multiqc configuration file config/multiqc.yaml
+        is not meant for use with this variant of the multiqc rule.
+        depending on later use cases, there may need to be two separate
+        config yamls for the two different instances of the rule.
         """
         input:
             "results/qc/sex_check/ploidy.txt",
