@@ -13,18 +13,17 @@ rule HC_call_variants:
         bwt="resources/Homo_sapiens_assembly38.fasta.64.bwt",
         pac="resources/Homo_sapiens_assembly38.fasta.64.pac",
         sa="resources/Homo_sapiens_assembly38.fasta.64.sa",
-        # bed="results/split_regions/{chrom}.bed",
         bam="results/bqsr/{sample}.bam",
         bai="results/bqsr/{sample}.bai",
-        intervals="resources/scattered_calling_intervals/{directory}_of_50/scattered.interval_list"
+        intervals="resources/{intervals}_of_50/scattered.interval_list"
     output:
-        gvcf=temp("results/HaplotypeCaller/called/interval_{directory}/{sample}.g.vcf"),
-        idx=temp("results/HaplotypeCaller/called/interval_{directory}/{sample}.g.vcf.idx"),
+        gvcf=temp("results/HaplotypeCaller/called/interval_{intervals}/{sample}.g.vcf"),
+        idx=temp("results/HaplotypeCaller/called/interval_{intervals}/{sample}.g.vcf.idx"),
     params:
         t=tempDir,
         java_opts=utils.allow_blanks(config["haplotypeCaller"]["java_opts"]),
     benchmark:
-        "results/performance_benchmarks/HC_call_variants/{sample}_interval_{directory}.tsv"
+        "results/performance_benchmarks/HC_call_variants/{sample}_interval_{intervals}.tsv"
     conda:
         "../envs/gatk.yaml"
     resources:
@@ -46,13 +45,13 @@ rule HC_call_variants:
 rule HC_compress_gvcfs:
     """Zip and index gVCFs."""
     input:
-        gvcf="results/HaplotypeCaller/called/interval_{directory}/{sample}.g.vcf",
-        idx="results/HaplotypeCaller/called/interval_{directory}/{sample}.g.vcf.idx",
+        gvcf="results/HaplotypeCaller/called/interval_{intervals}/{sample}.g.vcf",
+        idx="results/HaplotypeCaller/called/interval_{intervals}/{sample}.g.vcf.idx",
     output:
-        gvcf=temp("results/HaplotypeCaller/called/interval_{directory}/{sample}.g.vcf.gz"),
-        tbi=temp("results/HaplotypeCaller/called/interval_{directory}/{sample}.g.vcf.gz.tbi"),
+        gvcf=temp("results/HaplotypeCaller/called/interval_{intervals}/{sample}.g.vcf.gz"),
+        tbi=temp("results/HaplotypeCaller/called/interval_{intervals}/{sample}.g.vcf.gz.tbi"),
     benchmark:
-        "results/performance_benchmarks/HC_compress_gvcfs/{sample}_interval_{directory}.tsv"
+        "results/performance_benchmarks/HC_compress_gvcfs/{sample}_interval_{intervals}.tsv"
     conda:
         "../envs/bcftools_tabix.yaml"
     shell:
@@ -69,10 +68,10 @@ rule HC_concat_gvcfs:
     """
     input:
         vcfList=expand(
-            "results/HaplotypeCaller/called/interval_{directory}/{{sample}}.g.vcf.gz", directory=INTERVALS
+            "results/HaplotypeCaller/called/interval_{intervals}/{{sample}}.g.vcf.gz", intervals=INTERVALS,
         ),
         indexList=expand(
-            "results/HaplotypeCaller/called/interval_{directory}/{{sample}}.g.vcf.gz.tbi", directory=INTERVALS
+            "results/HaplotypeCaller/called/interval_{intervals}/{{sample}}.g.vcf.gz.tbi", intervals=INTERVALS,
         ),
     output:
         "results/HaplotypeCaller/called/{sample}_all_regions.g.vcf.gz",

@@ -135,7 +135,7 @@ def get_batch_limit_number(jobs, n):
         limit = 1
     return limit
 
-i"""Removed get_chrom_list function for interval testing """
+"""Removed get_chrom_list function for interval testing """
 def _karyotypic_sort(c):
     """"""
     c = c.replace("chr", "")
@@ -155,16 +155,16 @@ def get_DBImport_path1(wildcards):
     """Define input files for rule HC_genotype_gvcfs."""
     return glob.glob(
         "results/HaplotypeCaller/DBImport/"
-        + wildcards.directory
+        + wildcards.intervals
         + "/"
-        + wildcards.directory
+        + wildcards.intervals
         + "*/genomicsdb_meta_dir/genomicsdb_meta*.json"
     )
 
 
 def get_DBImport_path2(wildcards):
     """Define input files for rule HC_genotype_gvcfs."""
-    path = "".join(glob.glob("results/HaplotypeCaller/DBImport/" + wildcards.directory + "/*/__*/"))
+    path = "".join(glob.glob("results/HaplotypeCaller/DBImport/" + wildcards.intervals + "/*/__*/"))
     myList = []
     if os.path.exists(path):
         myList = [
