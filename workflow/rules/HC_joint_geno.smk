@@ -99,9 +99,7 @@ rule HC_consolidate_gvcfs:
         indexList=expand(
             "results/HaplotypeCaller/called/{sample}_all_regions.g.vcf.gz.tbi", sample=SAMPLES
         ),
-        intervals=expand(
-            "resources/{intervals}_of_50/scattered.interval_list", intervals=INTERVALS
-        ),
+        interval="resources/{intervals}_of_50/scattered.interval_list"
     output:
         o1="results/HaplotypeCaller/DBImport/interval_{intervals}/vcfheader.vcf",
         o2="results/HaplotypeCaller/DBImport/interval_{intervals}/vidmap.json",
@@ -130,7 +128,7 @@ rule HC_consolidate_gvcfs:
         "--disable-bam-index-caching "
         "--sample-name-map {input.sampleMap} "
         "--genomicsdb-workspace-path {params.db} "
-        "-L {input.intervals} "
+        "-L {input.interval} "
         "--tmp-dir {params.t} "
         "--reader-threads {params.reader_threads} "
         "--genomicsdb-shared-posixfs-optimizations"
