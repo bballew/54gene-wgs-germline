@@ -176,20 +176,21 @@ rule exclude_samples:
 
 
 if full:
+
     rule multiqc:
         """Generate one multiQC report for all input fastqs.
         Should add samtools stats output and possibly others eventually,
         dedup metrics, ...
         """
         input:
-            expand("results/fastqc/{rg}_r1_fastqc.zip", rg=sampleDict.keys()),
-            expand("results/fastqc/{rg}_r2_fastqc.zip", rg=sampleDict.keys()),
+            expand("results/post_trimming_fastqc/{rg}_r1_fastqc.zip", rg=sampleDict.keys()),
+            expand("results/post_trimming_fastqc/{rg}_r2_fastqc.zip", rg=sampleDict.keys()),
             "results/qc/sex_check/ploidy.txt",
             "results/qc/relatedness/somalier.pairs.tsv",
             "results/qc/bcftools_stats/joint_called_stats.out",
             expand("results/paired_trimmed_reads/{rg}_fastp.json", rg=sampleDict.keys()),
             expand("results/dedup/{sample}.metrics.txt", sample=SAMPLES),
-            expand("results/bqsr/{sample}.recal_table",sample=SAMPLES),
+            expand("results/bqsr/{sample}.recal_table", sample=SAMPLES),
             expand("results/alignment_stats/{sample}.txt", sample=SAMPLES),
             expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES),
             "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
@@ -201,13 +202,28 @@ if full:
         params:
             outDir="results/multiqc/",
             outName="multiqc.html",
-            inDirs="results/fastqc results/qc results/paired_trimmed_reads results/dedup results/bqsr results/alignment_stats results/HaplotypeCaller/filtered",
+            inDirs="results/post_trimming_fastqc results/qc results/paired_trimmed_reads results/dedup results/bqsr results/alignment_stats results/HaplotypeCaller/filtered",
         conda:
             "../envs/fastqc_multiqc.yaml"
         shell:
             "multiqc --force -o {params.outDir} -n {params.outName} {params.inDirs}"
 
+    use rule multiqc as input_multiqc with:
+        input:
+            expand("results/fastqc/{rg}_r1_fastqc.zip", rg=sampleDict.keys()),
+            expand("results/fastqc/{rg}_r2_fastqc.zip", rg=sampleDict.keys()),
+        output:
+            "results/input_multiqc/multiqc.html",
+        benchmark:
+            "results/performance_benchmarks/input_multiqc/benchmarks.tsv"
+        params:
+            outDir="results/input_multiqc",
+            outName="multiqc.html",
+            inDirs="results/fastqc",
+
+
 if jointgeno:
+
     rule multiqc:
         """Generate one multiQC report for all input fastqs.
         Should add samtools stats output and possibly others eventually,

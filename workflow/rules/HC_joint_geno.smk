@@ -1,5 +1,8 @@
 if jointgeno:
 
+    localrules:
+        symlink_gvcfs,
+
     rule symlink_gvcfs:
         """"""
         input:
@@ -154,6 +157,8 @@ rule HC_genotype_gvcfs:
     params:
         db="results/HaplotypeCaller/DBImport/interval_{intervals}",
         t=tempDir,
+        m=config["genotypeGVCFs"]["max_alt_alleles"],
+        c=config["genotypeGVCFs"]["max_genotype_count"],
         java_opts=utils.allow_blanks(config["genotypeGVCFs"]["java_opts"]),
     conda:
         "../envs/gatk.yaml"
@@ -168,6 +173,8 @@ rule HC_genotype_gvcfs:
         "-V gendb://{params.db} "
         "-O {output.vcf} "
         "--tmp-dir {params.t} "
+        "--max-alternate-alleles {params.m} "
+        "--max-genotype-count {params.c} "
         "-stand-call-conf 30 "
         "-G StandardAnnotation "
         "-G StandardHCAnnotation"
