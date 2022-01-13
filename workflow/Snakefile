@@ -4,6 +4,7 @@
 
 AUTHORS:
     B. Ballew
+    E. Joshi
 
 This pipeline takes demultiplexed, adapter-removed, compressed fastqs as input,
 and generates QC reports, aligned BAMs, gVCFs, and multi-sample VCFs.
@@ -50,12 +51,17 @@ sampleDict = utils.read_in_manifest(sampleFile, full)
 # list of unique sample names
 SAMPLES = utils.create_samples_set(sampleDict) if full else sampleDict.keys()
 
+# generate list of intervals
+# for the purposes of testing this method of joint calling I am
+# hardcoding 50 intervals in
+INTERVALS = [i for i in range(1,51)] 
+
 # weight for trimming and fastqc rules, to avoid hitting fsx throughput limits
 # The Second parameter is the desired max number of concurrently-running jobs of
 # that rule.
 concurrent_limit = utils.get_batch_limit_number(jobs, max_concurrent)
 
-chromList = utils.get_chrom_list(bed)
+# chromList = utils.get_chrom_list(bed)
 
 TARGETS = [
     # "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
@@ -87,11 +93,10 @@ elif jointgeno:
     include: "rules/filter.smk"
     include: "rules/post_calling_qc.smk"
 
-
 wildcard_constraints:
     sample="|".join(SAMPLES),
     rg="|".join(sampleDict.keys()),
-    chrom="|".join(chromList),
+    # chrom="|".join(chromList),
 
 
 rule all:

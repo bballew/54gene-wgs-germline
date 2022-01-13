@@ -135,19 +135,7 @@ def get_batch_limit_number(jobs, n):
         limit = 1
     return limit
 
-
-def get_chrom_list(bed):
-    """Retrieve list of chromosomes from bed file in config
-
-    The user provides a bed file (e.g. each chromosome's start and end for
-    WGS, or a list of targeted regions for WES).  This function returns a
-    list of unique chromosomes included in the bed for parallelization.
-    """
-    with open(bed) as file:
-        chromList = list(set([line.split()[0] for line in file]))
-    return sorted(chromList, key=_karyotypic_sort)
-
-
+"""Removed get_chrom_list function for interval testing """
 def _karyotypic_sort(c):
     """"""
     c = c.replace("chr", "")
@@ -167,16 +155,16 @@ def get_DBImport_path1(wildcards):
     """Define input files for rule HC_genotype_gvcfs."""
     return glob.glob(
         "results/HaplotypeCaller/DBImport/"
-        + wildcards.chrom
+        + wildcards.intervals
         + "/"
-        + wildcards.chrom
+        + wildcards.intervals
         + "*/genomicsdb_meta_dir/genomicsdb_meta*.json"
     )
 
 
 def get_DBImport_path2(wildcards):
     """Define input files for rule HC_genotype_gvcfs."""
-    path = "".join(glob.glob("results/HaplotypeCaller/DBImport/" + wildcards.chrom + "/*/__*/"))
+    path = "".join(glob.glob("results/HaplotypeCaller/DBImport/" + wildcards.intervals + "/*/__*/"))
     myList = []
     if os.path.exists(path):
         myList = [
