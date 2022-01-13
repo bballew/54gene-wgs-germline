@@ -54,7 +54,7 @@ SAMPLES = utils.create_samples_set(sampleDict) if full else sampleDict.keys()
 # generate list of intervals
 # for the purposes of testing this method of joint calling I am
 # hardcoding 50 intervals in
-INTERVALS = [i for i in range(1,51)] 
+INTERVALS = [i for i in range(1, 51)]
 
 # weight for trimming and fastqc rules, to avoid hitting fsx throughput limits
 # The Second parameter is the desired max number of concurrently-running jobs of
@@ -76,7 +76,6 @@ if full:
 
     TARGETS.append(expand("results/alignment_stats/{sample}.txt", sample=SAMPLES))
     TARGETS.append(expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES))
-    TARGETS.append("results/input_multiqc/multiqc.html")
 
     include: "rules/resources.smk"
     include: "rules/fastq_qc.smk"
@@ -94,10 +93,10 @@ elif jointgeno:
     include: "rules/filter.smk"
     include: "rules/post_calling_qc.smk"
 
+
 wildcard_constraints:
     sample="|".join(SAMPLES),
     rg="|".join(sampleDict.keys()),
-    # chrom="|".join(chromList),
 
 
 rule all:
