@@ -135,7 +135,10 @@ def get_batch_limit_number(jobs, n):
         limit = 1
     return limit
 
+
 """Removed get_chrom_list function for interval testing """
+
+
 def _karyotypic_sort(c):
     """"""
     c = c.replace("chr", "")

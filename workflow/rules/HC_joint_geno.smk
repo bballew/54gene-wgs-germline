@@ -102,7 +102,7 @@ rule HC_consolidate_gvcfs:
         indexList=expand(
             "results/HaplotypeCaller/called/{sample}_all_regions.g.vcf.gz.tbi", sample=SAMPLES
         ),
-        interval="resources/{intervals}_of_50/scattered.interval_list"
+        interval="resources/{intervals}_of_50/scattered.interval_list",
     output:
         o1="results/HaplotypeCaller/DBImport/interval_{intervals}/vcfheader.vcf",
         o2="results/HaplotypeCaller/DBImport/interval_{intervals}/vidmap.json",
@@ -183,8 +183,12 @@ rule HC_genotype_gvcfs:
 rule HC_concat_vcfs_bcftools:
     """Combine per-interval joint-called multi-sample VCFs."""
     input:
-        vcfList=expand("results/HaplotypeCaller/genotyped/interval_{intervals}.vcf.gz", intervals=INTERVALS),
-        indexList=expand("results/HaplotypeCaller/genotyped/interval_{intervals}.vcf.gz.tbi", intervals=INTERVALS),
+        vcfList=expand(
+            "results/HaplotypeCaller/genotyped/interval_{intervals}.vcf.gz", intervals=INTERVALS
+        ),
+        indexList=expand(
+            "results/HaplotypeCaller/genotyped/interval_{intervals}.vcf.gz.tbi", intervals=INTERVALS
+        ),
     output:
         projectVCF="results/HaplotypeCaller/genotyped/HC_variants.vcf.gz",
         idx="results/HaplotypeCaller/genotyped/HC_variants.vcf.gz.tbi",
