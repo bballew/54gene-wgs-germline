@@ -8,7 +8,7 @@ rule bcftools_extract_final_subject_list:
     output:
         "results/run_summary/final_subject_list.tsv",
     conda:
-        "../envs/bcftools.yaml"
+        "../envs/bcftools_tabix.yaml"
     benchmark:
         "results/performance_benchmarks/bcftools_extract_final_subject_list/bcftools_extract_final_subject_list.tsv"
     shell:
