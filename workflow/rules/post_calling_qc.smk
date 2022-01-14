@@ -60,7 +60,7 @@ rule create_ped:
         ped="results/qc/relatedness/sex_linker.ped",
     params:
         prefix="results/qc/relatedness/sex_linker",
-    benchmarking:
+    benchmark:
         "results/performance_benchmarks/create_ped/create_ped.tsv"
     shell:
         "python workflow/scripts/generate_ped.py {input} {params.prefix}"
