@@ -53,10 +53,22 @@ rule plot_variant_stats:
 # ID and exclude samples with het/hom above....x?  Make tunable for WGS vs WES?  Use some outlier threshold?
 
 
+rule create_ped:
+    input:
+        linker=config["sexLinker"],
+    output:
+        ped="results/qc/relatedness/sex_linker.ped",
+    params:
+        prefix="results/qc/relatedness/sex_linker",
+    shell:
+        "python workflow/scripts/generate_ped.py {input} {params.prefix}"
+
+
 rule check_relatedness:
     input:
         vcf="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
         r="resources/Homo_sapiens_assembly38.fasta",
+        ped="results/qc/relatedness/sex_linker.ped",
     output:
         sites="results/qc/relatedness/sites.hg38.vcf.gz",
         s="results/qc/relatedness/somalier",
@@ -76,7 +88,7 @@ rule check_relatedness:
         "-d {params.d} "
         "--sites {output.sites} "
         "-f {input.r} {input.vcf} && "
-        "./results/qc/relatedness/somalier relate -o {params.o} {params.d}/*.somalier"
+        "./results/qc/relatedness/somalier relate --ped {input.ped} -o {params.o} {params.d}/*.somalier"
 
 
 # rule per_base_coverage:

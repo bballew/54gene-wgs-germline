@@ -1,4 +1,5 @@
 sampleFile: "config/manifest.txt"
+sexLinker: "config/sex_linker.tsv"
 jobs: 1000
 tempDir: "temp/"
 runType:
