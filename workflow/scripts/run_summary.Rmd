@@ -1,0 +1,62 @@
+---
+title: "WGS Run Summary"
+author:
+  - "Bari Ballew"
+  - "Cameron Palmer"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+params:
+  rmd: "run_summary.Rmd"
+output:
+  html_document:
+    code_folding: "hide"
+  highlight: tango
+  number_sections: no
+  theme: default
+  toc: yes
+  toc_depth: 3
+  toc_float:
+    collapsed: no
+    smooth_scroll: yes
+---
+
+```{r load.packages, eval=TRUE, echo=FALSE}
+## Load required R packages
+
+library(knitr, quietly = TRUE)
+library(kableExtra, quietly = TRUE)
+library(ggplot2, quietly = TRUE)
+library(RColorBrewer, quietly = TRUE)
+```
+
+```{r load.resources, eval=TRUE, echo=FALSE}
+## Load tested functions for this report
+source(snakemake@input[["r_resources"]])
+```
+
+```{r set.ggplot2.theme, eval=TRUE, echo=TRUE}
+## Configure standard theme information for ggplot2
+
+my.theme <- theme_light() + theme(plot.title = element_text(size = 15, hjust = 0.5),
+                                  axis.title = element_text(size = 14),
+                                  axis.text = element_text(size = 12),
+                                  strip.background = element_blank(),
+                                  strip.text = element_text(size = 14, colour = "black"))
+```
+
+
+## Assorted Software Links
+
+<br>
+
+***
+<br>
+
+## Session Information
+
+<br>
+
+The following summarizes the loaded R configuration for the run that created this report.
+
+```{r session.info, eval=TRUE, echo=TRUE}
+sessionInfo()
+```

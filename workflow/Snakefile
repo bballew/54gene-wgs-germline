@@ -70,6 +70,7 @@ TARGETS = [
     # "results/qc/sex_check/ploidy.png",
     "results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz",
     "results/multiqc/multiqc.html",
+    "results/run_summary/run_summary.html",
 ]
 
 if full:
@@ -84,6 +85,7 @@ if full:
     include: "rules/HC_joint_geno.smk"
     include: "rules/filter.smk"
     include: "rules/post_calling_qc.smk"
+    include: "rules/report.smk"
 
 
 elif jointgeno:
@@ -92,6 +94,7 @@ elif jointgeno:
     include: "rules/HC_joint_geno.smk"
     include: "rules/filter.smk"
     include: "rules/post_calling_qc.smk"
+    include: "rules/report.smk"
 
 
 wildcard_constraints:

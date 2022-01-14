@@ -1,0 +1,15 @@
+channels:
+  - r
+  - conda-forge
+dependencies:
+  - r-base>=4
+  - r-car
+  - r-stringr
+  - r-ggplot2
+  - r-cairo
+  - xorg-libxau
+  - mscorefonts
+  - r-knitr
+  - r-rmarkdown
+  - r-rcolorbrewer
+  - r-kableextra
