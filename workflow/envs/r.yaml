@@ -13,3 +13,4 @@ dependencies:
   - r-rmarkdown
   - r-rcolorbrewer
   - r-kableextra
+  - r-r.utils
