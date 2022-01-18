@@ -15,7 +15,7 @@ max_concurrent: 40  # max concurrent running jobs for especially high-bandwidth 
 max_het_ratio: 2.5
 min_avg_depth: 20.0
 max_contam: 0.03  # N/A for joint_genotyping
-benchmark: ["fastqc", "quality_trimming", "align_reads", "HC_call_variants", "HC_consolidate_gvcfs", "HC_genotype_gvcfs", "multiqc"] # list of rules to benchmark performance for 
+time_threshold: 5 # exclude rules from benchmarking report if below this elapsed time threshold in minutes
 
 fastqc:
   threads: 8

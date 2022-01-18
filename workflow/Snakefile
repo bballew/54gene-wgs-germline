@@ -35,7 +35,7 @@ jointgeno = config["runType"]["joint_genotyping"]
 global_vars = config["global_vars"]
 bed = config["bed"]
 max_concurrent = config["max_concurrent"]
-bench_rules = config["benchmark"]
+
 
 # create temp and log dirs if needed
 pathlib.Path(tempDir).mkdir(parents=True, exist_ok=True)
@@ -73,7 +73,7 @@ if full:
     TARGETS.append(expand("results/alignment_stats/{sample}.txt", sample=SAMPLES))
     TARGETS.append(expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES))
 
-#    include: "rules/resources.smk"
+    include: "rules/resources.smk"
     include: "rules/fastq_qc.smk"
     include: "rules/align.smk"
     include: "rules/HC_calling.smk"

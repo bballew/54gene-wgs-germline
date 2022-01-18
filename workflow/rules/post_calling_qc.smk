@@ -242,7 +242,7 @@ rule combine_benchmarks:
     and append the rule name and process (i.e. sample name) to the file as columns.
     """
     input:
-        tsv=[j for i in expand("results/performance_benchmarks/{rule}/*.tsv", rule=bench_rules) for j in glob(i)]
+        tsv=[j for i in expand("results/performance_benchmarks/*/*.tsv") for j in glob(i)]
     output: 
         benchmarks="results/performance_benchmarks/combined_benchmarks.tsv"
     conda:
@@ -261,6 +261,8 @@ rule benchmarking_report:
         benchmarks="results/performance_benchmarks/combined_benchmarks.tsv"
     output: 
         "results/performance_benchmarks/benchmarking_report.html"
+    params:
+        threshold=config["time_threshold"]
     conda:
         "../envs/r.yaml"
     script:

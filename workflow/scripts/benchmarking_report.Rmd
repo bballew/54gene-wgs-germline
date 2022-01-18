@@ -8,104 +8,144 @@ output:
   html_document:
     theme: default
     toc: yes
-    toc_depth: 3
+    toc_depth: 5
 ---
 
-```{r setup, include=FALSE}
-
+```{r data.setup, include=FALSE, echo=FALSE, eval=TRUE}
 # Load required packages
 knitr::opts_chunk$set(echo = TRUE)
 require(knitr, quietly = TRUE)
 require(ggplot2, quietly=TRUE)
 require(RColorBrewer, quietly=TRUE)
 require(lubridate, quietly = TRUE)
-```
+require(dplyr, quietly = TRUE)
+require(gluedown, quietly = TRUE)
 
-```{r data_setup, include=TRUE, eval=TRUE}
 # set input variable from snakemake
-table <- snakemake@input[["benchmarks"]]
+benchmarks.table <- snakemake@input[["benchmarks"]]
 
 # read in tsv
-dataset <- read.csv(table, header=TRUE, sep="\t)
+dataset <- read.table(benchmarks.table, header=TRUE, sep="\t")
 
-# some minor date/time manipulation using lubridate for ease in plotting time
+# some light date/time manipulation for ease in plotting
 dataset$times <- hms(dataset$h.m.s)
-dataset$walltime <- hour(dataset$times) + minute(dataset$times)/60
+d.lub <- hour(dataset$times) + minute(dataset$times)/60 + second(dataset$times)/3600
+dataset$walltime <- d.lub
+
+# some upfront unit conversions  & derivations for ease in comprehension
+# # convert IO units from MB to GB
+dataset$io_in <- dataset$io_in / 1000
+dataset$io_out <- dataset$io_out / 1000
+
+# # convert CPU time from seconds to hours
+dataset$cpu_time_hrs <- dataset$cpu_time / 3600
+
+# # calculate cpu/walltime ratio
+dataset$cpuwall_ratio <- (dataset$cpu_time / dataset$s)
+
+# subset the dataset to get data for rules where there is more than 1 
+# observation/process to pass to geom_boxplot
+subset.df <- dataset %>% group_by(rule) %>% filter(n() > 1)
+
+# subset the dataset to get data points for rules meeting time_threshold
+# parameter specified at the rule level
+time.param <- snakemake@params[["threshold"]]
+time.threshold <- time.param * 60
+filtered.df <- dataset %>% group_by(rule) %>% filter(s >= time.threshold)
+```
+
+```{r plot.functions, eval=TRUE, echo=FALSE}
+# plotting function for box/jitter plot where single data points are omitted
+# from boxplots
+create.boxjitter.plot <- function(df, df.subset, xvar, yvar, xlab, ylab) {
+  bd.plot <- ggplot(data=df, aes_string(x=xvar, y=yvar)) +
+    geom_boxplot(data = df.subset, aes_string(fill=xvar), show.legend = FALSE)  +
+    geom_point(position="identity", show.legend = FALSE, alpha=1/2, size=1) +
+    labs(x=xlab, y=ylab) +
+    theme_minimal() +
+    theme(axis.text.x=element_text(angle = 90, vjust=0.5, hjust=1))
+  bd.plot
+}
 ```
 
 This is a (development version) R Markdown report that can generated for the pipeline with visualizations for the specified rules and their performance benchmarks.
 
-## Resource Usage and Run Statistics
+## Resource Usage and Run Statistics Overview
 
-### Execution time 
+#### Rules included in this report 
+```{r list.rules, echo=FALSE, include=TRUE, results='asis'}
+inlines <- c(
+  md_bold(unique(dataset$rule))
+)
+md_bullet(inlines)
+```
+#### Overview of all rules
 
-```{r execution_time, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
-# plot the total wall time
-exec.time <- ggplot(dataset, aes(x=rule, y=s, colour=process)) +
-  geom_point(position="identity", show.legend = FALSE) +
-  ylim(0,8) +
-  labs(x="Rule", y="Walltime in hours") +
-  theme(axis.text.x=element_text(angle = 90, vjust=0.5, hjust=1))
-exec.time
+##### Execution time 
+
+```{r all.time.exec, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+# plot walltime for all rules benchmarked
+exec.time.all <- create.boxjitter.plot(dataset, subset.df, "rule", "walltime", "Rule", "Total walltime in hours for all rules")
+exec.time.all
 ```
 
-### Memory  
-```{r memory_usage, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
-# plot the memory usage
-mem.usage <- ggplot(dataset, aes(x=rule, y=max_pss, colour=process)) +
-  scale_y_continuous(n.breaks=12) +
-  geom_point(position="identity", show.legend = FALSE, alpha=1/2) +
-  labs(x="Rule", y="Memory usage (max_pss) in MB") +
-  theme(axis.text.x=element_text(angle = 90, vjust=0.5, hjust=1))
-mem.usage
+##### Memory  
+```{r all.mem.usage, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+# plot memory usage for all rules 
+mem.usage.all <- create.boxjitter.plot(dataset, subset.df, "rule", "max_pss", "Rule", "Memory usage (max_pss) in MB for all rules") +
+  scale_y_continuous(n.breaks = 12) 
+mem.usage.all 
 ```
 
-## I/O {.tabset .tabset-pills}
+### Resource Usage Detailed View
+Displays psutil metrics for rules meeting the user-specified time threshold specified at the config level.
 
-### Read
-```{r, echo=FALSE, eval=TRUE, fig.align='center', message=FALSE, warning=FALSE}
+```{r threshold.stat, echo=FALSE, results='asis'}
+cat(paste0("Time threshold (minutes): ", time.param))
+```
+
+##### Memory  
+```{r memory.usage, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+# plot the memory usage with boxplots for rules with >1 process otherwise
+# just plot the datapoint
+mem.usage <- create.boxjitter.plot(filtered.df, subset.df, "rule", "max_pss", "Rule", "Memory usage (max_pss) in MB") +
+  scale_y_continuous(n.breaks = 12)
+mem.usage 
+```
+
+#### I/O {.tabset .tabset-pills}
+
+##### Read
+```{r, i.read, echo=FALSE, eval=TRUE, fig.align='center', message=FALSE, warning=FALSE}
 # plot the io read
-io.read <- ggplot(dataset, aes(x=rule, y=io_in, colour=process)) +
-  geom_point(position="identity", show.legend=FALSE, alpha=1/2) +
-  labs(x="Rule", y="Cumulative MB Read") +
-  theme(axis.text.x=element_text(angle = 90, vjust=0.5, hjust=1))
+io.read <- create.boxjitter.plot(filtered.df, subset.df, "rule", "io_in", "Rule", "Cumulative GB Read")
 io.read
 ```
 
-
-### Write
-```{r, echo=FALSE, eval=TRUE, fig.align='center', message=FALSE, warning=FALSE}
+##### Write
+```{r, i.write, echo=FALSE, eval=TRUE, fig.align='center', message=FALSE, warning=FALSE}
 # plot io write
-io.write <- ggplot(dataset, aes(x=rule, y=io_out, colour=process)) +
-  geom_point(position="identity", show.legend=FALSE, alpha=1/2) +
-  labs(x="Rule", y="Cumulative MB Written") +
-  theme(axis.text.x=element_text(angle = 90, vjust=0.5, hjust=1))
-io.write 
+io.write <- create.boxjitter.plot(filtered.df, subset.df, "rule", "io_out", "Rule", "Cumulative GB Written")
+io.write
 ```
 
-## CPU Time {.tabset .tabset-pills}
+#### CPU Time {.tabset .tabset-pills}
 
-### Total CPU time
-```{r, cpu_time, eval=TRUE, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+##### Total CPU time
+Note: Multi-threaded processes will have values greater than 1 where the CPU/s is a function of the number of threads / total walltime.
+
+```{r, cpu.time, eval=TRUE, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
 # plot the CPU time in hours
-# TODO: Ideally we can include boxplots for this set of visualizations
-dataset$cpu_time_hrs <- dataset$cpu_time / 3600
-cpu.time <- ggplot(dataset, aes(x=rule, y=cpu_time_hrs, colour=process)) +
-  geom_point(position="identity", show.legend=FALSE, alpha=1/2) +
-  labs(x="Rule", y="CPU time in hours") +
-  theme(axis.text.x=element_text(angle=90, vjust=0.5, hjust=1))
+cpu.time <- create.boxjitter.plot(filtered.df, subset.df, "rule", "cpu_time_hrs", "Rule", "CPU time in hours")
 cpu.time
 ```
 
-### CPU to Walltime Ratio
+##### CPU to Walltime Ratio
 Note: Multi-threaded processes will have values greater than 1 where the CPU/s is a function of the number of threads / total walltime.
+
 ```{r, cputowalltime, eval=TRUE, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
 # plot cpu to walltime ratio (i.e. CPU/s)
-dataset$cpuwall_ratio <- (dataset$cpu_time / dataset$s)
-cpuwall.ratio <- ggplot(dataset, aes(x=rule, y=cpuwall_ratio, colour=process)) +
-  geom_point(position="identity", show.legend = FALSE, alpha=1/2) +
-  labs(x="Rule", y="CPU/second") +
-  theme(axis.text.x=element_text(angle=90, vjust=0.5, hjust=1))
+cpuwall.ratio <- create.boxjitter.plot(filtered.df, subset.df, "rule", "cpuwall_ratio", "Rule", "CPU/second")
 cpuwall.ratio
 ```
 
