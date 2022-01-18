@@ -61,6 +61,7 @@ def encode_sex(df: pd.DataFrame) -> pd.DataFrame:
     """a"""
     df["Sex"] = df["Sex"].str.lower()
     df["Sex"] = df["Sex"].replace(["f", "female", "m", "male"], [2, 2, 1, 1])
+    df["Sex"] = df["Sex"].astype(int)
     return df
 
 
