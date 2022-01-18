@@ -26,15 +26,19 @@ count.rows.in.file <- function(filename) {
 #' one subject ID per file
 #' @return data.frame, prepared table ready for knitr
 #'
-prepare.subject.tracking.table <- function(input.subjects, output.subjects.filename) {
+prepare.subject.tracking.table <- function(input.subjects, output.subjects.filename, exclude.reasons.filename) {
     stopifnot(is.vector(input.subjects, mode = "character"))
     stopifnot(is.vector(output.subjects.filename, mode = "character"),
               length(output.subjects.filename) == 1)
     stopifnot(file.exists(output.subjects.filename))
+    stopifnot(file.exists(exclude.reasons.filename))
+    exclude.reasons <- read.table(exclude.reasons.filename, header = FALSE, sep = "\t", row.names = 1)
     output.subjects <- read.table(output.subjects.filename, header = FALSE, sep = "\t")[, 1]
-
-    df <- data.frame(Subject = input.subjects,
-                     "In Final VCF" = ifelse(input.subjects %in% output.subjects, "yes", "no"),
+    result <- rep("Pass", length(input.subjects))
+    result[!(input.subjects %in% output.subjects)] <- "No"
+    result[input.subjects %in% rownames(exclude.reasons)] <- exclude.reasons[input.subjects[input.subjects %in% rownames(exclude.reasons)], 1]
+    df <- data.frame("Subject" = input.subjects,
+                     "Final QC Outcome" = result,
                      check.names = FALSE)
     df
 }

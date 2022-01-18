@@ -5,6 +5,7 @@ source("../../run_summary_resources.R")
 
 input.subjects <- c("A", "B", "C", "D", "E", "F", "G")
 output.subjects.filename <- "testthat_resources/output_subjects.tsv"
+exclude.reasons.filename <- "testthat_resources/exclude_reasons.tsv"
 
 test_that("count.rows.in.file works correctly", {
     expect_equal(count.rows.in.file(output.subjects.filename),
@@ -13,8 +14,8 @@ test_that("count.rows.in.file works correctly", {
 
 test_that("prepare.subject.tracking.table correctly aligns subjects", {
     expected <- data.frame(Subject = input.subjects,
-                           "In Final VCF" = c("yes", "no", "yes", "no", "no", "yes", "no"),
+                           "Final QC Outcome" = c("Pass", "low_depth", "Pass", "contamination,low_depth", "No", "Pass", "high_het_hom"),
                            check.names = FALSE)
-    expect_identical(prepare.subject.tracking.table(input.subjects, output.subjects.filename),
+    expect_identical(prepare.subject.tracking.table(input.subjects, output.subjects.filename, exclude.reasons.filename),
                      expected)
 })

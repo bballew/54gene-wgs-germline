@@ -45,6 +45,7 @@ my.theme <- theme_light() + theme(plot.title = element_text(size = 15, hjust = 0
 
 ```{r load.snakemake.files, eval=TRUE, echo=FALSE}
 input.subjects <- snakemake@params[["input_samples"]]
+exclude.reasons.filename <- snakemake@input[["exclude_list"]]
 output.subjects.filename <- snakemake@input[["output_subject_list"]]
 ```
 
@@ -56,7 +57,8 @@ output.subjects.filename <- snakemake@input[["output_subject_list"]]
 First there were `r length(input.subjects)` subjects, but that became `r count.rows.in.file(output.subjects.filename)` subjects, womp womp.
 
 ```{r report.before.after.subjects, eval=TRUE, echo=FALSE, results="asis"}
-res <- prepare.subject.tracking.table(input.subjects, output.subjects.filename)
+res <- prepare.subject.tracking.table(input.subjects, output.subjects.filename, exclude.reasons.filename)
+
 knitr::kable(res, caption = "Summary of Subject Fate") %>% kableExtra::kable_styling("striped", position = "left", full_width = FALSE)
 ```
 
