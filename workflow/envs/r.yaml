@@ -10,3 +10,4 @@ dependencies:
   - r-rcolorbrewer
   - r-tidyverse
   - r-lubridate
+  - r-gluedown

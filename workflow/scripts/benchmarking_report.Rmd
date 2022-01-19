@@ -13,7 +13,7 @@ output:
 
 ```{r data.setup, include=FALSE, echo=FALSE, eval=TRUE}
 # Load required packages
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, fig.width=12, fig.height=8)
 require(knitr, quietly = TRUE)
 require(ggplot2, quietly=TRUE)
 require(RColorBrewer, quietly=TRUE)
@@ -63,7 +63,9 @@ create.boxjitter.plot <- function(df, df.subset, xvar, yvar, xlab, ylab) {
     geom_point(position="identity", show.legend = FALSE, alpha=1/2, size=1) +
     labs(x=xlab, y=ylab) +
     theme_minimal() +
-    theme(axis.text.x=element_text(angle = 90, vjust=0.5, hjust=1))
+    theme(axis.text.x=element_text(angle = 90, vjust=0.5, hjust=1),
+          axis.title = element_text(size = 14),
+          axis.text = element_text(size = 12))
   bd.plot
 }
 ```
@@ -79,6 +81,7 @@ inlines <- c(
 )
 md_bullet(inlines)
 ```
+
 #### Overview of all rules
 
 ##### Execution time 
