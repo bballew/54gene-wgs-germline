@@ -19,7 +19,7 @@ output:
     smooth_scroll: yes
 ---
 
-```{r load.packages, eval=TRUE, echo=FALSE}
+```{r load.packages, eval=TRUE, echo=FALSE, message=FALSE}
 ## Load required R packages
 
 library(knitr, quietly = TRUE)
@@ -28,7 +28,7 @@ library(ggplot2, quietly = TRUE)
 library(RColorBrewer, quietly = TRUE)
 ```
 
-```{r load.resources, eval=TRUE, echo=FALSE}
+```{r load.resources, eval=TRUE, echo=FALSE, message=FALSE}
 ## Load tested functions for this report
 source(snakemake@input[["r_resources"]])
 ```

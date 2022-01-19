@@ -1,4 +1,4 @@
-library(R.utils)
+library(R.utils, quietly=TRUE)
 
 #' Determine the number of rows in a file
 #'
