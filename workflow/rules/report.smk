@@ -24,6 +24,7 @@ rule run_summary:
         output_subject_list="results/run_summary/final_subject_list.tsv",
         r_resources="workflow/scripts/run_summary_resources.R",
         exclude_list="results/post_qc_exclusions/exclude_list_with_annotation.tsv",
+        relatedness="results/qc/relatedness/somalier.pairs.tsv",
     output:
         "results/run_summary/run_summary.html",
     params:

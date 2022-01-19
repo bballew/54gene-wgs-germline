@@ -47,6 +47,12 @@ my.theme <- theme_light() + theme(plot.title = element_text(size = 15, hjust = 0
 input.subjects <- snakemake@params[["input_samples"]]
 exclude.reasons.filename <- snakemake@input[["exclude_list"]]
 output.subjects.filename <- snakemake@input[["output_subject_list"]]
+somalier.relatedness.filename <- snakemake@input[["relatedness"]]
+```
+
+```{r configure.variables, eval=TRUE, echo=FALSE}
+somalier.related.min <- 0.5
+somalier.duplicate.min <- 0.95
 ```
 
 ***
@@ -60,6 +66,40 @@ First there were `r length(input.subjects)` subjects, but that became `r count.r
 res <- prepare.subject.tracking.table(input.subjects, output.subjects.filename, exclude.reasons.filename)
 
 knitr::kable(res, caption = "Summary of Subject Fate") %>% kableExtra::kable_styling("striped", position = "left", full_width = FALSE)
+```
+
+***
+<br>
+
+## Subjects Flagged as Genetic Duplicates
+
+The following subject pairs were identified as being highly genetically related (Somalier relatedness >`r somalier.duplicate.min`).  The subjects were not automatically removed from the final VCF, but should be assessed manually to determine whom to include in further analyses.
+
+```{r report.dups, eval=TRUE, echo=FALSE, results="asis"}
+res <- report.related.subject.pairs(output.subjects.filename, somalier.relatedness.filename, somalier.duplicate.min, 1.0)
+
+if (nrow(res) == 0) {
+    cat("No duplicate subjects were detected above the specified relatedness cutoff.")
+} else {
+    print(knitr::kable(res, caption = "Genetic Duplicates") %>% kableExtra::kable_styling("striped", position = "left", full_width = FALSE))
+}
+```
+
+***
+<br>
+
+## Subjects Flagged as Potentially Related
+
+The following subjects were identified as being potentially related to one another (Somalier relatedness `r somalier.related.min`-`r somalier.duplicate.min`).  Because Somalier relies on the selected variants being ~0.5 allele frequency in the population, the actual degree of relatedness is not guaranteed from this output.  Potential relatedness for these subjects should be followed up using more specialized software, e.g. KING.  There is also the potential for related subjects below this threshold that would be excluded from this report.
+
+```{r report.relateds, eval=TRUE, echo=FALSE, results="asis"}
+res <- report.related.subject.pairs(output.subjects.filename, somalier.relatedness.filename, somalier.related.min, somalier.duplicate.min)
+
+if (nrow(res) == 0) {
+    cat("No non-identical related subjects were detected within the specified range.")
+} else {
+    print(knitr::kable(res, caption = "Potentially Related Non-identical Subjects") %>% kableExtra::kable_styling("striped", position = "left", full_width = FALSE))
+}
 ```
 
 ***

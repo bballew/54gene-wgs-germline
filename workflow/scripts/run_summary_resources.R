@@ -42,3 +42,40 @@ prepare.subject.tracking.table <- function(input.subjects, output.subjects.filen
                      check.names = FALSE)
     df
 }
+
+#' Create a table reporting pairs of subjects related
+#' to some degree according to Somalier
+#'
+#' @param output.subjects.filename character vector, name
+#' of file containing subject list from `bcftools query -l`
+#' @param somalier.relatedness.filename character vector,
+#' Somalier paired relatedness report filename
+#' @param min.cutoff numeric, lower exclusive bound of
+#' Somalier relatedness metric for related pairs
+#' @param max.cutoff numeric, upper inclusive bound of
+#' Somalier relatedness metric for related pairs
+#' @return data.frame, first three columns of Somalier
+#' paired relatedness report for subject pairs matching
+#' requested relatedness criteria
+report.related.subject.pairs <- function(output.subjects.filename, somalier.relatedness.filename, min.cutoff, max.cutoff) {
+    stopifnot(is.character(output.subjects.filename))
+    stopifnot(file.exists(output.subjects.filename))
+    stopifnot(is.character(somalier.relatedness.filename))
+    stopifnot(file.exists(somalier.relatedness.filename))
+    stopifnot(is.numeric(min.cutoff))
+    stopifnot(is.numeric(max.cutoff))
+    stopifnot(min.cutoff <= max.cutoff)
+
+    output.subjects <- read.table(output.subjects.filename, header = FALSE, stringsAsFactors = FALSE)[, 1]
+    somalier.relatedness <- read.table(somalier.relatedness.filename, header = FALSE, stringsAsFactors = FALSE)[, 1:3]
+
+    somalier.relatedness <- somalier.relatedness[somalier.relatedness[, 1] %in% output.subjects &
+                                                 somalier.relatedness[, 2] %in% output.subjects &
+                                                 somalier.relatedness[, 3] > min.cutoff &
+                                                 somalier.relatedness[, 3] <= max.cutoff, ]
+    rownames(somalier.relatedness) <- NULL
+    colnames(somalier.relatedness) <- c("Subject 1",
+                                        "Subject 2",
+                                        "Somalier Relatedness")
+    somalier.relatedness
+}
