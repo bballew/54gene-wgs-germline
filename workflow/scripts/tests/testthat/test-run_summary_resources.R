@@ -8,6 +8,7 @@ output.subjects.filename <- "testthat_resources/output_subjects.tsv"
 exclude.reasons.filename <- "testthat_resources/exclude_reasons.tsv"
 somalier.relatedness.filename <- "testthat_resources/somalier.pairs.tsv"
 fastqc.filename <- "testthat_resources/multiqc_fastqc_1.txt"
+bcftools.stats.filename <- "testthat_resources/joint_called_stats.out"
 
 test_that("count.rows.in.file works correctly", {
     expect_equal(count.rows.in.file(output.subjects.filename),
@@ -72,4 +73,13 @@ test_that("add.fastqc.data returns lane and read for failing fastq files for spe
     expected[2, 5] = "S1_L001_r1"
     observed <- add.fastqc.data(input.df, fastqc.filename)
     expect_identical(observed, expected)
+})
+
+test_that("add.coverage returns dataframe with additional column enumerating coverage values per subject", {
+    input.df <- data.frame(Subject = input.subjects,
+			"Final QC Outcome" = c("Pass", "low_depth", "Pass", "contamination,low_depth", "No", "Pass", "high_het_hom"),
+			check.names = FALSE)
+    expected <- cbind(input.df, "Coverage" = c("18.5", "22.4", "23.6", "29.1", "28.7", "25.2", "19.1"))
+    observed <- add.coverage(input.df, bcftools.stats.filename)
+	expect_identical(observed, expected)
 })

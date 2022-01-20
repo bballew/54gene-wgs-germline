@@ -118,3 +118,22 @@ report.related.subject.pairs <- function(output.subjects.filename, somalier.rela
                                         "Somalier Relatedness")
     somalier.relatedness
 }
+
+
+#' Pull coverage information from bcftools stats output run on final
+#' merged vcf, and use it to populated a column in the summary table
+#'
+#' @param df data.frame, contains the samples and summary metrics as populated
+#' by other functions in this script
+#' @param bcftools.stats.filename character vector, filename of text output
+#' of bcftools stats
+#' @return data.frame, previous summary stats plus coverage as reported by
+#' bcftools
+add.coverage <- function(df, bcftools.stats.filename) {
+    stats.lines <- readLines(bcftools.stats.filename)
+    psc.lines <- stats.lines[str_detect(stats.lines, "^PSC")]
+    cvg.df <- data.frame(t(data.frame(lapply(str_split(psc.lines, "\t"), function(x) {x[c(3, 10)]}))))
+    rownames(cvg.df) <- cvg.df[, 1]
+    df[, "Coverage"] <- cvg.df[df[, 1], 2]
+    df
+}

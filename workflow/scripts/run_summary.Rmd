@@ -49,6 +49,7 @@ exclude.reasons.filename <- snakemake@input[["exclude_list"]]
 output.subjects.filename <- snakemake@input[["output_subject_list"]]
 somalier.relatedness.filename <- snakemake@input[["relatedness"]]
 fastqc.filename <- snakemake@input[["fastqc"]]
+bcftools.stats.filename <- snakemake@input[["bcftools_stats"]]
 ```
 
 ```{r configure.variables, eval=TRUE, echo=FALSE}
@@ -66,6 +67,7 @@ A total of `r length(input.subjects)` subjects were queued up for analysis in th
 ```{r report.before.after.subjects, eval=TRUE, echo=FALSE, results="asis"}
 res <- prepare.subject.tracking.table(input.subjects, output.subjects.filename, exclude.reasons.filename)
 res <- add.fastqc.data(res, fastqc.filename)
+res <- add.coverage(res, bcftools.stats.filename)
 
 knitr::kable(res, caption = "Summary of Subject Fate") %>% kableExtra::kable_styling("striped", position = "left", full_width = FALSE)
 ```
