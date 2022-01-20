@@ -25,6 +25,7 @@ rule run_summary:
         r_resources="workflow/scripts/run_summary_resources.R",
         exclude_list="results/post_qc_exclusions/exclude_list_with_annotation.tsv",
         relatedness="results/qc/relatedness/somalier.pairs.tsv",
+        fastqc="results/multiqc/multiqc_data/multiqc_fastqc_1.txt",
     output:
         "results/run_summary/run_summary.html",
     params:

@@ -48,6 +48,7 @@ input.subjects <- snakemake@params[["input_samples"]]
 exclude.reasons.filename <- snakemake@input[["exclude_list"]]
 output.subjects.filename <- snakemake@input[["output_subject_list"]]
 somalier.relatedness.filename <- snakemake@input[["relatedness"]]
+fastqc.filename <- snakemake@input[["fastqc"]]
 ```
 
 ```{r configure.variables, eval=TRUE, echo=FALSE}
@@ -64,6 +65,7 @@ First there were `r length(input.subjects)` subjects, but that became `r count.r
 
 ```{r report.before.after.subjects, eval=TRUE, echo=FALSE, results="asis"}
 res <- prepare.subject.tracking.table(input.subjects, output.subjects.filename, exclude.reasons.filename)
+res <- add.fastqc.data(res, fastqc.filename)
 
 knitr::kable(res, caption = "Summary of Subject Fate") %>% kableExtra::kable_styling("striped", position = "left", full_width = FALSE)
 ```
