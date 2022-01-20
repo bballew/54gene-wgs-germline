@@ -61,7 +61,7 @@ somalier.duplicate.min <- 0.95
 
 ## Final Subject Tracking
 
-First there were `r length(input.subjects)` subjects, but that became `r count.rows.in.file(output.subjects.filename)` subjects, womp womp.
+A total of `r length(input.subjects)` subjects were queued up for analysis in this run; `r count.rows.in.file(output.subjects.filename)` subjects passed automated QC and are present in the final VCF.  The table below reports lane/read failures for select FastQC metrics.  Only failing fastqs are reported in those columns.  Please see the MultiQC report for additional information. 
 
 ```{r report.before.after.subjects, eval=TRUE, echo=FALSE, results="asis"}
 res <- prepare.subject.tracking.table(input.subjects, output.subjects.filename, exclude.reasons.filename)

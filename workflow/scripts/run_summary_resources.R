@@ -63,17 +63,17 @@ add.fastqc.data <- function(df, fastqc.filename) {
                             "Per Base N Content Failures",
                             "Overrepresented Sequences Failures")
     res <- df
-    for (i in seq_len(target.cols)) {
+    for (i in seq_len(length(target.cols))) {
         stopifnot(!(names(target.cols)[i] %in% colnames(res)))
         stopifnot(target.cols[i] %in% colnames(fastqc.data))
         res[, names(target.cols)[i]] <- unname(sapply(res[, 1], function(id) {
             target.rows <- stringr::str_detect(fastqc.data[, 1],
                                                paste("^", id, "_S[0-9]+_L[0-9]+_r[12]$", sep = "")) &
-                df[, target.cols[i]] == "fail"
+                fastqc.data[, target.cols[i]] == "fail"
             if (length(which(target.rows)) == 0) {
                 ""
             } else {
-                paste(sort(stringr::str_replace(fastqc.data[, 1],
+                paste(sort(stringr::str_replace(fastqc.data[target.rows, 1],
                                                 paste("^", id, "_", sep = ""),
                                                 "")), collapse = ", ")
             }

@@ -7,6 +7,7 @@ input.subjects <- c("A", "B", "C", "D", "E", "F", "G")
 output.subjects.filename <- "testthat_resources/output_subjects.tsv"
 exclude.reasons.filename <- "testthat_resources/exclude_reasons.tsv"
 somalier.relatedness.filename <- "testthat_resources/somalier.pairs.tsv"
+fastqc.filename <- "testthat_resources/multiqc_fastqc_1.txt"
 
 test_that("count.rows.in.file works correctly", {
     expect_equal(count.rows.in.file(output.subjects.filename),
@@ -55,5 +56,20 @@ test_that("report.related.subject.pairs treats min as exclusive and max as inclu
                                              somalier.relatedness.filename,
                                              0.4,
                                              0.99)
+    expect_identical(observed, expected)
+})
+
+test_that("add.fastqc.data returns lane and read for failing fastq files for specific metrics", {
+    input.df <- data.frame(Subject = input.subjects,
+			    "Final QC Outcome" = c("Pass", "low_depth", "Pass", "contamination,low_depth", "No", "Pass", "high_het_hom"),
+			    check.names = FALSE)
+    expected <- cbind(input.df, 
+			"Per Base Sequence Quality Failures" = rep("", nrow(input.df)), 
+			"Per Base N Content Failures" = rep("", nrow(input.df)), 
+			"Overrepresented Sequences Failures" = rep("", nrow(input.df)))
+    expected[1, 3] = "S1_L002_r1, S1_L002_r2"
+    expected[1, 4] = "S1_L002_r1"
+    expected[2, 5] = "S1_L001_r1"
+    observed <- add.fastqc.data(input.df, fastqc.filename)
     expect_identical(observed, expected)
 })
