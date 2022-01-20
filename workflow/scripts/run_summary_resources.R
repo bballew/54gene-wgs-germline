@@ -1,4 +1,5 @@
 library(R.utils, quietly=TRUE)
+library(stringr, quietly=TRUE)
 
 #' Determine the number of rows in a file
 #'
@@ -41,6 +42,44 @@ prepare.subject.tracking.table <- function(input.subjects, output.subjects.filen
                      "Final QC Outcome" = result,
                      check.names = FALSE)
     df
+}
+
+#' Add FastQC fail annotation by sample/lane to existing subject summary data frame
+#'
+#' @param df data.frame; data frame with subject ID in first column
+#' @param fastqc.filename character vector; name of multiqc backend summary
+#' table of FastQC output
+#' @return data.frame; input df with additional summary information added as new columns
+add.fastqc.data <- function(df, fastqc.filename) {
+    stopifnot(is.data.frame(df))
+    stopifnot(is.character(fastqc.filename))
+    stopifnot(file.exists(fastqc.filename))
+    fastqc.data <- read.table(fastqc.filename, header = TRUE, sep = "\t",
+                              stringsAsFactors = FALSE, comment.char = "")
+    target.cols <- c("per_base_sequence_quality",
+                     "per_base_n_content",
+                     "overrepresented_sequences")
+    names(target.cols) <- c("Per Base Sequence Quality Failures",
+                            "Per Base N Content Failures",
+                            "Overrepresented Sequences Failures")
+    res <- df
+    for (i in seq_len(target.cols)) {
+        stopifnot(!(names(target.cols)[i] %in% colnames(res)))
+        stopifnot(target.cols[i] %in% colnames(fastqc.data))
+        res[, names(target.cols)[i]] <- unname(sapply(res[, 1], function(id) {
+            target.rows <- stringr::str_detect(fastqc.data[, 1],
+                                               paste("^", id, "_S[0-9]+_L[0-9]+_r[12]$", sep = "")) &
+                df[, target.cols[i]] == "fail"
+            if (length(which(target.rows)) == 0) {
+                ""
+            } else {
+                paste(sort(stringr::str_replace(fastqc.data[, 1],
+                                                paste("^", id, "_", sep = ""),
+                                                "")), collapse = ", ")
+            }
+        }))
+    }
+    res
 }
 
 #' Create a table reporting pairs of subjects related
