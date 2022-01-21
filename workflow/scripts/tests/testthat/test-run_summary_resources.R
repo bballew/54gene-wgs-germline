@@ -17,7 +17,7 @@ test_that("count.rows.in.file works correctly", {
 
 test_that("prepare.subject.tracking.table correctly aligns subjects", {
     expected <- data.frame(Subject = input.subjects,
-                           "Final QC Outcome" = c("Pass", "low_depth", "Pass", "contamination,low_depth", "No", "Pass", "high_het_hom"),
+                           "QC Outcome for This Run" = c("Pass", "low_depth", "Pass", "contamination,low_depth", "No", "Pass", "high_het_hom"),
                            check.names = FALSE)
     expect_identical(prepare.subject.tracking.table(input.subjects, output.subjects.filename, exclude.reasons.filename),
                      expected)
@@ -62,22 +62,25 @@ test_that("report.related.subject.pairs treats min as exclusive and max as inclu
 
 test_that("add.fastqc.data returns lane and read for failing fastq files for specific metrics", {
     input.df <- data.frame(Subject = input.subjects,
-			    "Final QC Outcome" = c("Pass", "low_depth", "Pass", "contamination,low_depth", "No", "Pass", "high_het_hom"),
+			    "QC Outcome for This Run" = c("Pass", "low_depth", "Pass", "contamination,low_depth", "No", "Pass", "high_het_hom"),
 			    check.names = FALSE)
     expected <- cbind(input.df, 
 			"Per Base Sequence Quality Failures" = rep("", nrow(input.df)), 
 			"Per Base N Content Failures" = rep("", nrow(input.df)), 
-			"Overrepresented Sequences Failures" = rep("", nrow(input.df)))
+			"Overrepresented Sequences Failures" = rep("", nrow(input.df)),
+			"Rerun Recommendation" = c("Rerun subset of fastqs", "Fail", "Pass", "Fail", "Fail", "Pass", "Fail"))
     expected[1, 3] = "S1_L002_r1, S1_L002_r2"
     expected[1, 4] = "S1_L002_r1"
     expected[2, 5] = "S1_L001_r1"
-    observed <- add.fastqc.data(input.df, fastqc.filename)
+	observed <- add.fastqc.data(input.df, fastqc.filename)
+	print(expected)
+	print(observed)
     expect_identical(observed, expected)
 })
 
 test_that("add.coverage returns dataframe with additional column enumerating coverage values per subject", {
     input.df <- data.frame(Subject = input.subjects,
-			"Final QC Outcome" = c("Pass", "low_depth", "Pass", "contamination,low_depth", "No", "Pass", "high_het_hom"),
+			"QC Outcome for This Run" = c("Pass", "low_depth", "Pass", "contamination,low_depth", "No", "Pass", "high_het_hom"),
 			check.names = FALSE)
     expected <- input.df
 	expected$Coverage <- c(18.5, 22.4, 23.6, 29.1, 28.7, 25.2, 19.1)

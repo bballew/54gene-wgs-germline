@@ -39,7 +39,7 @@ prepare.subject.tracking.table <- function(input.subjects, output.subjects.filen
     result[!(input.subjects %in% output.subjects)] <- "No"
     result[input.subjects %in% rownames(exclude.reasons)] <- exclude.reasons[input.subjects[input.subjects %in% rownames(exclude.reasons)], 1]
     df <- data.frame("Subject" = input.subjects,
-                     "Final QC Outcome" = result,
+                     "QC Outcome for This Run" = result,
                      check.names = FALSE)
     df
 }
@@ -79,7 +79,12 @@ add.fastqc.data <- function(df, fastqc.filename) {
             }
         }))
     }
-    res
+	res[, "Rerun Recommendation"] <- "Pass"
+	res[res[, "Per Base Sequence Quality Failures"] != "" | 
+			res[, "Per Base N Content Failures"] != "" | 
+			res[, "Overrepresented Sequences Failures"] != "", "Rerun Recommendation"] <- "Rerun subset of fastqs"
+	res[res[, "QC Outcome for This Run"] != "Pass", "Rerun Recommendation"] <- "Fail"
+	res
 }
 
 #' Create a table reporting pairs of subjects related
