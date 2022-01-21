@@ -79,7 +79,8 @@ test_that("add.coverage returns dataframe with additional column enumerating cov
     input.df <- data.frame(Subject = input.subjects,
 			"Final QC Outcome" = c("Pass", "low_depth", "Pass", "contamination,low_depth", "No", "Pass", "high_het_hom"),
 			check.names = FALSE)
-    expected <- cbind(input.df, "Coverage" = c("18.5", "22.4", "23.6", "29.1", "28.7", "25.2", "19.1"))
+    expected <- input.df
+	expected$Coverage <- c(18.5, 22.4, 23.6, 29.1, 28.7, 25.2, 19.1)
     observed <- add.coverage(input.df, bcftools.stats.filename)
 	expect_identical(observed, expected)
 })

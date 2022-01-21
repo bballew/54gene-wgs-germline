@@ -134,6 +134,6 @@ add.coverage <- function(df, bcftools.stats.filename) {
     psc.lines <- stats.lines[str_detect(stats.lines, "^PSC")]
     cvg.df <- data.frame(t(data.frame(lapply(str_split(psc.lines, "\t"), function(x) {x[c(3, 10)]}))))
     rownames(cvg.df) <- cvg.df[, 1]
-    df[, "Coverage"] <- cvg.df[df[, 1], 2]
+    df[, "Coverage"] <- as.numeric(cvg.df[df[, 1], 2])
     df
 }
