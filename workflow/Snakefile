@@ -78,6 +78,7 @@ if full:
     TARGETS.append(expand("results/alignment_stats/{sample}.txt", sample=SAMPLES))
     TARGETS.append(expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES))
 
+    include: "rules/track_time.smk"
     include: "rules/resources.smk"
     include: "rules/fastq_qc.smk"
     include: "rules/align.smk"
@@ -90,6 +91,7 @@ if full:
 
 elif jointgeno:
 
+    include: "rules/track_time.smk"
     include: "rules/resources.smk"
     include: "rules/HC_joint_geno.smk"
     include: "rules/filter.smk"

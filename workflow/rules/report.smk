@@ -21,6 +21,7 @@ rule run_summary:
     about overall run that is poorly captured by multiqc.
     """
     input:
+        start_time="results/tat_tracking/start_time.txt",
         output_subject_list="results/run_summary/final_subject_list.tsv",
         r_resources="workflow/scripts/run_summary_resources.R",
         exclude_list="results/post_qc_exclusions/exclude_list_with_annotation.tsv",

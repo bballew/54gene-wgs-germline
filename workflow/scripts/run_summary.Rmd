@@ -51,6 +51,7 @@ somalier.relatedness.filename <- snakemake@input[["relatedness"]]
 fastqc.filename <- snakemake@input[["fastqc"]]
 bcftools.stats.filename <- snakemake@input[["bcftools_stats"]]
 tsv.path <- snakemake@params[["out_prefix"]]
+start.time.filename <- snakemake@input[["start_time"]]
 ```
 
 ```{r configure.variables, eval=TRUE, echo=FALSE}
@@ -108,6 +109,19 @@ if (nrow(res) == 0) {
     print(knitr::kable(res, caption = "Potentially Related Non-identical Subjects") %>% kableExtra::kable_styling("striped", position = "left", full_width = FALSE))
 }
 ```
+
+***
+<br>
+
+## Total Elapsed Analysis Run Time
+
+```{r report.time, eval=TRUE, echo=FALSE, results="hide"}
+start.time <- read.table(start.time.filename, header = FALSE)[1,1]
+end.time <- as.integer(format(Sys.time(), "%s"))
+elapsed.time <- round((end.time - start.time) / 3600, 2)
+```
+
+Elapsed time was `r elapsed.time` hours.
 
 ***
 <br>
