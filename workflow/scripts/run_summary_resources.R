@@ -80,8 +80,8 @@ add.fastqc.data <- function(df, fastqc.filename) {
         }))
     }
 	res[, "Rerun Recommendation"] <- "Pass"
-	res[res[, "Per Base Sequence Quality Failures"] != "" | 
-			res[, "Per Base N Content Failures"] != "" | 
+	res[res[, "Per Base Sequence Quality Failures"] != "" |
+			res[, "Per Base N Content Failures"] != "" |
 			res[, "Overrepresented Sequences Failures"] != "", "Rerun Recommendation"] <- "Rerun subset of fastqs"
 	res[res[, "QC Outcome for This Run"] != "Pass", "Rerun Recommendation"] <- "Fail"
 	res
@@ -135,10 +135,22 @@ report.related.subject.pairs <- function(output.subjects.filename, somalier.rela
 #' @return data.frame, previous summary stats plus coverage as reported by
 #' bcftools
 add.coverage <- function(df, bcftools.stats.filename) {
+    stopifnot(is.data.frame(df))
+    stopifnot(is.character(bcftools.stats.filename))
+    stopifnot(file.exists(bcftools.stats.filename))
     stats.lines <- readLines(bcftools.stats.filename)
     psc.lines <- stats.lines[str_detect(stats.lines, "^PSC")]
     cvg.df <- data.frame(t(data.frame(lapply(str_split(psc.lines, "\t"), function(x) {x[c(3, 10)]}))))
     rownames(cvg.df) <- cvg.df[, 1]
     df[, "Coverage"] <- as.numeric(cvg.df[df[, 1], 2])
     df
+}
+
+#'
+#'
+#'
+write.output.table <- function(df, out.prefix) {
+	stopifnot(is.data.frame(df))
+	stopifnot(is.vector(out.prefix, mode = "character"), length(out.prefix) == 1)
+	write.table(df, paste(out.prefix, ".tsv", sep = ""), row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
 }

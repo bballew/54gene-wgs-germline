@@ -50,6 +50,7 @@ output.subjects.filename <- snakemake@input[["output_subject_list"]]
 somalier.relatedness.filename <- snakemake@input[["relatedness"]]
 fastqc.filename <- snakemake@input[["fastqc"]]
 bcftools.stats.filename <- snakemake@input[["bcftools_stats"]]
+tsv.path <- snakemake@params[["out_prefix"]]
 ```
 
 ```{r configure.variables, eval=TRUE, echo=FALSE}
@@ -62,7 +63,7 @@ somalier.duplicate.min <- 0.95
 
 ## Final Subject Tracking
 
-A total of `r length(input.subjects)` subjects were queued up for analysis in this run; `r count.rows.in.file(output.subjects.filename)` subjects passed automated QC and are present in the final VCF.  The table below reports lane/read failures for select FastQC metrics.  Only failing fastqs are reported in those columns.  Please see the MultiQC report for additional information. 
+A total of `r length(input.subjects)` subjects were queued up for analysis in this run; `r count.rows.in.file(output.subjects.filename)` subjects passed automated QC and are present in the final VCF.  The table below reports lane/read failures for select FastQC metrics.  Only failing fastqs are reported in those columns.  Please see the MultiQC report for additional information.
 
 ```{r report.before.after.subjects, eval=TRUE, echo=FALSE, results="asis"}
 res <- prepare.subject.tracking.table(input.subjects, output.subjects.filename, exclude.reasons.filename)
@@ -70,6 +71,8 @@ res <- add.fastqc.data(res, fastqc.filename)
 res <- add.coverage(res, bcftools.stats.filename)
 
 knitr::kable(res, caption = "Summary of Subject Fate") %>% kableExtra::kable_styling("striped", position = "left", full_width = FALSE)
+
+write.output.table(res, tsv.path)
 ```
 
 ***

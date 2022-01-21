@@ -26,11 +26,12 @@ rule run_summary:
         exclude_list="results/post_qc_exclusions/exclude_list_with_annotation.tsv",
         relatedness="results/qc/relatedness/somalier.pairs.tsv",
         fastqc="results/multiqc/multiqc_data/multiqc_fastqc_1.txt",
-	bcftools_stats="results/qc/bcftools_stats/joint_called_stats.out",
+        bcftools_stats="results/qc/bcftools_stats/joint_called_stats.out",
     output:
-        "results/run_summary/run_summary.html",
+        report="results/run_summary/run_summary.html",
     params:
         input_samples=SAMPLES,
+        out_prefix="results/run_summary/run_summary",
     conda:
         "../envs/r.yaml"
     benchmark:
