@@ -149,6 +149,27 @@ add.coverage <- function(df, bcftools.stats.filename) {
 #'
 #'
 #'
+report.sex.discordances <- function(output.subjects.filename, somalier.sex.filename) {
+	stopifnot(is.character(output.subjects.filename))
+	stopifnot(file.exists(output.subjects.filename))
+    stopifnot(is.character(somalier.sex.filename))
+    stopifnot(file.exists(somalier.sex.filename))
+
+	output.subjects <- read.table(output.subjects.filename, header = FALSE, stringsAsFactors = FALSE)[, 1]
+	somalier.sex <- read.table(somalier.sex.filename, header = FALSE, stringsAsFactors = FALSE)[, c(2,5,7)]
+
+	somalier.sex <- somalier.sex[somalier.sex[, 1] %in% output.subjects &
+								 ((somalier.sex[, 2] != 2 & somalier.sex[, 3] == "female") | (somalier.sex[, 2] != 1 & somalier.sex[, 3] == "male")) ,]
+	rownames(somalier.sex) <- NULL
+	colnames(somalier.sex) <- c("Subject",
+								"Inferred Sex",
+								"Self-reported Sex")
+	somalier.sex
+}
+
+#'
+#'
+#'
 write.output.table <- function(df, out.prefix) {
 	stopifnot(is.data.frame(df))
 	stopifnot(is.vector(out.prefix, mode = "character"), length(out.prefix) == 1)
