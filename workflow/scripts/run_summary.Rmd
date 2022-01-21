@@ -70,6 +70,8 @@ A total of `r length(input.subjects)` subjects were queued up for analysis in th
 res <- prepare.subject.tracking.table(input.subjects, output.subjects.filename, exclude.reasons.filename)
 res <- add.fastqc.data(res, fastqc.filename)
 res <- add.coverage(res, bcftools.stats.filename)
+res <- res[order(res[, "Subject"]), ]
+rownames(res) <- NULL
 
 knitr::kable(res, caption = "Summary of Subject Fate") %>% kableExtra::kable_styling("striped", position = "left", full_width = FALSE)
 
