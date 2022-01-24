@@ -89,6 +89,6 @@ test_that("add.coverage returns dataframe with additional column enumerating cov
 
 test_that("report.sex.discordances returns dataframe with subject, inferred, and self-reported sex, if discordant", {
 	observed <- report.sex.discordances(output.subjects.filename, somalier.sex.filename)
-	expected <- data.frame("Subject" = c("C", "F"), "Inferred Sex" = c(1, 2), "Self-reported Sex" = c("female", "male"), check.names = FALSE)
+	expected <- data.frame("Subject" = c("C", "F"), "Inferred Sex" = c(1, 2), "Self-reported Sex" = c("-9", "male"), check.names = FALSE)
 	expect_equal(observed, expected)
 })

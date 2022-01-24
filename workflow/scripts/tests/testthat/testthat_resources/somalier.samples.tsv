@@ -1,7 +1,7 @@
 #family_id	sample_id	paternal_id	maternal_id	sex	phenotype	original_pedigree_sex	gt_depth_mean	gt_depth_sd	depth_mean	depth_sd	ab_mean	ab_std	n_hom_ref	n_het	n_hom_alt	n_unknown	p_middling_ab	X_depth_mean	X_n	X_hom_ref	X_het	X_hom_alt	Y_depth_mean	Y_n
 A	A	0	0	2	-9	female	21.2	5.8	18.1	9.3	0.53	0.41	4166	4986	5097	3135	0.003	20.26	287	101	94	92	0.00	0
 B	B	0	0	2	-9	female	23.6	6.1	20.1	10.1	0.50	0.38	3934	6369	3982	3099	0.003	22.89	288	82	116	90	0.00	0
-C	C	0	0	1	-9	female	25.9	6.4	22.1	10.9	0.53	0.40	4198	5277	5003	2906	0.003	25.28	300	108	97	95	0.00	0
+C	C	0	0	1	-9	-9	25.9	6.4	22.1	10.9	0.53	0.40	4198	5277	5003	2906	0.003	25.28	300	108	97	95	0.00	0
 D	D	0	0	2	-9	female	25.9	6.4	22.1	10.9	0.53	0.40	4198	5277	5003	2906	0.003	25.28	300	108	97	95	0.00	0
 E	E	0	0	2	-9	male	25.9	6.4	22.1	10.9	0.53	0.40	4198	5277	5003	2906	0.003	25.28	300	108	97	95	0.00	0
 F	F	0	0	2	-9	male	25.9	6.4	22.1	10.9	0.53	0.40	4198	5277	5003	2906	0.003	25.28	300	108	97	95	0.00	0

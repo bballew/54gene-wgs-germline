@@ -146,9 +146,16 @@ add.coverage <- function(df, bcftools.stats.filename) {
     df
 }
 
+#' Compare self-reported sex and inferred sex from Somalier
+#' and report out samples with discordances.  Samples with
+#' missing self-reported sex are also reported as discordant.
 #'
-#'
-#'
+#' @param output.subjects.filename character vector, name
+#' of file containing subject list from `bcftools query -l`
+#' @param somalier.sex.filename character vector, name of
+#' file containing self-reported and inferred sex
+#' @return data.frame, table of sex discordant or self-reported
+#' sex missing samples
 report.sex.discordances <- function(output.subjects.filename, somalier.sex.filename) {
 	stopifnot(is.character(output.subjects.filename))
 	stopifnot(file.exists(output.subjects.filename))
@@ -159,7 +166,8 @@ report.sex.discordances <- function(output.subjects.filename, somalier.sex.filen
 	somalier.sex <- read.table(somalier.sex.filename, header = FALSE, stringsAsFactors = FALSE)[, c(2,5,7)]
 
 	somalier.sex <- somalier.sex[somalier.sex[, 1] %in% output.subjects &
-								 ((somalier.sex[, 2] != 2 & somalier.sex[, 3] == "female") | (somalier.sex[, 2] != 1 & somalier.sex[, 3] == "male")) ,]
+								 ((somalier.sex[, 2] != 2 & somalier.sex[, 3] == "female") | (somalier.sex[, 2] != 1 & somalier.sex[, 3] == "male")
+								 | !(somalier.sex[, 3] %in% c("male", "female"))) ,]
 	rownames(somalier.sex) <- NULL
 	colnames(somalier.sex) <- c("Subject",
 								"Inferred Sex",
