@@ -57,10 +57,18 @@ def add_ped_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def check_sex_values(df: pd.DataFrame) -> pd.DataFrame:
+    """a"""
+    df["Sex"] = df["Sex"].str.lower()
+    if not all(df[~df["Sex"].isna()].isin(["f", "female", "m", "male"])["Sex"]):
+        raise
+
+
 def encode_sex(df: pd.DataFrame) -> pd.DataFrame:
     """a"""
     df["Sex"] = df["Sex"].str.lower()
     df["Sex"] = df["Sex"].replace(["f", "female", "m", "male"], [2, 2, 1, 1])
+    df = df.fillna(0)
     df["Sex"] = df["Sex"].astype(int)
     return df
 
@@ -80,6 +88,14 @@ if __name__ == "__main__":
     except Exception:
         sys.exit(
             "Error: Correct headers not detected in {} (requires 'Sample' and 'Sex', in that order).".format(
+                infile
+            )
+        )
+    try:
+        check_sex_values(df)
+    except Exception:
+        sys.exit(
+            "Error: Sex reported in {} must be represented by f, female, m, or male (case insensitive).  Missing data can be represented by any of the following strings: '', '#N/A', '#N/A N/A', '#NA', '-1.#IND', '-1.#QNAN', '-NaN', '-nan', '1.#IND', '1.#QNAN', '<NA>', 'N/A', 'NA', 'NULL', 'NaN', 'n/a', 'nan', or 'null'.".format(
                 infile
             )
         )
