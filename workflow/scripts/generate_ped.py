@@ -21,7 +21,13 @@ def get_args() -> list:
 
 
 def check_if_ped(infile: str) -> bool:
-    """a"""
+    """Look for .ped file extension
+
+    This script can either be provided a tsv, which it will
+    convert to a plink-style ped, or it can be provided a ped
+    which it will simply copy to the expected output name/
+    location.
+    """
     if infile.endswith(".ped"):
         return True
     else:
@@ -29,17 +35,19 @@ def check_if_ped(infile: str) -> bool:
 
 
 def read_in_linker(infile: str) -> pd.DataFrame:
-    """a"""
+    """Read tsv linker file into a dataframe"""
     df = pd.read_table(infile, sep="\t")
     return df
 
 
 def check_column_number(df: pd.DataFrame):
+    """Check for two and only two columns in input tsv"""
     if len(df.columns) != 2:
         raise
 
 
 def check_column_headers(df: pd.DataFrame):
+    """Check for required headers in input tsv"""
     if ["Sample", "Sex"] != list(df.columns)[0:2]:
         raise
 
@@ -58,14 +66,25 @@ def add_ped_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def check_sex_values(df: pd.DataFrame) -> pd.DataFrame:
-    """a"""
+    """Check for allowed values for sex information
+
+    Input tsv may only have (case-insensitive) f, female,
+    m, or male to encode sex.  Missing data can be encoded
+    by one of the standard NA values that pandas can deal
+    with automatically.  The error message emitted when this
+    error is raised lists out the allowed values.
+    """
     df["Sex"] = df["Sex"].str.lower()
     if not all(df[~df["Sex"].isna()].isin(["f", "female", "m", "male"])["Sex"]):
         raise
 
 
 def encode_sex(df: pd.DataFrame) -> pd.DataFrame:
-    """a"""
+    """Convert sex information to ped encoding
+
+    Missing sex information is converted to 0; male and
+    female are converted to 1 and 2 respectively.
+    """
     df["Sex"] = df["Sex"].str.lower()
     df["Sex"] = df["Sex"].replace(["f", "female", "m", "male"], [2, 2, 1, 1])
     df = df.fillna(0)
