@@ -1,14 +1,15 @@
+from email.errors import InvalidMultipartContentTransferEncodingDefect
 import pytest
 import pandas as pd
 from scripts import generate_ped
 
+# create mock linker dataframe to generate PED for
 @pytest.fixture
 def passing_linker():
-    sample_data = {
+    return pd.DataFrame({
         "Sample": ["Sample1", "Sample2"],
         "Sex": ["M", "F"]
-    }
-    return pd.DataFrame(sample_data)
+    })
 
 @pytest.fixture
 def dropped_column(passing_linker):
@@ -30,22 +31,18 @@ def ped_format():
         "d": "-9"
     })
 
-@pytest.fixture
-def exp_ped_format():
+def encodedsex_format():
     return pd.DataFrame({
         "Sample": ["Sample1", "Sample2"],
         "a": ["Sample1", "Sample2"],
         "c": [0, 0],
         "b": [0, 0],
-        "Sex": ["M", "F"],
+        "Sex": [1, 2],
         "d": "-9"
-    })
-
-def encoded_sex(exp_ped_format):
-    exp_ped_format.replace({"M": 1, "F": 2}, inplace=True)
-    return exp_ped_format 
+    })    
 
 # testing functions
+
 # check_if_ped
 @pytest.mark.parametrize(
     "test_in, exp_out", [("testfile.ped", True), ("testfile.tsv", False), ("testfile.PED", True)],
@@ -72,13 +69,12 @@ def test_check_column_headers_fail(incorrect_headers):
     with pytest.raises(Exception):
         generate_ped.check_column_headers(incorrect_headers)
 
-# # add_ped_columns
-def test_add_ped_columns(passing_linker):
-     test_out = generate_ped.add_ped_columns(passing_linker)
-     pd.testing.assert_frame_equal(test_out, ped_format())
+# add_ped_columns and encoded sex
+def test_add_ped_columns_and_encode_sex(passing_linker):
+     ped_out = generate_ped.add_ped_columns(passing_linker)
+     exp_ped_out = ped_format() 
+     pd.testing.assert_frame_equal(ped_out, exp_ped_out)
 
-# encode_sex
-def test_encode_sex(exp_ped_format):
-     test_out = generate_ped.encode_sex(exp_ped_format)
-     pd.testing.assert_frame_equal(test_out, encoded_sex(exp_ped_format))
-
+     encode_out = generate_ped.encode_sex(exp_ped_out)
+     exp_encode_out = encodedsex_format()
+     pd.testing.assert_frame_equal(encode_out, exp_encode_out)
