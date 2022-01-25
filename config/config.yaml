@@ -1,14 +1,15 @@
 sampleFile: "config/manifest.txt"
 sexLinker: "config/sex_linker.tsv"
-jobs: 1000
+jobs: 50
 tempDir: "temp/"
 runType:
-  full: yes
+  full: no
   joint_genotyping: no
+  fastq_qc_only: yes
 global_vars: 'export _JAVA_OPTIONS="-Djava.io.tmpdir=temp/ -XX:CompressedClassSpaceSize=200m"' # you get TMPDIR set to tempDir for free
 cluster_mode: "sbatch -o logs/%x.o%j -p {resources.queue} --mem-per-cpu={resources.mem_mb}M -D ./ --cpus-per-task={threads}"
-default_queue: "spot"
-compute_queue: "spot"
+default_queue: "comp"
+compute_queue: "comp"
 memory_queue: "mem"
 bed: "resources/Homo_sapiens_assembly38.bed"
 max_concurrent: 40 # max concurrent running jobs for especially high-bandwidth rules, to control hitting the fsx bandwidth cap
@@ -76,7 +77,8 @@ variantFiltration:
 verifyBamID: # only for full runs
   memory: 4000
   region:
-    - chr21
+    - chr5
+    - chr10
 picardCollectVariantCallingMetrics:
   memory: 6000
   xmx: 1000

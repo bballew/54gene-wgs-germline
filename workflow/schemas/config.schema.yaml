@@ -22,9 +22,12 @@ properties:
         type: boolean
       joint_genotyping:
         type: boolean
+      fastq_qc_only:
+        type: boolean
     required:
       - full
       - joint_genotyping
+      - fastq_qc_only
     additionalProperties: false
   global_vars:
     type: string

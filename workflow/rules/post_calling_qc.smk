@@ -249,6 +249,7 @@ if jointgeno:
             "results/qc/bcftools_stats/joint_called_stats.out",
             "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
             "results/HaplotypeCaller/filtered/HC.variant_calling_summary_metrics",
+            mqc_config="config/multiqc.yaml",
         output:
             "results/multiqc/multiqc.html",
         benchmark:
@@ -257,6 +258,29 @@ if jointgeno:
             outDir="results/multiqc/",
             outName="multiqc.html",
             inDirs="results/qc results/HaplotypeCaller/filtered",
+        conda:
+            "../envs/fastqc_multiqc.yaml"
+        shell:
+            "multiqc --force -o {params.outDir} -n {params.outName} {params.inDirs}"
+
+
+if fastq_qc_only:
+
+    rule multiqc:
+        """Generate one multiQC report for all input fastqs."""
+        input:
+            expand("results/fastqc/{rg}_r1_fastqc.zip", rg=sampleDict.keys()),
+            expand("results/fastqc/{rg}_r2_fastqc.zip", rg=sampleDict.keys()),
+            expand("results/post_trimming_fastqc/{rg}_r1_fastqc.zip", rg=sampleDict.keys()),
+            expand("results/post_trimming_fastqc/{rg}_r2_fastqc.zip", rg=sampleDict.keys()),
+        output:
+            "results/multiqc/multiqc.html",
+        benchmark:
+            "results/performance_benchmarks/multiqc/benchmarks.tsv"
+        params:
+            outDir="results/multiqc/",
+            outName="multiqc.html",
+            inDirs="results/fastqc results/post_trimming_fastqc",
         conda:
             "../envs/fastqc_multiqc.yaml"
         shell:
