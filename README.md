@@ -26,6 +26,9 @@ Configure the workflow according to your needs via editing the files in the `con
 This pipeline currently offers two modes.  Please specify the run mode in `config.yaml`.
 - __full__: This mode starts with fastq pairs and emits a joint-called, filtered, multi-sample VCF.
 - __joint_genotyping__: This mode starts with gVCFs and runs joint-calling and filtering, emitting a multi-sample VCF.  The idea here is that samples can be analyzed in batches in the full run mode, and then the batches can be jointly re-genotyped with this mode.
+- __fastq_qc_only__: This mode starts with fastq pairs and performs trimming, then runs FastQC on both pre- and post-trimming fastq pairs, and finally
+  emits a MultiQC report.  This is designed to be run initially before a full pipeline run, so that if any lanes need to be dropped or trimming
+  parameters adjusted, it can be identified before spending time and compute on alignment, joint calling, etc.
 
 After joint-calling the samples listed in the manifest, the pipeline will create a new multi-sample VCF where samples have been automatically removed based on the following thresholds sourced from the config:
 - max_het_ratio (defaults to 2.5): excludes samples with het/hom-alt ratios, as calculated by bcftools stats, that are above the threshold
@@ -34,7 +37,7 @@ After joint-calling the samples listed in the manifest, the pipeline will create
 
 #### B.  Manifest file
 
-You will need to provide a headerless, whitespace-delimited manifest file to run the pipeline.  For __full__ mode:
+You will need to provide a headerless, whitespace-delimited manifest file to run the pipeline.  For __full__ mode and for __fastq_qc_only__ mode:
 - Columns: `readgroup (should be unique)  sample_ID   path/to/r1.fastq    path/to/r2.fastq`
 - `readgroup` values should be unique, e.g. sampleID_flowcellID
 - `sample_ID` should be the same for all fastq pairs from a single sample, and can be different from the fastq filenames
@@ -106,7 +109,10 @@ The following QC metrics are available:
 - Inferred sex via bcftools +guess-ploidy at `results/qc/sex_check/`
 - Picard metrics at `results/HaplotypeCaller/filtered/`
 - bcftools stats at `results/qc/bcftools_stats/`
-- multiqc report at `results/multiqc/` (WIP)
+- multiqc report at `results/multiqc/`
+
+A final summary report for the run is available at `results/run_summary/`.  This report contains overview information, such as samples starting vs.
+samples emitted into the final VCF, a table of key QC stats, and lists of samples flagged for unexpected relatedness, duplication, or sex discordance.
 
 
 ### Step 6: Commit changes
@@ -144,7 +150,7 @@ In case you have also changed or added steps, please consider contributing them 
 
 Test cases are in the subfolder `tests`. They are automatically executed via continuous integration (TBD).
 
-Unit tests for scripts are found in `workflow/scripts/`.  They can be executed with `pytest`.
+Unit tests for scripts are found in `workflow/scripts/`.  They can be executed with `pytest` or `testthat` for python and R scripts, respectively.
 
 Test input data, configs, and example manifests for both pipeline modes can be found [here](https://gitlab.com/data-analysis5/54gene-wgs-test-data).  Note that there are a few important caveats when testing.
 - Somalier doesn't seem to be functional on Mac, so make sure you're in a linux environment or comment out that target from the Snakefile (ugh).  (Using a container for the OS would solve this problem....)
