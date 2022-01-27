@@ -3,6 +3,7 @@
 import glob
 import os
 import sys
+from snakemake.io import glob_wildcards 
 
 sampleDict = {}
 
@@ -216,3 +217,13 @@ def get_DBImport_path2(wildcards):
 
 def allow_blanks(c):
     return c if c is not None else ""
+
+def get_interval_arg(interval_prefix):
+    """ Get input interval files based on a user-specified
+    path in the config.yaml for parallelization at the 
+    variant calling and joint-calling step. 
+    i.e. interval_prefix = "resources/scattered_calling_intervals 
+    """
+    intervals, file = glob_wildcards(interval_prefix + "/{intervals}/{file}")
+    int_file = set(file)
+    return "{}/{}/{}".format(interval_prefix, intervals, *int_file)
