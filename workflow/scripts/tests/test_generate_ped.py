@@ -20,6 +20,7 @@ def incorrect_headers(passing_linker):
     passing_linker.rename({"Sample" : "Sample_name"}, axis=1, inplace = True)
     return passing_linker
 
+@pytest.fixture
 def ped_format():
     return pd.DataFrame({
         "Sample": ["Sample1", "Sample2"],
@@ -29,17 +30,12 @@ def ped_format():
         "Sex": ["M", "F"],
         "d": "-9"
     })
-
-""" Can't call multiple fixtures directly in an elegant way for 
-test_add_ped_columns so here I create a fixture that just calls 
-the ped_format() function to return the dataframe and use as 
-input for test_encoded_sex.
-
-Reference: https://github.com/pytest-dev/pytest/issues/3950 """
-
-@pytest.fixture(name="ped_format_indirect")
-def ped_format_indirect():
-    return ped_format() 
+    
+@pytest.fixture
+def encodedsex_format(ped_format):
+    df = ped_format.copy()
+    df.loc[:, "Sex"] = [1,2]
+    return df
 
 # testing functions
 
@@ -68,14 +64,11 @@ def test_check_column_headers_fail(incorrect_headers):
         generate_ped.check_column_headers(incorrect_headers)
 
 # add_ped_columns
-def test_add_ped_columns(passing_linker):
+def test_add_ped_columns(passing_linker, ped_format):
     ped_out = generate_ped.add_ped_columns(passing_linker)
-    exp_ped_out = ped_format()
-    pd.testing.assert_frame_equal(ped_out, exp_ped_out)
+    pd.testing.assert_frame_equal(ped_out, ped_format)
 
 # encode_sex
-def test_encoded_sex(ped_format_indirect):
-    encoded_out = generate_ped.encode_sex(ped_format_indirect)
-    ped_format_example = ped_format()
-    exp_encode_out = ped_format_example.replace({'Sex': {'M':1, 'F':2}})
-    pd.testing.assert_frame_equal(encoded_out, exp_encode_out)
+def test_encode_sex(ped_format, encodedsex_format):
+    encode_out = generate_ped.encode_sex(ped_format)
+    pd.testing.assert_frame_equal(encode_out, encodedsex_format)
