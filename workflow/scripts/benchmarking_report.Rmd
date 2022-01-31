@@ -74,17 +74,21 @@ This is a (development version) R Markdown report that can generated for the pip
 
 ## Resource Usage and Run Statistics Overview
 
-#### Rules included in this report 
+#### Rules included in this report: (`r length(unique(dataset[["rule"]]))`) 
 ```{r list.rules, echo=FALSE, include=TRUE, results='asis'}
 inlines <- c(
   md_bold(unique(dataset$rule))
 )
 md_bullet(inlines)
 ```
+&nbsp;
+&nbsp;
+&nbsp;
 
-#### Overview of all rules
+#### Overview of All Rules
 
 ##### Execution time 
+Total elapsed time displayed in hours for all rules in this workflow. 
 
 ```{r all.time.exec, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
 # plot walltime for all rules benchmarked
@@ -92,33 +96,94 @@ exec.time.all <- create.boxjitter.plot(dataset, subset.df, "rule", "walltime", "
 exec.time.all
 ```
 
-##### Memory  
-```{r all.mem.usage, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
-# plot memory usage for all rules 
-mem.usage.all <- create.boxjitter.plot(dataset, subset.df, "rule", "max_pss", "Rule", "Memory usage (max_pss) in MB for all rules") +
+#### Memory {.tabset .tabset-pills}
+These plots display memory usage for **all rules** in the form of maximum "Resident Set Size", "Virtual Memory Size",
+"Unique Set Size", and "Proportional Set Size" in MB. These metrics are derived from Snakemake's [benchmark](https://snakemake.readthedocs.io/en/stable/tutorial/additional_features.html) directive which uses 
+functionalities provided by the [psutil](https://psutil.readthedocs.io/en/latest/) (python system and process 
+utilities) library. 
+
+##### PSS
+Proportional Set Size: The amount of memory occupied for a particular process plus the shared memory across one or more other processes. 
+```{r max.pss.all, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+max.pss.all <- create.boxjitter.plot(dataset, subset.df, "rule", "max_pss", 
+                                     "Rule", "PSS (MB) for all rules") +
   scale_y_continuous(n.breaks = 12) 
-mem.usage.all 
+max.pss.all 
+```
+##### USS
+Unique Set Size: The amount of memory occupied by a process, unshared and unique to only that process. 
+```{r max.uss.all, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+max.uss.all <- create.boxjitter.plot(dataset, subset.df, "rule", "max_uss", 
+                                     "Rule", "USS (MB) for all rules") +
+  scale_y_continuous(n.breaks = 12) 
+max.uss.all 
+```
+##### RSS
+Resident Set Size: The amount of memory non-swapped physical memory occupied by a process.
+```{r max.rss.all, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+max.rss.all <- create.boxjitter.plot(dataset, subset.df, "rule", "max_rss", 
+                                     "Rule", "RSS (MB) for all rules") +
+  scale_y_continuous(n.breaks = 12) 
+max.rss.all 
+```
+##### VMS
+Virtual Memory Size: The amount of virtual memory occupied by a process.
+```{r max.vms.all, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+max.vms.all <- create.boxjitter.plot(dataset, subset.df, "rule", "max_vms", 
+                                     "Rule", "VMS (MB) for all rules") +
+  scale_y_continuous(n.breaks = 12) 
+max.vms.all 
 ```
 
+
 ### Resource Usage Detailed View
-Displays psutil metrics for rules meeting the user-specified time threshold specified at the config level.
+Displays snakemake's benchmark metrics for rules meeting the user-specified time threshold provided at the config level.
 
 ```{r threshold.stat, echo=FALSE, results='asis'}
 cat(paste0("Time threshold (minutes): ", time.param))
 ```
 
-##### Memory  
-```{r memory.usage, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+&nbsp;
+
+#### Memory {.tabset .tabset-pills}
+These plots display memory usage in the form of maximum "Proportional Set Size (PSS)", "Unique Set Size (USS)", "Resident Set Size (RSS)", "Virtual Memory Size (VMS)" for rules that **only** meet the user-specified time threshold.
+ 
+ ##### PSS
+Proportional Set Size: The amount of memory occupied for a particular process plus the shared memory across one or more other processes. 
+```{r max.pss.detailed, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
 # plot the memory usage with boxplots for rules with >1 process otherwise
 # just plot the datapoint
-mem.usage <- create.boxjitter.plot(filtered.df, subset.df, "rule", "max_pss", "Rule", "Memory usage (max_pss) in MB") +
+max.pss.detail <- create.boxjitter.plot(filtered.df, subset.df, "rule", "max_pss", "Rule", "PSS (MB)") +
   scale_y_continuous(n.breaks = 12)
-mem.usage 
+max.pss.detail
+```
+##### USS
+Unique Set Size: The amount of memory occupied by a process, unshared and unique to only that process. 
+```{r max.uss.detailed, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+max.uss.detail <- create.boxjitter.plot(filtered.df, subset.df, "rule", "max_uss", "Rule", "USS (MB)") +
+  scale_y_continuous(n.breaks = 12)
+max.uss.detail
+```
+##### RSS
+Resident Set Size: The amount of memory non-swapped physical memory occupied by a process.
+```{r max.rss.detailed, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+max.rss.detail <- create.boxjitter.plot(dataset, subset.df, "rule", "max_rss", "Rule", "RSS (MB)") +
+  scale_y_continuous(n.breaks = 12) 
+max.rss.detail 
+```
+##### VMS
+Virtual Memory Size: The amount of virtual memory occupied by a process.
+```{r max.vms.detailed, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
+max.vms.detail <- create.boxjitter.plot(filtered.df, subset.df, "rule", "max_vms", "Rule", "VMS (MB)") +
+  scale_y_continuous(n.breaks = 12)
+max.vms.detail
 ```
 
 #### I/O {.tabset .tabset-pills}
+The amount of information processed by the system through I/O (input-output) operations.
 
 ##### Read
+The amount of information cumulatively read by the system for each process in MB.
 ```{r, i.read, echo=FALSE, eval=TRUE, fig.align='center', message=FALSE, warning=FALSE}
 # plot the io read
 io.read <- create.boxjitter.plot(filtered.df, subset.df, "rule", "io_in", "Rule", "Cumulative GB Read")
@@ -126,6 +191,7 @@ io.read
 ```
 
 ##### Write
+The amount of information cumulatively written by the system for each process in MB.
 ```{r, i.write, echo=FALSE, eval=TRUE, fig.align='center', message=FALSE, warning=FALSE}
 # plot io write
 io.write <- create.boxjitter.plot(filtered.df, subset.df, "rule", "io_out", "Rule", "Cumulative GB Written")
@@ -135,7 +201,7 @@ io.write
 #### CPU Time {.tabset .tabset-pills}
 
 ##### Total CPU time
-Note: Multi-threaded processes will have values greater than 1 where the CPU/s is a function of the number of threads / total walltime.
+The total CPU time is the amount of time for which a CPU was used to process information performing logic or arithmetic operations for a particular process (displayed in hours).
 
 ```{r, cpu.time, eval=TRUE, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
 # plot the CPU time in hours
@@ -144,7 +210,15 @@ cpu.time
 ```
 
 ##### CPU to Walltime Ratio
-Note: Multi-threaded processes will have values greater than 1 where the CPU/s is a function of the number of threads / total walltime.
+Programs and applications do not use the CPU or processor 100% of the time and some time is spent on I/O operation, waiting for the network or disk. The relationship of CPU time to walltime (or CPU/second) for a process can provide insight on potential bottlenecks with CPU utilization, network bandwith, disk contention, system overhead, etc. More information on this can be found [here](https://pythonspeed.com/articles/blocking-cpu-or-io/).
+
+For **single-threaded** processes:\
+CPU/s ≈ 1 indicates the process spent all of its time using the CPU.\
+CPU/s < 1 indicates the process spent 1-(CPU/s) of the time waiting.
+
+For **multi-threaded processes** (CPU/s can be as high as *N* CPUs)\
+CPU/s < *N* indicates the process spent much of its time waiting.\
+CPU/s ≈ *N* indicates the process saturated the allocated number of processors (i.e. for a process with 2 threads, a CPU/s = 2 indicates saturation)
 
 ```{r, cputowalltime, eval=TRUE, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
 # plot cpu to walltime ratio (i.e. CPU/s)
