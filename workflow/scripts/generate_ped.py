@@ -3,6 +3,7 @@
 import argparse as ap
 import shutil
 import sys
+import re
 
 import pandas as pd
 
@@ -28,7 +29,7 @@ def check_if_ped(infile: str) -> bool:
     which it will simply copy to the expected output name/
     location.
     """
-    if infile.endswith(".ped"):
+    if re.search(".ped$", infile, re.IGNORECASE):
         return True
     else:
         return False
