@@ -41,7 +41,7 @@ def encodedsex_format(ped_format):
 
 # check_if_ped
 @pytest.mark.parametrize(
-    "test_in, exp_out", [("testfile.ped", True), ("testfile.tsv", False)],
+    "test_in, exp_out", [("testfile.ped", True), ("testfile.tsv", False),("testfile.PED", True), ("testfile.pe", False)]
 )
 def test_check_if_ped(test_in, exp_out):
     test_out = generate_ped.check_if_ped(test_in)
