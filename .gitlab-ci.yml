@@ -11,5 +11,4 @@ workflow:
 run_all:
   stage: pytest
   script:
-    - apt-get update
     - python -m pytest workflow/scripts/tests/
