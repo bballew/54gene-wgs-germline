@@ -36,14 +36,14 @@ jointgeno = config["runType"]["joint_genotyping"]
 global_vars = config["global_vars"]
 bed = config["bed"]
 max_concurrent = config["max_concurrent"]
-
-# get intervals from supplied path in config
-interval_prefix = config["interval_prefix"]
-INTERVALS = os.listdir(interval_prefix)
+intervalsFile = config["intervalsFile"]
 
 # create temp and log dirs if needed
 pathlib.Path(tempDir).mkdir(parents=True, exist_ok=True)
 pathlib.Path("logs/").mkdir(parents=True, exist_ok=True)
+
+# generate list of interval names
+intervals = utils.get_interval_list(intervalsFile)
 
 # configure shell behavior for all rules
 shell.executable("/bin/bash")
@@ -94,6 +94,7 @@ elif jointgeno:
 
 
 wildcard_constraints:
+    intervals="|".join(intervals),
     sample="|".join(SAMPLES),
     rg="|".join(sampleDict.keys()),
 

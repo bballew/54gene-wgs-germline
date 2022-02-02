@@ -15,7 +15,7 @@ rule HC_call_variants:
         sa="resources/Homo_sapiens_assembly38.fasta.64.sa",
         bam="results/bqsr/{sample}.bam",
         bai="results/bqsr/{sample}.bai",
-        intervals=interval_prefix+"/{intervals}/scattered.interval_list",
+        interval=utils.get_intervals_arg,
     output:
         gvcf=temp("results/HaplotypeCaller/called/{intervals}/{sample}.g.vcf"),
         idx=temp("results/HaplotypeCaller/called/{intervals}/{sample}.g.vcf.idx"),
@@ -36,7 +36,7 @@ rule HC_call_variants:
         "-R {input.r} "
         "-I {input.bam} "
         "-ERC GVCF "
-        "-L {input.intervals} "
+        "-L {input.interval} "
         "-O {output.gvcf} "
         "-G StandardAnnotation "
         "-G StandardHCAnnotation"
@@ -69,11 +69,11 @@ rule HC_concat_gvcfs:
     input:
         vcfList=expand(
             "results/HaplotypeCaller/called/{intervals}/{{sample}}.g.vcf.gz",
-            intervals=INTERVALS,
+            intervals=intervals,
         ),
         indexList=expand(
             "results/HaplotypeCaller/called/{intervals}/{{sample}}.g.vcf.gz.tbi",
-            intervals=INTERVALS,
+            intervals=intervals,
         ),
     output:
         "results/HaplotypeCaller/called/{sample}_all_regions.g.vcf.gz",

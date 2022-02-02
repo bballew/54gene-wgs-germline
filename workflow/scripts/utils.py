@@ -3,10 +3,10 @@
 import glob
 import os
 import sys
-from snakemake.io import glob_wildcards 
+import pandas as pd
 
 sampleDict = {}
-
+intFile = ''
 
 def read_in_manifest(s, full):
     """Parse whitespace delimited manifest file.
@@ -218,12 +218,25 @@ def get_DBImport_path2(wildcards):
 def allow_blanks(c):
     return c if c is not None else ""
 
-def get_interval_arg(interval_prefix):
-    """ Get input interval files based on a user-specified
-    path in the config.yaml for parallelization at the 
-    variant calling and joint-calling step. 
-    i.e. interval_prefix = "resources/scattered_calling_intervals 
-    """
-    intervals, file = glob_wildcards(interval_prefix + "/{intervals}/{file}")
-    int_file = set(file)
-    return "{}/{}/{}".format(interval_prefix, intervals, *int_file)
+def get_interval_list(file):
+    """Read in the intervals.txt file specified
+    in config and return a list of intervals names. """
+    global intFile
+    intFile = pd.read_csv(file, sep='\t')
+    intList = intFile.iloc[:,0].tolist()
+    return intList
+
+def get_intervals_arg(wildcards):
+    """Generate a string for the '-L (intervals)' argument
+    for HaplotypeCaller and GenomicsDB using the intervals.txt
+    file. """
+    t = intFile.iloc[:,1].apply(lambda x: os.sep.join(x.split(os.sep)[:-2]))
+    interval_prefix = set(t)
+    f = intFile.iloc[:,1].apply(os.path.basename)
+    filename = set(f)
+    return "{}/{}/{}".format(*interval_prefix, wildcards.intervals, *filename)
+
+    
+
+
+
