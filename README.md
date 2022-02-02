@@ -4,6 +4,8 @@ This workflow is designed to take either fastqs or gvcfs as input, and emit a jo
 
 ## Authors
 
+* Esha Joshi
+* Cameron Palmer
 * Bari Jane Ballew (@bballew)
 
 ## Usage
