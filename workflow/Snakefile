@@ -33,6 +33,7 @@ jobs = config["jobs"]
 tempDir = config["tempDir"]
 full = config["runType"]["full"]
 jointgeno = config["runType"]["joint_genotyping"]
+fastq_qc_only = config["runType"]["fastq_qc_only"]
 global_vars = config["global_vars"]
 bed = config["bed"]
 max_concurrent = config["max_concurrent"]
@@ -46,10 +47,10 @@ shell.executable("/bin/bash")
 shell.prefix("set -euo pipefail; {}; ".format(global_vars))
 
 # dict where key is readgroup, values are sample, r1 fastq, r2 fastq
-sampleDict = utils.read_in_manifest(sampleFile, full)
+sampleDict = utils.read_in_manifest(sampleFile, full, fastq_qc_only)
 
 # list of unique sample names
-SAMPLES = utils.create_samples_set(sampleDict) if full else sampleDict.keys()
+SAMPLES = utils.create_samples_set(sampleDict) if full or fastq_qc_only else sampleDict.keys()
 
 # generate list of intervals
 # for the purposes of testing this method of joint calling I am
@@ -63,20 +64,17 @@ concurrent_limit = utils.get_batch_limit_number(jobs, max_concurrent)
 
 # chromList = utils.get_chrom_list(bed)
 
-TARGETS = [
-    # "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
-    "results/qc/bcftools_stats/plots/plot-vcfstats.log",
-    # "results/qc/relatedness/somalier.pairs.tsv",
-    # "results/qc/sex_check/ploidy.png",
-    "results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz",
-    "results/multiqc/multiqc.html",
-]
+TARGETS = ["results/multiqc/multiqc.html"]
 
 if full:
 
     TARGETS.append(expand("results/alignment_stats/{sample}.txt", sample=SAMPLES))
     TARGETS.append(expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES))
+    TARGETS.append("results/run_summary/run_summary.html")
+    TARGETS.append("results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz")
+    TARGETS.append("results/qc/bcftools_stats/plots/plot-vcfstats.log")
 
+    include: "rules/track_time.smk"
     include: "rules/resources.smk"
     include: "rules/fastq_qc.smk"
     include: "rules/align.smk"
@@ -84,13 +82,26 @@ if full:
     include: "rules/HC_joint_geno.smk"
     include: "rules/filter.smk"
     include: "rules/post_calling_qc.smk"
+    include: "rules/report.smk"
 
 
 elif jointgeno:
 
+    TARGETS.append("results/run_summary/run_summary.html")
+    TARGETS.append("results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz")
+    TARGETS.append("results/qc/bcftools_stats/plots/plot-vcfstats.log")
+
+    include: "rules/track_time.smk"
     include: "rules/resources.smk"
     include: "rules/HC_joint_geno.smk"
     include: "rules/filter.smk"
+    include: "rules/post_calling_qc.smk"
+    include: "rules/report.smk"
+
+
+elif fastq_qc_only:
+
+    include: "rules/fastq_qc.smk"
     include: "rules/post_calling_qc.smk"
 
 

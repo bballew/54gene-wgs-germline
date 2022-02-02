@@ -130,7 +130,11 @@ def exclude_contam(df_v: pd.DataFrame, c: float) -> pd.DataFrame:
     else:
         df_contam.loc[:, "exclude_reason"] = "contamination"
         t = df_contam["#SEQ_ID"].str.split(":", expand=True)
-        df_contam["sample"] = t[1]
+        if len(t) == 2:
+            df_contam["sample"] = t[1]
+        else:
+            # if you're running a single sample, verifyBamID doesn't use the sample_self:sample format in this field
+            df_contam["sample"] = t[0]
         return df_contam[["sample", "exclude_reason"]]
 
 
