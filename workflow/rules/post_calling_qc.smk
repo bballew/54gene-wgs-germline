@@ -261,7 +261,7 @@ if jointgeno:
         conda:
             "../envs/fastqc_multiqc.yaml"
         shell:
-            "multiqc --force -o {params.outDir} -n {params.outName} {params.inDirs}"
+            "multiqc --force -o {params.outDir} --config {input.mqc_config} -n {params.outName} {params.inDirs}"
 
 
 if fastq_qc_only:
@@ -273,6 +273,7 @@ if fastq_qc_only:
             expand("results/fastqc/{rg}_r2_fastqc.zip", rg=sampleDict.keys()),
             expand("results/post_trimming_fastqc/{rg}_r1_fastqc.zip", rg=sampleDict.keys()),
             expand("results/post_trimming_fastqc/{rg}_r2_fastqc.zip", rg=sampleDict.keys()),
+            mqc_config="config/multiqc.yaml",
         output:
             "results/multiqc/multiqc.html",
         benchmark:
@@ -284,4 +285,4 @@ if fastq_qc_only:
         conda:
             "../envs/fastqc_multiqc.yaml"
         shell:
-            "multiqc --force -o {params.outDir} -n {params.outName} {params.inDirs}"
+            "multiqc --force -o {params.outDir} --config {input.mqc_config} -n {params.outName} {params.inDirs}"
