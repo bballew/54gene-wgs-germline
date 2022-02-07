@@ -102,17 +102,17 @@ rule HC_consolidate_gvcfs:
         indexList=expand(
             "results/HaplotypeCaller/called/{sample}_all_regions.g.vcf.gz.tbi", sample=SAMPLES
         ),
-        interval=utils.get_intervals_arg,
+        intervalfile=lambda wildcards: intervals_df.loc[wildcards.interval, "file_path"],
     output:
-        o1="results/HaplotypeCaller/DBImport/{intervals}/vcfheader.vcf",
-        o2="results/HaplotypeCaller/DBImport/{intervals}/vidmap.json",
-        o3="results/HaplotypeCaller/DBImport/{intervals}/callset.json",
-        o4="results/HaplotypeCaller/DBImport/{intervals}/__tiledb_workspace.tdb",
-        d=directory("results/HaplotypeCaller/DBImport/{intervals}"),
+        o1="results/HaplotypeCaller/DBImport/{interval}/vcfheader.vcf",
+        o2="results/HaplotypeCaller/DBImport/{interval}/vidmap.json",
+        o3="results/HaplotypeCaller/DBImport/{interval}/callset.json",
+        o4="results/HaplotypeCaller/DBImport/{interval}/__tiledb_workspace.tdb",
+        d=directory("results/HaplotypeCaller/DBImport/{interval}"),
     benchmark:
-        "results/performance_benchmarks/HC_consolidate_gvcfs/{intervals}.tsv"
+        "results/performance_benchmarks/HC_consolidate_gvcfs/{interval}.tsv"
     params:
-        db="results/HaplotypeCaller/DBImport/{intervals}",
+        db="results/HaplotypeCaller/DBImport/{interval}",
         t=tempDir,
         java_opts=utils.allow_blanks(config["genomicsDBImport"]["java_opts"]),
         batch_size=config["genomicsDBImport"]["batch_size"],
@@ -131,7 +131,7 @@ rule HC_consolidate_gvcfs:
         "--disable-bam-index-caching "
         "--sample-name-map {input.sampleMap} "
         "--genomicsdb-workspace-path {params.db} "
-        "-L {input.interval} "
+        "-L {input.intervalfile} "
         "--tmp-dir {params.t} "
         "--reader-threads {params.reader_threads} "
         "--genomicsdb-shared-posixfs-optimizations"
@@ -143,19 +143,19 @@ rule HC_genotype_gvcfs:
         r="resources/Homo_sapiens_assembly38.fasta",
         f="resources/Homo_sapiens_assembly38.fasta.fai",
         d="resources/Homo_sapiens_assembly38.dict",
-        o1="results/HaplotypeCaller/DBImport/{intervals}/vcfheader.vcf",
-        o2="results/HaplotypeCaller/DBImport/{intervals}/vidmap.json",
-        o3="results/HaplotypeCaller/DBImport/{intervals}/callset.json",
-        o4="results/HaplotypeCaller/DBImport/{intervals}/__tiledb_workspace.tdb",
+        o1="results/HaplotypeCaller/DBImport/{interval}/vcfheader.vcf",
+        o2="results/HaplotypeCaller/DBImport/{interval}/vidmap.json",
+        o3="results/HaplotypeCaller/DBImport/{interval}/callset.json",
+        o4="results/HaplotypeCaller/DBImport/{interval}/__tiledb_workspace.tdb",
         o5=utils.get_DBImport_path1,
         o6=utils.get_DBImport_path2,
     output:
-        vcf=temp("results/HaplotypeCaller/genotyped/{intervals}.vcf.gz"),
-        idx=temp("results/HaplotypeCaller/genotyped/{intervals}.vcf.gz.tbi"),
+        vcf=temp("results/HaplotypeCaller/genotyped/{interval}.vcf.gz"),
+        idx=temp("results/HaplotypeCaller/genotyped/{interval}.vcf.gz.tbi"),
     benchmark:
-        "results/performance_benchmarks/HC_genotype_gvcfs/{intervals}.tsv"
+        "results/performance_benchmarks/HC_genotype_gvcfs/{interval}.tsv"
     params:
-        db="results/HaplotypeCaller/DBImport/{intervals}",
+        db="results/HaplotypeCaller/DBImport/{interval}",
         t=tempDir,
         m=config["genotypeGVCFs"]["max_alt_alleles"],
         c=config["genotypeGVCFs"]["max_genotype_count"],
@@ -184,10 +184,10 @@ rule HC_concat_vcfs_bcftools:
     """Combine per-interval joint-called multi-sample VCFs."""
     input:
         vcfList=expand(
-            "results/HaplotypeCaller/genotyped/{intervals}.vcf.gz", intervals=intervals
+            "results/HaplotypeCaller/genotyped/{interval}.vcf.gz", interval=intervalList
         ),
         indexList=expand(
-            "results/HaplotypeCaller/genotyped/{intervals}.vcf.gz.tbi", intervals=intervals
+            "results/HaplotypeCaller/genotyped/{interval}.vcf.gz.tbi", interval=intervalList
         ),
     output:
         projectVCF="results/HaplotypeCaller/genotyped/HC_variants.vcf.gz",

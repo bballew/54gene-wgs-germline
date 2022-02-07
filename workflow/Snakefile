@@ -42,8 +42,9 @@ intervalsFile = config["intervalsFile"]
 pathlib.Path(tempDir).mkdir(parents=True, exist_ok=True)
 pathlib.Path("logs/").mkdir(parents=True, exist_ok=True)
 
-# generate list of interval names
-intervals = utils.get_interval_list(intervalsFile)
+# generate list of interval names from the interval file dataframe
+intervals_df = utils.read_in_intervals(intervalsFile)
+intervalList = list(intervals_df["interval_name"])
 
 # configure shell behavior for all rules
 shell.executable("/bin/bash")
@@ -59,8 +60,6 @@ SAMPLES = utils.create_samples_set(sampleDict) if full else sampleDict.keys()
 # The Second parameter is the desired max number of concurrently-running jobs of
 # that rule.
 concurrent_limit = utils.get_batch_limit_number(jobs, max_concurrent)
-
-# chromList = utils.get_chrom_list(bed)
 
 TARGETS = [
     # "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
@@ -94,7 +93,7 @@ elif jointgeno:
 
 
 wildcard_constraints:
-    intervals="|".join(intervals),
+    interval="|".join(intervalList),
     sample="|".join(SAMPLES),
     rg="|".join(sampleDict.keys()),
 

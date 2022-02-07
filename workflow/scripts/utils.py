@@ -3,10 +3,11 @@
 import glob
 import os
 import sys
+
 import pandas as pd
 
 sampleDict = {}
-intFile = ''
+
 
 def read_in_manifest(s, full):
     """Parse whitespace delimited manifest file.
@@ -137,9 +138,6 @@ def get_batch_limit_number(jobs, n):
     return limit
 
 
-"""Removed get_chrom_list function for interval testing """
-
-
 def _karyotypic_sort(c):
     """"""
     c = c.replace("chr", "")
@@ -159,16 +157,16 @@ def get_DBImport_path1(wildcards):
     """Define input files for rule HC_genotype_gvcfs."""
     return glob.glob(
         "results/HaplotypeCaller/DBImport/"
-        + wildcards.intervals
+        + wildcards.interval
         + "/"
-        + wildcards.intervals
+        + wildcards.interval
         + "*/genomicsdb_meta_dir/genomicsdb_meta*.json"
     )
 
 
 def get_DBImport_path2(wildcards):
     """Define input files for rule HC_genotype_gvcfs."""
-    path = "".join(glob.glob("results/HaplotypeCaller/DBImport/" + wildcards.intervals + "/*/__*/"))
+    path = "".join(glob.glob("results/HaplotypeCaller/DBImport/" + wildcards.interval + "/*/__*/"))
     myList = []
     if os.path.exists(path):
         myList = [
@@ -218,25 +216,10 @@ def get_DBImport_path2(wildcards):
 def allow_blanks(c):
     return c if c is not None else ""
 
-def get_interval_list(file):
-    """Read in the intervals.txt file specified
-    in config and return a list of intervals names. """
-    global intFile
-    intFile = pd.read_csv(file, sep='\t')
-    intList = intFile.iloc[:,0].tolist()
-    return intList
 
-def get_intervals_arg(wildcards):
-    """Generate a string for the '-L (intervals)' argument
-    for HaplotypeCaller and GenomicsDB using the intervals.txt
-    file. """
-    t = intFile.iloc[:,1].apply(lambda x: os.sep.join(x.split(os.sep)[:-2]))
-    interval_prefix = set(t)
-    f = intFile.iloc[:,1].apply(os.path.basename)
-    filename = set(f)
-    return "{}/{}/{}".format(*interval_prefix, wildcards.intervals, *filename)
-
-    
-
-
-
+def read_in_intervals(file):
+    """Read in the intervals.tsv file specified in the config as a dataframe and return the dataframe if the interval names are unique."""
+    intervals_df = pd.read_table(file).set_index("interval_name", drop=False)
+    if intervals_df.index.is_unique is False:
+        return sys.exit("Duplicate interval names detected in intervals file.")
+    return intervals_df
