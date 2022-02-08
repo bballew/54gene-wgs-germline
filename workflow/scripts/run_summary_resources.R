@@ -18,6 +18,22 @@ count.rows.in.file <- function(filename) {
 
 
 #' Prepare a table reporting subject resolution
+#' for initial QC runs only.
+#'
+#' @param input.subjects character vector; input
+#' subject IDs from manifest, without duplicates
+#' @return data.frame, prepared table ready for knitr
+#'
+prepare.initial.subject.tracking.table <- function(input.subjects) {
+    stopifnot(is.vector(input.subjects, mode = "character"))
+    result <- rep("Initial QC", length(input.subjects))
+    df <- data.frame("Subject" = input.subjects,
+                     "QC Outcome for This Run" = result,
+                     check.names = FALSE)
+    df
+}
+
+#' Prepare a table reporting subject resolution
 #' through the entire pipeline.
 #'
 #' @param input.subjects character vector; input

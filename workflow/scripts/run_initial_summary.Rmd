@@ -1,0 +1,99 @@
+---
+title: "WGS Run Summary"
+author:
+  - "Bari Ballew"
+  - "Cameron Palmer"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+params:
+  rmd: "run_summary.Rmd"
+output:
+  html_document:
+    code_folding: "hide"
+  highlight: tango
+  number_sections: no
+  theme: default
+  toc: yes
+  toc_depth: 3
+  toc_float:
+    collapsed: no
+    smooth_scroll: yes
+---
+
+```{r load.packages, eval=TRUE, echo=FALSE, message=FALSE}
+## Load required R packages
+
+library(knitr, quietly = TRUE)
+library(kableExtra, quietly = TRUE)
+library(ggplot2, quietly = TRUE)
+library(RColorBrewer, quietly = TRUE)
+```
+
+```{r load.resources, eval=TRUE, echo=FALSE, message=FALSE}
+## Load tested functions for this report
+source(snakemake@input[["r_resources"]])
+```
+
+```{r set.ggplot2.theme, eval=TRUE, echo=TRUE}
+## Configure standard theme information for ggplot2
+
+my.theme <- theme_light() + theme(plot.title = element_text(size = 15, hjust = 0.5),
+                                  axis.title = element_text(size = 14),
+                                  axis.text = element_text(size = 12),
+                                  strip.background = element_blank(),
+                                  strip.text = element_text(size = 14, colour = "black"))
+```
+
+```{r load.snakemake.files, eval=TRUE, echo=FALSE}
+input.subjects <- snakemake@params[["input_samples"]]
+fastqc.filename <- snakemake@input[["fastqc"]]
+tsv.path <- snakemake@params[["out_prefix"]]
+start.time.filename <- snakemake@input[["start_time"]]
+```
+
+## Initial QC Subject Tracking
+
+A total of `r length(input.subjects)` subjects were queued up for analysis in this run.  The table below reports lane/read failures for select FastQC metrics.  Only failing fastqs are reported in those columns.  Please see the MultiQC report for additional information.
+
+```{r report.before.after.subjects, eval=TRUE, echo=FALSE, results="asis"}
+res <- prepare.initial.subject.tracking.table(input.subjects)
+res <- add.fastqc.data(res, fastqc.filename)
+res <- res[order(res[, "Subject"]), ]
+rownames(res) <- NULL
+
+knitr::kable(res, caption = "Summary of Subject Fate") %>% kableExtra::kable_styling("striped", position = "left", full_width = FALSE)
+
+write.output.table(res, tsv.path)
+```
+
+***
+<br>
+
+## Total Elapsed Analysis Run Time
+
+```{r report.time, eval=TRUE, echo=FALSE, results="hide"}
+start.time <- read.table(start.time.filename, header = FALSE)[1,1]
+end.time <- as.integer(format(Sys.time(), "%s"))
+elapsed.time <- round((end.time - start.time) / 3600, 2)
+```
+
+Elapsed time was `r elapsed.time` hours.
+
+***
+<br>
+
+## Assorted Software Links
+
+<br>
+
+***
+<br>
+
+## Session Information
+
+<br>
+
+The following summarizes the loaded R configuration for the run that created this report.
+
+```{r session.info, eval=TRUE, echo=TRUE}
+sessionInfo()
+```

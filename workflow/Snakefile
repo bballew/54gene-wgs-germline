@@ -64,13 +64,13 @@ concurrent_limit = utils.get_batch_limit_number(jobs, max_concurrent)
 
 # chromList = utils.get_chrom_list(bed)
 
-TARGETS = ["results/multiqc/multiqc.html"]
+TARGETS = ["results/multiqc/multiqc.html", "results/run_summary/run_summary.html"]
 
 if full:
 
     TARGETS.append(expand("results/alignment_stats/{sample}.txt", sample=SAMPLES))
     TARGETS.append(expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES))
-    TARGETS.append("results/run_summary/run_summary.html")
+    # TARGETS.append("results/run_summary/run_summary.html")
     TARGETS.append("results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz")
     TARGETS.append("results/qc/bcftools_stats/plots/plot-vcfstats.log")
 
@@ -87,7 +87,7 @@ if full:
 
 elif jointgeno:
 
-    TARGETS.append("results/run_summary/run_summary.html")
+    # TARGETS.append("results/run_summary/run_summary.html")
     TARGETS.append("results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz")
     TARGETS.append("results/qc/bcftools_stats/plots/plot-vcfstats.log")
 
@@ -103,6 +103,8 @@ elif fastq_qc_only:
 
     include: "rules/fastq_qc.smk"
     include: "rules/post_calling_qc.smk"
+    include: "rules/report.smk"
+    include: "rules/track_time.smk"
 
 
 wildcard_constraints:
