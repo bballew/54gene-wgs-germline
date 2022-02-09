@@ -219,7 +219,7 @@ def allow_blanks(c):
 
 def read_in_intervals(file):
     """Read in the intervals.tsv file specified in the config as a dataframe and return the dataframe if the interval names are unique."""
-    intervals_df = pd.read_table(file).set_index("interval_name", drop=False)
+    intervals_df = pd.read_table(file).set_index("interval_name", drop=True)
     if intervals_df.index.is_unique is False:
-        return sys.exit("Duplicate interval names detected in intervals file.")
+        raise Exception("Duplicate interval names in supplied interval file.")
     return intervals_df
