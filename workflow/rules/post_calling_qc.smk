@@ -252,6 +252,7 @@ if jointgeno:
             mqc_config="config/multiqc.yaml",
         output:
             "results/multiqc/multiqc.html",
+            "results/multiqc/multiqc_data/multiqc_fastqc_1.txt",
         benchmark:
             "results/performance_benchmarks/multiqc/benchmarks.tsv"
         params:
@@ -276,6 +277,7 @@ if fastq_qc_only:
             mqc_config="config/multiqc.yaml",
         output:
             "results/multiqc/multiqc.html",
+            "results/multiqc/multiqc_data/multiqc_fastqc_1.txt",
         benchmark:
             "results/performance_benchmarks/multiqc/benchmarks.tsv"
         params:
