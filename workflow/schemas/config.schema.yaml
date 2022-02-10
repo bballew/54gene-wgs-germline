@@ -222,6 +222,9 @@ properties:
       max_alt_alleles:
         type: integer
         minimum: 1
+      genomicsdb_max_alt_alleles:
+        type: integer
+        minimum: 1
       max_genotype_count:
         type: integer
         minimum: 2
@@ -231,6 +234,7 @@ properties:
       - memory
       - xmx
       - max_alt_alleles
+      - genomicsdb_max_alt_alleles
       - max_genotype_count
       - java_opts
     additionalProperties: false
