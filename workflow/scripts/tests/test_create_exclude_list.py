@@ -315,7 +315,7 @@ def test_exclude_contam_fail():
         columns=verifybamid_cols,
     )
     test_out = ex.exclude_contam(test_df, 0.03)
-    expected_out = pd.DataFrame([("sample-0295", "contamination")], columns=out_cols)
+    expected_out = pd.DataFrame([("file1", "contamination")], columns=out_cols)
     assert pd.testing.assert_frame_equal(test_out, expected_out) is None
 
 
