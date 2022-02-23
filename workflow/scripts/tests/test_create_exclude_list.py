@@ -266,7 +266,8 @@ def test_exclude_contam_pass():
     assert test_out.empty
 
 
-def test_exclude_contam_fail():
+def test_exclude_contam_fail_multi():
+    # where there are multiple subjects in manifest
     test_df = pd.DataFrame(
         [
             (
@@ -297,7 +298,7 @@ def test_exclude_contam_fail():
                 1931410,
                 35895529,
                 18.59,
-                0.00915,
+                0.08212,
                 7641448.19,
                 7657447.68,
                 "NA",
@@ -315,7 +316,42 @@ def test_exclude_contam_fail():
         columns=verifybamid_cols,
     )
     test_out = ex.exclude_contam(test_df, 0.03)
-    expected_out = pd.DataFrame([("file1", "contamination")], columns=out_cols)
+    expected_out = pd.DataFrame(
+        [("sample-0295", "contamination"), ("sample-0214", "contamination")], columns=out_cols
+    )
+    assert pd.testing.assert_frame_equal(test_out, expected_out) is None
+
+
+def test_exclude_contam_fail_single():
+    # when there is only one subject in manifest
+    test_df = pd.DataFrame(
+        [
+            (
+                "sample-0295",
+                "ALL",
+                "sample-0295",
+                1931410,
+                36724056,
+                19.01,
+                0.10967,
+                7749750.48,
+                7767800.39,
+                "NA",
+                "NA",
+                0.01478,
+                7054259.63,
+                7094649.09,
+                "NA",
+                "NA",
+                19.301,
+                1.0170,
+                0.9929,
+            ),
+        ],
+        columns=verifybamid_cols,
+    )
+    test_out = ex.exclude_contam(test_df, 0.03)
+    expected_out = pd.DataFrame([("sample-0295", "contamination")], columns=out_cols,)
     assert pd.testing.assert_frame_equal(test_out, expected_out) is None
 
 
