@@ -8,6 +8,8 @@ type: object
 properties:
   sampleFile:
     type: string
+  intervalsFile:
+    type: string
   sexLinker:
     type: string
   jobs:
@@ -316,6 +318,7 @@ properties:
 required:
   - sampleFile
   - sexLinker
+  - intervalsFile
   - jobs
   - tempDir
   - runType

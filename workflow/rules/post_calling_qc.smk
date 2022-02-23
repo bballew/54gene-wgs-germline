@@ -66,14 +66,15 @@ rule create_ped:
         "python workflow/scripts/generate_ped.py {input} {params.prefix}"
 
 
+#if config["somalier"]:
 rule check_relatedness:
     input:
         vcf="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
         r="resources/Homo_sapiens_assembly38.fasta",
         ped="results/qc/relatedness/sex_linker.ped",
     output:
-        sites="results/qc/relatedness/sites.hg38.vcf.gz",
-        s="results/qc/relatedness/somalier",
+ #       sites="results/qc/relatedness/sites.hg38.vcf.gz",
+ #       s="results/qc/relatedness/somalier",
         o1="results/qc/relatedness/somalier.html",
         o2="results/qc/relatedness/somalier.pairs.tsv",
         o3="results/qc/relatedness/somalier.samples.tsv",
@@ -82,15 +83,17 @@ rule check_relatedness:
         o="results/qc/relatedness/somalier",
     benchmark:
         "results/performance_benchmarks/check_relatedness/check_relatedness.tsv"
+    conda:
+        "../envs/somalier.yaml"
     shell:
-        "wget -O {output.s} https://github.com/brentp/somalier/releases/download/v0.2.12/somalier && "
-        "wget -O {output.sites} https://github.com/brentp/somalier/files/3412456/sites.hg38.vcf.gz && "
-        "chmod +x {output.s} && "
-        "./results/qc/relatedness/somalier extract "
+  #      "wget -O {output.s} https://github.com/brentp/somalier/releases/download/v0.2.15/somalier && "
+  #      "wget -O {output.sites} https://github.com/brentp/somalier/files/3412456/sites.hg38.vcf.gz && "
+  #      "chmod +x {output.s} && "
+        "somalier extract "
         "-d {params.d} "
-        "--sites {output.sites} "
+        "--sites $CONDA_PREFIX/share/somalier/sites.hg38.vcf.gz "
         "-f {input.r} {input.vcf} && "
-        "./results/qc/relatedness/somalier relate --ped {input.ped} -o {params.o} {params.d}/*.somalier"
+        "somalier relate --ped {input.ped} -o {params.o} {params.d}/*.somalier"
 
 
 # rule per_base_coverage:
@@ -216,6 +219,7 @@ if full:
             "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
             "results/HaplotypeCaller/filtered/HC.variant_calling_summary_metrics",
             mqc_config="config/multiqc.yaml",
+#			somalier="lkjlk" if config["somalier"] else ""
         output:
             "results/multiqc/multiqc.html",
             "results/multiqc/multiqc_data/multiqc_fastqc_1.txt",
