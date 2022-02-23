@@ -1,5 +1,7 @@
+from io import StringIO
 from unittest import mock
 
+import pandas as pd
 import pytest
 from scripts import utils
 
@@ -9,11 +11,17 @@ sampleDict_full = {
     "sampleB_rg1": ["sampleB", "B_r1.fq", "B_r2.fq"],
 }
 
-
 sampleDict_jointgeno = {
     "sampleA": "sampleA.g.vcf.gz",
     "sampleB": "sampleB.g.vcf.gz",
 }
+
+
+@pytest.fixture
+def sample_intervalsDf():
+    return pd.DataFrame(
+        {"interval_name": ["interval_A", "interval_B"], "file_path": ["/path/to/A", "/path/to/B"]}
+    ).set_index("interval_name")
 
 
 class wildcards:
@@ -153,3 +161,19 @@ def test_karyotypic_sort_exit(capsys):
 )
 def test_allow_blanks(test_in, exp_out):
     assert utils.allow_blanks(test_in) == exp_out
+
+
+def test_read_in_intervals(sample_intervalsDf):
+    valid_intervals = StringIO(
+        "interval_name\tfile_path\ninterval_A\t/path/to/A\ninterval_B\t/path/to/B"
+    )
+    test_out = utils.read_in_intervals(valid_intervals)
+    pd.testing.assert_frame_equal(test_out, sample_intervalsDf)
+
+
+def test_read_in_intervals_fail():
+    duplicate_intervals = StringIO(
+        "interval_name\tfile_path\ninterval_A\t/path/to/A\ninterval_A\t/path/to/B"
+    )
+    with pytest.raises(Exception):
+        utils.read_in_intervals(duplicate_intervals)

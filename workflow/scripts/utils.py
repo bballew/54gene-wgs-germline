@@ -4,6 +4,8 @@ import glob
 import os
 import sys
 
+import pandas as pd
+
 sampleDict = {}
 
 
@@ -155,16 +157,16 @@ def get_DBImport_path1(wildcards):
     """Define input files for rule HC_genotype_gvcfs."""
     return glob.glob(
         "results/HaplotypeCaller/DBImport/"
-        + wildcards.intervals
+        + wildcards.interval
         + "/"
-        + wildcards.intervals
+        + wildcards.interval
         + "*/genomicsdb_meta_dir/genomicsdb_meta*.json"
     )
 
 
 def get_DBImport_path2(wildcards):
     """Define input files for rule HC_genotype_gvcfs."""
-    path = "".join(glob.glob("results/HaplotypeCaller/DBImport/" + wildcards.intervals + "/*/__*/"))
+    path = "".join(glob.glob("results/HaplotypeCaller/DBImport/" + wildcards.interval + "/*/__*/"))
     myList = []
     if os.path.exists(path):
         myList = [
@@ -213,3 +215,11 @@ def get_DBImport_path2(wildcards):
 
 def allow_blanks(c):
     return c if c is not None else ""
+
+
+def read_in_intervals(file):
+    """Read in the intervals.tsv file specified in the config as a dataframe and return the dataframe if the interval names are unique."""
+    intervals_df = pd.read_table(file).set_index("interval_name", drop=True)
+    if intervals_df.index.is_unique is False:
+        raise Exception("Duplicate interval names in supplied interval file.")
+    return intervals_df

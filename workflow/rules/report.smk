@@ -36,6 +36,7 @@ if full or jointgeno:
         params:
             input_samples=SAMPLES,
             out_prefix="results/run_summary/run_summary",
+            somalier=config["somalier"],
         conda:
             "../envs/r.yaml"
         benchmark:
@@ -60,6 +61,7 @@ if fastq_qc_only:
         params:
             input_samples=SAMPLES,
             out_prefix="results/run_summary/run_summary",
+            somalier=False,
         conda:
             "../envs/r.yaml"
         benchmark:
