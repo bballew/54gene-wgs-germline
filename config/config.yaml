@@ -20,6 +20,7 @@ max_het_ratio: 2.5
 min_avg_depth: 20.0
 max_contam: 0.03 # N/A for joint_genotyping
 
+somalier: True
 fastqc:
   threads: 8
   memory: 6000
