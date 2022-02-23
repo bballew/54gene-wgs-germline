@@ -1,6 +1,7 @@
 sampleFile: "config/manifest.txt"
+intervalsFile: "config/intervals.txt"
+jobs: 1000
 sexLinker: "config/sex_linker.tsv"
-jobs: 200
 tempDir: "temp/"
 runType:
   full: yes
@@ -12,7 +13,7 @@ default_queue: "comp"
 compute_queue: "comp"
 memory_queue: "mem"
 bed: "resources/Homo_sapiens_assembly38.bed"
-max_concurrent: 40 # max concurrent running jobs for especially high-bandwidth rules, to control hitting the fsx bandwidth cap
+max_concurrent: 2 # max concurrent running jobs for especially high-bandwidth rules, to control hitting the fsx bandwidth cap
 
 # QC thresholds for sample removal:
 max_het_ratio: 2.5
