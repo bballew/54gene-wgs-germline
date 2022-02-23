@@ -56,6 +56,8 @@ properties:
     type: number
     minimum: 0
     maximum: 1
+  somalier:
+    type: boolean
   fastqc:
     type: object
     properties:
@@ -332,6 +334,7 @@ required:
   - max_het_ratio
   - min_avg_depth
   - max_contam
+  - somalier
   - fastqc
   - fastp
   - bwa

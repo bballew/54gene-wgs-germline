@@ -66,35 +66,40 @@ rule create_ped:
         "python workflow/scripts/generate_ped.py {input} {params.prefix}"
 
 
-#if config["somalier"]:
-rule check_relatedness:
-    input:
-        vcf="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
-        r="resources/Homo_sapiens_assembly38.fasta",
-        ped="results/qc/relatedness/sex_linker.ped",
-    output:
- #       sites="results/qc/relatedness/sites.hg38.vcf.gz",
- #       s="results/qc/relatedness/somalier",
-        o1="results/qc/relatedness/somalier.html",
-        o2="results/qc/relatedness/somalier.pairs.tsv",
-        o3="results/qc/relatedness/somalier.samples.tsv",
-    params:
-        d="results/qc/relatedness/extracted/",
-        o="results/qc/relatedness/somalier",
-    benchmark:
-        "results/performance_benchmarks/check_relatedness/check_relatedness.tsv"
-    conda:
-        "../envs/somalier.yaml"
-    shell:
-  #      "wget -O {output.s} https://github.com/brentp/somalier/releases/download/v0.2.15/somalier && "
-  #      "wget -O {output.sites} https://github.com/brentp/somalier/files/3412456/sites.hg38.vcf.gz && "
-  #      "chmod +x {output.s} && "
-        "somalier extract "
-        "-d {params.d} "
-        "--sites $CONDA_PREFIX/share/somalier/sites.hg38.vcf.gz "
-        "-f {input.r} {input.vcf} && "
-        "somalier relate --ped {input.ped} -o {params.o} {params.d}/*.somalier"
+if config["somalier"]:
+    rule check_relatedness:
+        input:
+            vcf="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
+            r="resources/Homo_sapiens_assembly38.fasta",
+            ped="results/qc/relatedness/sex_linker.ped",
+        output:
+            o1="results/qc/relatedness/somalier.html",
+            o2="results/qc/relatedness/somalier.pairs.tsv",
+            o3="results/qc/relatedness/somalier.samples.tsv",
+        params:
+            d="results/qc/relatedness/extracted/",
+            o="results/qc/relatedness/somalier",
+        benchmark:
+            "results/performance_benchmarks/check_relatedness/check_relatedness.tsv"
+        conda:
+            "../envs/somalier.yaml"
+        shell:
+            "somalier extract "
+            "-d {params.d} "
+            "--sites $CONDA_PREFIX/share/somalier/sites.hg38.vcf.gz "
+            "-f {input.r} {input.vcf} && "
+            "somalier relate --ped {input.ped} -o {params.o} {params.d}/*.somalier"
 
+else:
+    rule mock_somalier_outputs:
+        """"""
+        output:
+            o1=temp("results/qc/relatedness/somalier.html"),
+            o2=temp("results/qc/relatedness/somalier.pairs.tsv"),
+            o3=temp("results/qc/relatedness/somalier.samples.tsv"),
+        shell:
+            "touch {output}"
+        
 
 # rule per_base_coverage:
 #     input:
@@ -219,7 +224,6 @@ if full:
             "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
             "results/HaplotypeCaller/filtered/HC.variant_calling_summary_metrics",
             mqc_config="config/multiqc.yaml",
-#			somalier="lkjlk" if config["somalier"] else ""
         output:
             "results/multiqc/multiqc.html",
             "results/multiqc/multiqc_data/multiqc_fastqc_1.txt",
@@ -228,11 +232,12 @@ if full:
         params:
             outDir="results/multiqc/",
             outName="multiqc.html",
-            inDirs="results/fastqc results/post_trimming_fastqc results/qc results/paired_trimmed_reads results/dedup results/bqsr results/alignment_stats results/HaplotypeCaller/filtered",
+            inDirs="results/fastqc results/post_trimming_fastqc results/qc/sex_check results/qc/bcftools_stats results/qc/contamination_check results/paired_trimmed_reads results/dedup results/bqsr results/alignment_stats results/HaplotypeCaller/filtered",
+            relatedness="results/qc/relatedness" if config["somalier"] else "",
         conda:
             "../envs/fastqc_multiqc.yaml"
         shell:
-            "multiqc --force -o {params.outDir} -n {params.outName} --config {input.mqc_config} {params.inDirs}"
+            "multiqc --force -o {params.outDir} -n {params.outName} --config {input.mqc_config} {params.inDirs} {params.relatedness}"
 
 
 if jointgeno:
@@ -262,11 +267,12 @@ if jointgeno:
         params:
             outDir="results/multiqc/",
             outName="multiqc.html",
-            inDirs="results/qc results/HaplotypeCaller/filtered",
+            inDirs="results/qc/sex_check results/qc/bcftools_stats results/HaplotypeCaller/filtered",
+            relatedness="results/qc/relatedness" if config["somalier"] else "",
         conda:
             "../envs/fastqc_multiqc.yaml"
         shell:
-            "multiqc --force -o {params.outDir} --config {input.mqc_config} -n {params.outName} {params.inDirs}"
+            "multiqc --force -o {params.outDir} --config {input.mqc_config} -n {params.outName} {params.inDirs} {params.relatedness}"
 
 
 if fastq_qc_only:

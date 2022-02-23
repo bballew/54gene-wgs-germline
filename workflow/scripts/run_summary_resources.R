@@ -50,13 +50,15 @@ prepare.subject.tracking.table <- function(input.subjects, output.subjects.filen
     stopifnot(file.exists(output.subjects.filename))
     stopifnot(file.exists(exclude.reasons.filename))
 	output.subjects <- c()
-	if (file.info(output.subjects.filename)$size  > 0) {
+	if (file.info(output.subjects.filename)$size > 0) {
 		output.subjects <- read.table(output.subjects.filename, header = FALSE, sep = "\t")[, 1]
 	}
-	exclude.reasons <- read.table(exclude.reasons.filename, header = FALSE, sep = "\t", row.names = 1)
-    result <- rep("Pass", length(input.subjects))
-    result[!(input.subjects %in% output.subjects)] <- "No"
-    result[input.subjects %in% rownames(exclude.reasons)] <- exclude.reasons[input.subjects[input.subjects %in% rownames(exclude.reasons)], 1]
+	result <- rep("Pass", length(input.subjects))
+	if (file.info(exclude.reasons.filename)$size > 0) {
+		exclude.reasons <- read.table(exclude.reasons.filename, header = FALSE, sep = "\t", row.names = 1)
+		result[!(input.subjects %in% output.subjects)] <- "No"
+		result[input.subjects %in% rownames(exclude.reasons)] <- exclude.reasons[input.subjects[input.subjects %in% rownames(exclude.reasons)], 1]
+	}
     df <- data.frame("Subject" = input.subjects,
                      "QC Outcome for This Run" = result,
                      check.names = FALSE)
@@ -130,18 +132,20 @@ report.related.subject.pairs <- function(output.subjects.filename, somalier.rela
     stopifnot(min.cutoff <= max.cutoff)
 
 	output.subjects <- c()
-	if (file.info(output.subjects.filename)$size  > 0) {
+	if (file.info(output.subjects.filename)$size > 0) {
 		output.subjects <- read.table(output.subjects.filename, header = FALSE, stringsAsFactors = FALSE)[, 1]
 	}
 
     somalier.relatedness <- data.frame("x", "y", 1.0)[0, ]
-	lines.in.file = length(readLines(somalier.relatedness.filename, n = 2))
-	if (lines.in.file == 2) {
-		somalier.relatedness <- read.table(somalier.relatedness.filename, header = FALSE, stringsAsFactors = FALSE)[, 1:3]
-		somalier.relatedness <- somalier.relatedness[somalier.relatedness[, 1] %in% output.subjects &
-                                                 somalier.relatedness[, 2] %in% output.subjects &
-                                                 somalier.relatedness[, 3] > min.cutoff &
-                                                 somalier.relatedness[, 3] <= max.cutoff, ]
+	if (file.info(somalier.relatedness.filename)$size > 0) {
+		lines.in.file = length(readLines(somalier.relatedness.filename, n = 2))
+		if (lines.in.file == 2) {
+			somalier.relatedness <- read.table(somalier.relatedness.filename, header = FALSE, stringsAsFactors = FALSE)[, 1:3]
+			somalier.relatedness <- somalier.relatedness[somalier.relatedness[, 1] %in% output.subjects &
+													 somalier.relatedness[, 2] %in% output.subjects &
+													 somalier.relatedness[, 3] > min.cutoff &
+													 somalier.relatedness[, 3] <= max.cutoff, ]
+		}
 	}
 
     rownames(somalier.relatedness) <- NULL
@@ -194,14 +198,16 @@ report.sex.discordances <- function(output.subjects.filename, somalier.sex.filen
 		output.subjects <- read.table(output.subjects.filename, header = FALSE, stringsAsFactors = FALSE)[, 1]
 	}
 
-	lines.in.file = length(readLines(somalier.sex.filename, n = 2))
 	somalier.sex <- data.frame("x", 1, "y")[0, ]
-	if (lines.in.file == 2) {
-		somalier.sex <- read.table(somalier.sex.filename, header = FALSE, stringsAsFactors = FALSE)[, c(2,5,7)]
-		somalier.sex <- somalier.sex[somalier.sex[, 1] %in% output.subjects &
-								 ((somalier.sex[, 2] != 2 & somalier.sex[, 3] == "female")
-								 | (somalier.sex[, 2] != 1 & somalier.sex[, 3] == "male")
-								 | !(somalier.sex[, 3] %in% c("male", "female"))) ,]
+	if (file.info(somalier.sex.filename)$size > 0) {
+		lines.in.file = length(readLines(somalier.sex.filename, n = 2))
+		if (lines.in.file == 2) {
+			somalier.sex <- read.table(somalier.sex.filename, header = FALSE, stringsAsFactors = FALSE)[, c(2,5,7)]
+			somalier.sex <- somalier.sex[somalier.sex[, 1] %in% output.subjects &
+									 ((somalier.sex[, 2] != 2 & somalier.sex[, 3] == "female")
+									 | (somalier.sex[, 2] != 1 & somalier.sex[, 3] == "male")
+									 | !(somalier.sex[, 3] %in% c("male", "female"))) ,]
+		}
 	}
 	rownames(somalier.sex) <- NULL
 	colnames(somalier.sex) <- c("Subject",
