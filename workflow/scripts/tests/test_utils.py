@@ -91,7 +91,8 @@ def test_get_sm(test_in, exp_out):
 
 
 @pytest.mark.parametrize(
-    "test_in, exp_out", [("sampleA", "sampleA.g.vcf.gz"), ("sampleB", "sampleB.g.vcf.gz")],
+    "test_in, exp_out",
+    [("sampleA", "sampleA.g.vcf.gz"), ("sampleB", "sampleB.g.vcf.gz")],
 )
 def test_get_gvcf(test_in, exp_out):
     wildcards.sample = test_in
@@ -99,7 +100,8 @@ def test_get_gvcf(test_in, exp_out):
 
 
 @pytest.mark.parametrize(
-    "test_in, exp_out", [("sampleA", "sampleA.g.vcf.gz.tbi"), ("sampleB", "sampleB.g.vcf.gz.tbi")],
+    "test_in, exp_out",
+    [("sampleA", "sampleA.g.vcf.gz.tbi"), ("sampleB", "sampleB.g.vcf.gz.tbi")],
 )
 def test_get_gvcf_index(test_in, exp_out):
     wildcards.sample = test_in
@@ -131,7 +133,8 @@ def test_list_markdup_inputs(test_in, exp_out):
 
 
 @pytest.mark.parametrize(
-    "test_in, exp_out", [([100, 10], 10), ([1, 20], 1), ([10, 6], 2)],
+    "test_in, exp_out",
+    [([100, 10], 10), ([1, 20], 1), ([10, 6], 2)],
 )
 def test_get_batch_limit_number(test_in, exp_out):
     assert utils.get_batch_limit_number(test_in[0], test_in[1]) == exp_out
@@ -157,7 +160,8 @@ def test_karyotypic_sort_exit(capsys):
 
 
 @pytest.mark.parametrize(
-    "test_in, exp_out", [("-opt 1 -and another", "-opt 1 -and another"), (None, "")],
+    "test_in, exp_out",
+    [("-opt 1 -and another", "-opt 1 -and another"), (None, "")],
 )
 def test_allow_blanks(test_in, exp_out):
     assert utils.allow_blanks(test_in) == exp_out

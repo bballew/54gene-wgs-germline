@@ -185,9 +185,7 @@ rule HC_genotype_gvcfs:
 rule HC_concat_vcfs_bcftools:
     """Combine per-interval joint-called multi-sample VCFs."""
     input:
-        vcfList=expand(
-            "results/HaplotypeCaller/genotyped/{interval}.vcf.gz", interval=intervalList
-        ),
+        vcfList=expand("results/HaplotypeCaller/genotyped/{interval}.vcf.gz", interval=intervalList),
         indexList=expand(
             "results/HaplotypeCaller/genotyped/{interval}.vcf.gz.tbi", interval=intervalList
         ),

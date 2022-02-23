@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import argparse as ap
+import re
 import shutil
 import sys
-import re
 
 import pandas as pd
 

@@ -67,6 +67,7 @@ rule create_ped:
 
 
 if config["somalier"]:
+
     rule check_relatedness:
         input:
             vcf="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
@@ -90,7 +91,9 @@ if config["somalier"]:
             "-f {input.r} {input.vcf} && "
             "somalier relate --ped {input.ped} -o {params.o} {params.d}/*.somalier"
 
+
 else:
+
     rule mock_somalier_outputs:
         """"""
         output:
@@ -99,7 +102,7 @@ else:
             o3=temp("results/qc/relatedness/somalier.samples.tsv"),
         shell:
             "touch {output}"
-        
+
 
 # rule per_base_coverage:
 #     input:
