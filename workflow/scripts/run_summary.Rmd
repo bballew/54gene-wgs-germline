@@ -1,0 +1,168 @@
+---
+title: "WGS Run Summary"
+author:
+  - "Bari Ballew"
+  - "Cameron Palmer"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+params:
+  rmd: "run_summary.Rmd"
+output:
+  html_document:
+    code_folding: "hide"
+  highlight: tango
+  number_sections: no
+  theme: default
+  toc: yes
+  toc_depth: 3
+  toc_float:
+    collapsed: no
+    smooth_scroll: yes
+---
+
+```{r load.packages, eval=TRUE, echo=FALSE, message=FALSE}
+## Load required R packages
+
+library(knitr, quietly = TRUE)
+library(kableExtra, quietly = TRUE)
+library(ggplot2, quietly = TRUE)
+library(RColorBrewer, quietly = TRUE)
+```
+
+```{r load.resources, eval=TRUE, echo=FALSE, message=FALSE}
+## Load tested functions for this report
+source(snakemake@input[["r_resources"]])
+```
+
+```{r set.ggplot2.theme, eval=TRUE, echo=TRUE}
+## Configure standard theme information for ggplot2
+
+my.theme <- theme_light() + theme(plot.title = element_text(size = 15, hjust = 0.5),
+                                  axis.title = element_text(size = 14),
+                                  axis.text = element_text(size = 12),
+                                  strip.background = element_blank(),
+                                  strip.text = element_text(size = 14, colour = "black"))
+```
+
+```{r load.snakemake.files, eval=TRUE, echo=FALSE}
+input.subjects <- snakemake@params[["input_samples"]]
+exclude.reasons.filename <- snakemake@input[["exclude_list"]]
+output.subjects.filename <- snakemake@input[["output_subject_list"]]
+somalier.relatedness.filename <- snakemake@input[["relatedness"]]
+somalier.sex.filename <- snakemake@input[["sex"]]
+fastqc.filename <- snakemake@input[["fastqc"]]
+bcftools.stats.filename <- snakemake@input[["bcftools_stats"]]
+tsv.path <- snakemake@params[["out_prefix"]]
+start.time.filename <- snakemake@input[["start_time"]]
+```
+
+```{r configure.variables, eval=TRUE, echo=FALSE}
+somalier.related.min <- 0.5
+somalier.duplicate.min <- 0.95
+```
+
+***
+<br>
+
+## Final Subject Tracking
+
+A total of `r length(input.subjects)` subjects were queued up for analysis in this run; `r count.rows.in.file(output.subjects.filename)` subjects passed automated QC and are present in the final VCF.  The table below reports lane/read failures for select FastQC metrics.  Only failing fastqs are reported in those columns.  Please see the MultiQC report for additional information.
+
+```{r report.before.after.subjects, eval=TRUE, echo=FALSE, results="asis"}
+res <- prepare.subject.tracking.table(input.subjects, output.subjects.filename, exclude.reasons.filename)
+res <- add.fastqc.data(res, fastqc.filename)
+res <- add.coverage(res, bcftools.stats.filename)
+res <- res[order(res[, "Subject"]), ]
+rownames(res) <- NULL
+
+knitr::kable(res, caption = "Summary of Subject Fate") %>% kableExtra::kable_styling("striped", position = "left", full_width = FALSE)
+
+write.output.table(res, tsv.path)
+```
+
+***
+<br>
+
+## Subjects Flagged for Discordant Self-Reported vs. Inferred Sex
+
+The following subjects were identified as having an inferred sex (via Somalier) that was different from the sex listed in the linker file provided
+when running this pipeline.  These subjects may correlate with unexpected genetic duplicates; rarely, there may be evidence of sex chromosome
+karyotypes that can confound this analysis (e.g. XO, XXY, etc.).  These subjects are not automatically removed from the final VCF and require manual
+follow-up.
+
+
+```{r report.sex, eval=TRUE, echo=FALSE, results="asis"}
+res <- report.sex.discordances(output.subjects.filename, somalier.sex.filename)
+
+if (nrow(res) == 0) {
+    cat("No sex discordant subjects were identified.")
+} else {
+    print(knitr::kable(res, caption = "Sex Discordant Subjects") %>% kableExtra::kable_styling("striped", position = "left", full_width = FALSE))
+}
+```
+
+***
+<br>
+
+## Subjects Flagged as Genetic Duplicates
+
+The following subject pairs were identified as being highly genetically related (Somalier relatedness >`r somalier.duplicate.min`).  The subjects were not automatically removed from the final VCF, but should be assessed manually to determine whom to include in further analyses.
+
+```{r report.dups, eval=TRUE, echo=FALSE, results="asis"}
+res <- report.related.subject.pairs(output.subjects.filename, somalier.relatedness.filename, somalier.duplicate.min, 1.0)
+
+if (nrow(res) == 0) {
+    cat("No duplicate subjects were detected above the specified relatedness cutoff.")
+} else {
+    print(knitr::kable(res, caption = "Genetic Duplicates") %>% kableExtra::kable_styling("striped", position = "left", full_width = FALSE))
+}
+```
+
+***
+<br>
+
+## Subjects Flagged as Potentially Related
+
+The following subjects were identified as being potentially related to one another (Somalier relatedness `r somalier.related.min`-`r somalier.duplicate.min`).  Because Somalier relies on the selected variants being ~0.5 allele frequency in the population, the actual degree of relatedness is not guaranteed from this output.  Potential relatedness for these subjects should be followed up using more specialized software, e.g. KING.  There is also the potential for related subjects below this threshold that would be excluded from this report.
+
+```{r report.relateds, eval=TRUE, echo=FALSE, results="asis"}
+res <- report.related.subject.pairs(output.subjects.filename, somalier.relatedness.filename, somalier.related.min, somalier.duplicate.min)
+
+if (nrow(res) == 0) {
+    cat("No non-identical related subjects were detected within the specified range.")
+} else {
+    print(knitr::kable(res, caption = "Potentially Related Non-identical Subjects") %>% kableExtra::kable_styling("striped", position = "left", full_width = FALSE))
+}
+```
+
+***
+<br>
+
+## Total Elapsed Analysis Run Time
+
+```{r report.time, eval=TRUE, echo=FALSE, results="hide"}
+start.time <- read.table(start.time.filename, header = FALSE)[1,1]
+end.time <- as.integer(format(Sys.time(), "%s"))
+elapsed.time <- round((end.time - start.time) / 3600, 2)
+```
+
+Elapsed time was `r elapsed.time` hours.
+
+***
+<br>
+
+## Assorted Software Links
+
+<br>
+
+***
+<br>
+
+## Session Information
+
+<br>
+
+The following summarizes the loaded R configuration for the run that created this report.
+
+```{r session.info, eval=TRUE, echo=TRUE}
+sessionInfo()
+```

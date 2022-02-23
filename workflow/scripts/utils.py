@@ -9,7 +9,7 @@ import pandas as pd
 sampleDict = {}
 
 
-def read_in_manifest(s, full):
+def read_in_manifest(s, full, fastq_qc_only):
     """Parse whitespace delimited manifest file.
 
     Note the distinct requirements for the two different run types.
@@ -20,7 +20,7 @@ def read_in_manifest(s, full):
     global sampleDict
     with open(s) as f:
         for line in f:
-            if full:
+            if full or fastq_qc_only:
                 (rg, sm, read1, read2) = line.split()
                 sampleDict[rg] = sm, read1, read2
             else:

@@ -53,10 +53,24 @@ rule plot_variant_stats:
 # ID and exclude samples with het/hom above....x?  Make tunable for WGS vs WES?  Use some outlier threshold?
 
 
+rule create_ped:
+    input:
+        linker=config["sexLinker"],
+    output:
+        ped="results/qc/relatedness/sex_linker.ped",
+    params:
+        prefix="results/qc/relatedness/sex_linker",
+    benchmark:
+        "results/performance_benchmarks/create_ped/create_ped.tsv"
+    shell:
+        "python workflow/scripts/generate_ped.py {input} {params.prefix}"
+
+
 rule check_relatedness:
     input:
         vcf="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
         r="resources/Homo_sapiens_assembly38.fasta",
+        ped="results/qc/relatedness/sex_linker.ped",
     output:
         sites="results/qc/relatedness/sites.hg38.vcf.gz",
         s="results/qc/relatedness/somalier",
@@ -76,7 +90,7 @@ rule check_relatedness:
         "-d {params.d} "
         "--sites {output.sites} "
         "-f {input.r} {input.vcf} && "
-        "./results/qc/relatedness/somalier relate -o {params.o} {params.d}/*.somalier"
+        "./results/qc/relatedness/somalier relate --ped {input.ped} -o {params.o} {params.d}/*.somalier"
 
 
 # rule per_base_coverage:
@@ -204,6 +218,7 @@ if full:
             mqc_config="config/multiqc.yaml",
         output:
             "results/multiqc/multiqc.html",
+            "results/multiqc/multiqc_data/multiqc_fastqc_1.txt",
         benchmark:
             "results/performance_benchmarks/multiqc/benchmarks.tsv"
         params:
@@ -234,8 +249,10 @@ if jointgeno:
             "results/qc/bcftools_stats/joint_called_stats.out",
             "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
             "results/HaplotypeCaller/filtered/HC.variant_calling_summary_metrics",
+            mqc_config="config/multiqc.yaml",
         output:
             "results/multiqc/multiqc.html",
+            "results/multiqc/multiqc_data/multiqc_fastqc_1.txt",
         benchmark:
             "results/performance_benchmarks/multiqc/benchmarks.tsv"
         params:
@@ -245,4 +262,29 @@ if jointgeno:
         conda:
             "../envs/fastqc_multiqc.yaml"
         shell:
-            "multiqc --force -o {params.outDir} -n {params.outName} {params.inDirs}"
+            "multiqc --force -o {params.outDir} --config {input.mqc_config} -n {params.outName} {params.inDirs}"
+
+
+if fastq_qc_only:
+
+    rule multiqc:
+        """Generate one multiQC report for all input fastqs."""
+        input:
+            expand("results/fastqc/{rg}_r1_fastqc.zip", rg=sampleDict.keys()),
+            expand("results/fastqc/{rg}_r2_fastqc.zip", rg=sampleDict.keys()),
+            expand("results/post_trimming_fastqc/{rg}_r1_fastqc.zip", rg=sampleDict.keys()),
+            expand("results/post_trimming_fastqc/{rg}_r2_fastqc.zip", rg=sampleDict.keys()),
+            mqc_config="config/multiqc.yaml",
+        output:
+            "results/multiqc/multiqc.html",
+            "results/multiqc/multiqc_data/multiqc_fastqc_1.txt",
+        benchmark:
+            "results/performance_benchmarks/multiqc/benchmarks.tsv"
+        params:
+            outDir="results/multiqc/",
+            outName="multiqc.html",
+            inDirs="results/fastqc results/post_trimming_fastqc",
+        conda:
+            "../envs/fastqc_multiqc.yaml"
+        shell:
+            "multiqc --force -o {params.outDir} --config {input.mqc_config} -n {params.outName} {params.inDirs}"

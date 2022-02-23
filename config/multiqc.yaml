@@ -4,13 +4,6 @@
 ## Please do not change this configuration file unless you
 ## know exactly what you're doing.
 module_order:
-  - somalier
-  - verifybamid
-  - gatk
-  - bcftools
-  - picard
-  - samtools
-  - fastp
   - fastqc:
       name: 'FastQC (raw)'
       target: ''

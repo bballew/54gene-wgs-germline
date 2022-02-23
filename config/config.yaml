@@ -1,14 +1,16 @@
 sampleFile: "config/manifest.txt"
 intervalsFile: "config/intervals.txt"
 jobs: 1000
+sexLinker: "config/sex_linker.tsv"
 tempDir: "temp/"
 runType:
   full: yes
   joint_genotyping: no
+  fastq_qc_only: no
 global_vars: 'export _JAVA_OPTIONS="-Djava.io.tmpdir=temp/ -XX:CompressedClassSpaceSize=200m"' # you get TMPDIR set to tempDir for free
 cluster_mode: "sbatch -o logs/%x.o%j -p {resources.queue} --mem-per-cpu={resources.mem_mb}M -D ./ --cpus-per-task={threads}"
-default_queue: "spot"
-compute_queue: "spot"
+default_queue: "comp"
+compute_queue: "comp"
 memory_queue: "mem"
 bed: "resources/Homo_sapiens_assembly38.bed"
 max_concurrent: 2 # max concurrent running jobs for especially high-bandwidth rules, to control hitting the fsx bandwidth cap
@@ -60,6 +62,7 @@ genotypeGVCFs:
   memory: 24000
   xmx: 12000
   max_alt_alleles: 50
+  genomicsdb_max_alt_alleles: 51
   max_genotype_count: 5000
   java_opts:
 bcftools:
@@ -75,6 +78,9 @@ variantFiltration:
   java_opts:
 verifyBamID: # only for full runs
   memory: 4000
+  region:
+    - chr5
+    - chr10
 picardCollectVariantCallingMetrics:
   memory: 6000
   xmx: 1000

@@ -158,6 +158,7 @@ rule HC_genotype_gvcfs:
         db="results/HaplotypeCaller/DBImport/{interval}",
         t=tempDir,
         m=config["genotypeGVCFs"]["max_alt_alleles"],
+        g=config["genotypeGVCFs"]["genomicsdb_max_alt_alleles"],
         c=config["genotypeGVCFs"]["max_genotype_count"],
         java_opts=utils.allow_blanks(config["genotypeGVCFs"]["java_opts"]),
     conda:
@@ -174,6 +175,7 @@ rule HC_genotype_gvcfs:
         "-O {output.vcf} "
         "--tmp-dir {params.t} "
         "--max-alternate-alleles {params.m} "
+        "--genomicsdb-max-alternate-alleles {params.g} "
         "--max-genotype-count {params.c} "
         "-stand-call-conf 30 "
         "-G StandardAnnotation "
