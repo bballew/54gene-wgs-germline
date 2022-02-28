@@ -170,7 +170,7 @@ if full:
             vcf=temp("results/qc/contamination_check/subset.snps.hardfiltered.vcf.gz"),
             i=temp("results/qc/contamination_check/subset.snps.hardfiltered.vcf.gz.tbi"),
         params:
-            region=",".join(config["verifyBamID"]["region"])
+            region=",".join(config["verifyBamID"]["region"]),
         benchmark:
             "results/performance_benchmarks/subset_for_contam_check/subset.tsv"
         threads: config["bcftools"]["threads"]
@@ -273,7 +273,8 @@ rule picard_metrics:
             * config["picardCollectVariantCallingMetrics"]["memory"]
         ),
         xmx=(
-            lambda wildcards, attempt: attempt * config["picardCollectVariantCallingMetrics"]["xmx"]
+            lambda wildcards, attempt: attempt
+            * config["picardCollectVariantCallingMetrics"]["xmx"]
         ),
     shell:
         'export _JAVA_OPTIONS="" && '
