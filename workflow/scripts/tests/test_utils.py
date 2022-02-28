@@ -34,7 +34,7 @@ def test_read_in_manifest_full():
         read_data="rg1\tsample1\tsample1_r1.fq\tsample1_r2.fq\nrg2 sample2 sample2_r1.fq sample2_r2.fq"
     )
     with mock.patch("scripts.utils.open", m):
-        test_out = utils.read_in_manifest("file", True)
+        test_out = utils.read_in_manifest("file", True, False)
     exp_dict = {
         "rg1": ("sample1", "sample1_r1.fq", "sample1_r2.fq"),
         "rg2": ("sample2", "sample2_r1.fq", "sample2_r2.fq"),
