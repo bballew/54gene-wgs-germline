@@ -17,8 +17,11 @@ import pathlib
 from snakemake.utils import validate
 from scripts import utils
 
-label = subprocess.check_output(["git", "describe", "--always"]).strip()
-print(f"54gene WGS germline workflow {label}")
+try:
+    label = subprocess.check_output(["git", "describe", "--always"]).strip()
+    print(f"54gene WGS germline workflow {label}")
+except subprocess.CalledProcessError:
+    print("54gene WGS germline workflow, version not detected!")
 
 
 # reference the config file
@@ -62,10 +65,7 @@ SAMPLES = utils.create_samples_set(sampleDict) if full or fastq_qc_only else sam
 # that rule.
 concurrent_limit = utils.get_batch_limit_number(jobs, max_concurrent)
 
-TARGETS = [
-    "results/multiqc/multiqc.html",
-    "results/run_summary/run_summary.html"
-]
+TARGETS = ["results/multiqc/multiqc.html", "results/run_summary/run_summary.html"]
 
 if full:
 
