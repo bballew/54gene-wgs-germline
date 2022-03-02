@@ -31,6 +31,8 @@ properties:
       - joint_genotyping
       - fastq_qc_only
     additionalProperties: false
+  combine_vcfs:
+    type: boolean
   global_vars:
     type: string
   cluster_mode:

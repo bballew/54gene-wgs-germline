@@ -1,5 +1,5 @@
 sampleFile: "config/manifest.txt"
-intervalsFile: "config/intervals.txt"
+intervalsFile: "config/intervals.tsv"
 jobs: 1000
 sexLinker: "config/sex_linker.tsv"
 tempDir: "temp/"
@@ -7,6 +7,7 @@ runType:
   full: yes
   joint_genotyping: no
   fastq_qc_only: no
+combine_vcfs: False  # whether to combine per-chrom vcfs into multi-sample project-VCF or not, default is false
 global_vars: 'export _JAVA_OPTIONS="-Djava.io.tmpdir=temp/ -XX:CompressedClassSpaceSize=200m"' # you get TMPDIR set to tempDir for free
 cluster_mode: "sbatch -o logs/%x.o%j -p {resources.queue} --mem-per-cpu={resources.mem_mb}M -D ./ --cpus-per-task={threads}"
 default_queue: "comp"

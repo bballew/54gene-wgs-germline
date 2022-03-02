@@ -182,8 +182,8 @@ rule HC_genotype_gvcfs:
         "-G StandardHCAnnotation"
 
 
-rule HC_concat_vcfs_bcftools:
-    """Combine per-interval joint-called multi-sample VCFs."""
+rule HC_split_intervals_chrom:
+    """Separate the VCFs joint-called over intervals by chromosome."""
     input:
         vcfList=expand(
             "results/HaplotypeCaller/genotyped/{interval}.vcf.gz", interval=intervalList
@@ -192,18 +192,42 @@ rule HC_concat_vcfs_bcftools:
             "results/HaplotypeCaller/genotyped/{interval}.vcf.gz.tbi", interval=intervalList
         ),
     output:
-        projectVCF="results/HaplotypeCaller/genotyped/HC_variants.vcf.gz",
-        idx="results/HaplotypeCaller/genotyped/HC_variants.vcf.gz.tbi",
-    params:
-        t=tempDir,
+        vcf=temp("results/HaplotypeCaller/split_vcfs/{interval}/{chrom}.vcf.gz"),
+        index=temp("results/HaplotypeCaller/split_vcfs/{interval}/{chrom}.vcf.gz.tbi"),
     benchmark:
-        "results/performance_benchmarks/HC_concat_vcfs_bcftools/benchmarks.tsv"
+        "results/performance_benchmarks/HC_split_intervals_chrom/{interval}/{chrom}/benchmarks.tsv"
     conda:
         "../envs/bcftools_tabix.yaml"
     resources:
         mem_mb=lambda wildcards, attempt: attempt * config["bcftools"]["memory"],
         queue=config["compute_queue"],
     shell:
-        "bcftools concat -a {input.vcfList} -Ou | "
-        "bcftools sort -T {params.t} -Oz -o {output.projectVCF} && "
-        "tabix -p vcf {output.projectVCF}"
+        "bcftools view -r {wildcards.chrom} -Oz -o {output.vcf} {input.vcfList} && "
+        "tabix -p vcf {output.vcf}"
+
+
+rule HC_combine_chrom_vcfs:
+    """Combine the VCFs for each chromosome from each interval to generate multi-sample per-chromosome VCFs."""
+    input:
+        vcfList=expand(
+            "results/HaplotypeCaller/split_vcfs/{interval}/{{chrom}}.vcf.gz",
+            interval=intervalList,
+            chrom=chromList,
+        ),
+        indexList=expand(
+            "results/HaplotypeCaller/split_vcfs/{interval}/{{chrom}}.vcf.gz.tbi",
+            interval=intervalList,
+            chrom=chromList,
+        ),
+    output:
+        vcf="results/HaplotypeCaller/genotyped/chrom_vcfs/{chrom}.vcf.gz",
+        index="results/HaplotypeCaller/genotyped/chrom_vcfs/{chrom}.vcf.gz.tbi",
+    conda:
+        "../envs/bcftools_tabix.yaml"
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * config["bcftools"]["memory"],
+        queue=config["compute_queue"],
+    shell:
+        "bcftools concat -a -Ou {input.vcfList} | "
+        "bcftools sort -Oz -o {output.vcf} && "
+        "tabix -p vcf {output.vcf}"
