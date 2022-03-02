@@ -2,52 +2,56 @@ rule variant_stats:
     input:
         r="resources/Homo_sapiens_assembly38.fasta",
         f="resources/Homo_sapiens_assembly38.fasta.fai",
-        vcf="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
-        i="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz.tbi",
+        vcfList=expand(
+            "results/HaplotypeCaller/filtered/{chrom}.hardfiltered.vcf.gz", chrom=chromList
+        ),
+        indexList=expand(
+            "results/HaplotypeCaller/filtered/{chrom}.hardfiltered.vcf.gz.tbi", chrom=chromList
+        ),
     output:
-        "results/qc/bcftools_stats/joint_called_stats.out",
+        "results/qc/bcftools_stats/{chrom}/joint_called_stats.out",
     benchmark:
-        "results/performance_benchmarks/variant_stats/variant_stats.tsv"
+        "results/performance_benchmarks/variant_stats/{chrom}/variant_stats.tsv"
     conda:
         "../envs/bcftools_tabix.yaml"
     shell:
         "bcftools stats "
         "--af-bins 0.01,0.05,0.1,1 "
         "-F {input.r} "
-        "-s- {input.vcf} > {output}"
+        "-s- {input.vcfList} > {output}"
 
 
 rule plot_variant_stats:
     input:
-        "results/qc/bcftools_stats/joint_called_stats.out",
+        i=expand("results/qc/bcftools_stats/{chrom}/joint_called_stats.out", chrom=chromList),
     output:
-        "results/qc/bcftools_stats/plots/counts_by_af.indels.dat",
-        "results/qc/bcftools_stats/plots/indels.0.dat",
-        "results/qc/bcftools_stats/plots/substitutions.0.png",
-        "results/qc/bcftools_stats/plots/counts_by_af.snps.dat",
-        "results/qc/bcftools_stats/plots/depth.0.dat",
-        "results/qc/bcftools_stats/plots/indels.0.png",
-        "results/qc/bcftools_stats/plots/tstv_by_af.0.dat",
-        "results/qc/bcftools_stats/plots/depth.0.png",
-        "results/qc/bcftools_stats/plots/indels_by_sample.0.png",
-        "results/qc/bcftools_stats/plots/tstv_by_qual.0.dat",
-        "results/qc/bcftools_stats/plots/plot.py",
-        "results/qc/bcftools_stats/plots/dp_by_sample.0.png",
-        "results/qc/bcftools_stats/plots/plot-vcfstats.log",
-        "results/qc/bcftools_stats/plots/tstv_by_sample.0.dat",
-        "results/qc/bcftools_stats/plots/hets_by_sample.0.png",
-        "results/qc/bcftools_stats/plots/singletons_by_sample.0.png",
-        "results/qc/bcftools_stats/plots/hwe.0.dat",
-        "results/qc/bcftools_stats/plots/tstv_by_sample.0.png",
-        "results/qc/bcftools_stats/plots/snps_by_sample.0.png",
+        "results/qc/bcftools_stats/plots/{chrom}/counts_by_af.indels.dat",
+        "results/qc/bcftools_stats/plots/{chrom}/indels.0.dat",
+        "results/qc/bcftools_stats/plots/{chrom}/substitutions.0.png",
+        "results/qc/bcftools_stats/plots/{chrom}/counts_by_af.snps.dat",
+        "results/qc/bcftools_stats/plots/{chrom}/depth.0.dat",
+        "results/qc/bcftools_stats/plots/{chrom}/indels.0.png",
+        "results/qc/bcftools_stats/plots/{chrom}/tstv_by_af.0.dat",
+        "results/qc/bcftools_stats/plots/{chrom}/depth.0.png",
+        "results/qc/bcftools_stats/plots/{chrom}/indels_by_sample.0.png",
+        "results/qc/bcftools_stats/plots/{chrom}/tstv_by_qual.0.dat",
+        "results/qc/bcftools_stats/plots/{chrom}/plot.py",
+        "results/qc/bcftools_stats/plots/{chrom}/dp_by_sample.0.png",
+        "results/qc/bcftools_stats/plots/{chrom}/plot-vcfstats.log",
+        "results/qc/bcftools_stats/plots/{chrom}/tstv_by_sample.0.dat",
+        "results/qc/bcftools_stats/plots/{chrom}/hets_by_sample.0.png",
+        "results/qc/bcftools_stats/plots/{chrom}/singletons_by_sample.0.png",
+        "results/qc/bcftools_stats/plots/{chrom}/hwe.0.dat",
+        "results/qc/bcftools_stats/plots/{chrom}/tstv_by_sample.0.png",
+        "results/qc/bcftools_stats/plots/{chrom}/snps_by_sample.0.png",
     params:
-        d="results/qc/bcftools_stats/plots/",
+        d="results/qc/bcftools_stats/plots/{chrom}",
     benchmark:
-        "results/performance_benchmarks/plot_variant_stats/plot_variant_stats.tsv"
+        "results/performance_benchmarks/plot_variant_stats/{chrom}/plot_variant_stats.tsv"
     conda:
         "../envs/bcftools_tabix.yaml"
     shell:
-        "plot-vcfstats -P -p {params.d} {input}"
+        "plot-vcfstats -P -p {params.d} {input.i}"
 
 
 # ID and exclude samples with het/hom above....x?  Make tunable for WGS vs WES?  Use some outlier threshold?
@@ -67,9 +71,16 @@ rule create_ped:
 
 
 if config["somalier"]:
+
     rule check_relatedness:
         input:
-            vcf="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
+            vcf=(
+                expand("results/bqsr/{sample}.bam", sample=SAMPLES)
+                if full
+                else expand(
+                    "results/HaplotypeCaller/called/{sample}_all_regions.g.vcf.gz", sample=SAMPLES
+                )
+            ),
             r="resources/Homo_sapiens_assembly38.fasta",
             ped="results/qc/relatedness/sex_linker.ped",
         output:
@@ -77,7 +88,7 @@ if config["somalier"]:
             o2="results/qc/relatedness/somalier.pairs.tsv",
             o3="results/qc/relatedness/somalier.samples.tsv",
         params:
-            d="results/qc/relatedness/extracted/",
+            d="results/qc/relatedness/extracted",
             o="results/qc/relatedness/somalier",
         benchmark:
             "results/performance_benchmarks/check_relatedness/check_relatedness.tsv"
@@ -90,7 +101,9 @@ if config["somalier"]:
             "-f {input.r} {input.vcf} && "
             "somalier relate --ped {input.ped} -o {params.o} {params.d}/*.somalier"
 
+
 else:
+
     rule mock_somalier_outputs:
         """"""
         output:
@@ -99,7 +112,7 @@ else:
             o3=temp("results/qc/relatedness/somalier.samples.tsv"),
         shell:
             "touch {output}"
-        
+
 
 # rule per_base_coverage:
 #     input:
@@ -112,46 +125,25 @@ else:
 #     shell:
 #         "bedtools genomecov ...."
 
-
-rule sex_check:
-    input:
-        vcf="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
-        i="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz.tbi",
-    output:
-        txt="results/qc/sex_check/ploidy.txt",
-        png="results/qc/sex_check/ploidy.png",
-    params:
-        p="results/qc/sex_check/ploidy",
-    benchmark:
-        "results/performance_benchmarks/sex_check/sex_check.tsv"
-    conda:
-        "../envs/bcftools_tabix.yaml"
-    shell:
-        "bcftools +guess-ploidy -g hg38 {input.vcf} -v > {output.txt} && "
-        "guess-ploidy.py {output.txt} {params.p}"
-
-
-# rule sex_discordance:
-#     input:
-#     output:
-#     shell:
-
 if full:
 
     rule create_exclude_list:
         input:
-            v="results/qc/contamination_check/summary.txt",
-            b="results/qc/bcftools_stats/joint_called_stats.out",
+            v=expand(
+                "results/qc/contamination_check/{region}/summary.txt",
+                region=config["verifyBamID"]["region"],
+            ),
+            b=expand("results/qc/bcftools_stats/{chrom}/joint_called_stats.out", chrom=chromList),
         output:
-            l="results/post_qc_exclusions/exclude_list.tsv",
-            a="results/post_qc_exclusions/exclude_list_with_annotation.tsv",
+            l="results/post_qc_exclusions/{chrom}/exclude_list.tsv",
+            a="results/post_qc_exclusions/{chrom}/exclude_list_with_annotation.tsv",
         params:
-            out="results/post_qc_exclusions/exclude_list",
+            out="results/post_qc_exclusions/{chrom}/exclude_list",
             r=config["max_het_ratio"],
             d=config["min_avg_depth"],
             c=config["max_contam"],
         benchmark:
-            "results/performance_benchmarks/create_exclude_list/create_exclude_list.tsv"
+            "results/performance_benchmarks/create_exclude_list/{chrom}/create_exclude_list.tsv"
         conda:
             "../envs/python.yaml"
         shell:
@@ -162,16 +154,16 @@ else:
 
     rule create_exclude_list:
         input:
-            b="results/qc/bcftools_stats/joint_called_stats.out",
+            b=expand("results/qc/bcftools_stats/{chrom}/joint_called_stats.out", chrom=chromList),
         output:
-            l="results/post_qc_exclusions/exclude_list.tsv",
-            a="results/post_qc_exclusions/exclude_list_with_annotation.tsv",
+            l="results/post_qc_exclusions/{chrom}/exclude_list.tsv",
+            a="results/post_qc_exclusions/{chrom}/exclude_list_with_annotation.tsv",
         params:
-            out="results/post_qc_exclusions/exclude_list",
+            out="results/post_qc_exclusions/{chrom}/exclude_list",
             r=config["max_het_ratio"],
             d=config["min_avg_depth"],
         benchmark:
-            "results/performance_benchmarks/create_exclude_list/create_exclude_list.tsv"
+            "results/performance_benchmarks/create_exclude_list/{chrom}/create_exclude_list.tsv"
         conda:
             "../envs/python.yaml"
         shell:
@@ -180,19 +172,23 @@ else:
 
 rule exclude_samples:
     input:
-        v="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
-        i="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz.tbi",
-        l="results/post_qc_exclusions/exclude_list.tsv",
+        vcfList=expand(
+            "results/HaplotypeCaller/filtered/{chrom}.hardfiltered.vcf.gz", chrom=chromList
+        ),
+        indexList=expand(
+            "results/HaplotypeCaller/filtered/{chrom}.hardfiltered.vcf.gz.tbi", chrom=chromList
+        ),
+        l=expand("results/post_qc_exclusions/{chrom}/exclude_list.tsv", chrom=chromList),
     output:
-        v="results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz",
-        i="results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz.tbi",
+        v="results/post_qc_exclusions/samples_excluded.{chrom}.hardfiltered.vcf.gz",
+        i="results/post_qc_exclusions/samples_excluded.{chrom}.hardfiltered.vcf.gz.tbi",
     benchmark:
-        "results/performance_benchmarks/exclude_samples/exclude_samples.tsv"
+        "results/performance_benchmarks/exclude_samples/{chrom}/exclude_samples.tsv"
     threads: config["bcftools"]["threads"]
     conda:
         "../envs/bcftools_tabix.yaml"
     shell:
-        "bcftools view -S ^{input.l} --threads {threads} -Ou {input.v} | "
+        "bcftools view -S ^{input.l} --threads {threads} -Ou {input.vcfList} | "
         "bcftools annotate --threads {threads} --set-id '%CHROM:%POS:%REF:%ALT' -Oz -o {output.v} && "
         "tabix -p vcf {output.v}"
 
@@ -213,16 +209,25 @@ if full:
             expand("results/fastqc/{rg}_r2_fastqc.zip", rg=sampleDict.keys()),
             expand("results/post_trimming_fastqc/{rg}_r1_fastqc.zip", rg=sampleDict.keys()),
             expand("results/post_trimming_fastqc/{rg}_r2_fastqc.zip", rg=sampleDict.keys()),
-            "results/qc/sex_check/ploidy.txt",
             "results/qc/relatedness/somalier.pairs.tsv",
-            "results/qc/bcftools_stats/joint_called_stats.out",
+            expand("results/qc/bcftools_stats/{chrom}/joint_called_stats.out", chrom=chromList),
             expand("results/paired_trimmed_reads/{rg}_fastp.json", rg=sampleDict.keys()),
             expand("results/dedup/{sample}.metrics.txt", sample=SAMPLES),
             expand("results/bqsr/{sample}.recal_table", sample=SAMPLES),
             expand("results/alignment_stats/{sample}.txt", sample=SAMPLES),
-            expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES),
-            "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
-            "results/HaplotypeCaller/filtered/HC.variant_calling_summary_metrics",
+            expand(
+                "results/qc/contamination_check/{region}/{sample}.selfSM",
+                sample=SAMPLES,
+                region=config["verifyBamID"]["region"],
+            ),
+            expand(
+                "results/HaplotypeCaller/filtered/{chrom}.variant_calling_detail_metrics",
+                chrom=chromList,
+            ),
+            expand(
+                "results/HaplotypeCaller/filtered/{chrom}.variant_calling_summary_metrics",
+                chrom=chromList,
+            ),
             mqc_config="config/multiqc.yaml",
         output:
             "results/multiqc/multiqc.html",
@@ -232,7 +237,7 @@ if full:
         params:
             outDir="results/multiqc/",
             outName="multiqc.html",
-            inDirs="results/fastqc results/post_trimming_fastqc results/qc/sex_check results/qc/bcftools_stats results/qc/contamination_check results/paired_trimmed_reads results/dedup results/bqsr results/alignment_stats results/HaplotypeCaller/filtered",
+            inDirs="results/fastqc results/post_trimming_fastqc results/qc/bcftools_stats results/qc/contamination_check results/paired_trimmed_reads results/dedup results/bqsr results/alignment_stats results/HaplotypeCaller/filtered",
             relatedness="results/qc/relatedness" if config["somalier"] else "",
         conda:
             "../envs/fastqc_multiqc.yaml"
@@ -253,21 +258,26 @@ if jointgeno:
         config yamls for the two different instances of the rule.
         """
         input:
-            "results/qc/sex_check/ploidy.txt",
             "results/qc/relatedness/somalier.pairs.tsv",
-            "results/qc/bcftools_stats/joint_called_stats.out",
-            "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
-            "results/HaplotypeCaller/filtered/HC.variant_calling_summary_metrics",
+            expand("results/qc/bcftools_stats/{chrom}/joint_called_stats.out", chrom=chromList),
+            expand(
+                "results/HaplotypeCaller/filtered/{chrom}.variant_calling_detail_metrics",
+                chrom=chromList,
+            ),
+            expand(
+                "results/HaplotypeCaller/filtered/{chrom}.variant_calling_summary_metrics",
+                chrom=chromList,
+            ),
             mqc_config="config/multiqc.yaml",
         output:
             "results/multiqc/multiqc.html",
-            "results/multiqc/multiqc_data/multiqc_fastqc_1.txt",
+            #"results/multiqc/multiqc_data/multiqc_fastqc_1.txt",
         benchmark:
             "results/performance_benchmarks/multiqc/benchmarks.tsv"
         params:
             outDir="results/multiqc/",
             outName="multiqc.html",
-            inDirs="results/qc/sex_check results/qc/bcftools_stats results/HaplotypeCaller/filtered",
+            inDirs="results/qc/bcftools_stats results/HaplotypeCaller/filtered",
             relatedness="results/qc/relatedness" if config["somalier"] else "",
         conda:
             "../envs/fastqc_multiqc.yaml"

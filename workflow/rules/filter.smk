@@ -214,9 +214,9 @@ if full:
                 region=config["verifyBamID"]["region"],
             ),
         output:
-            "results/qc/contamination_check/summary.txt",
+            "results/qc/contamination_check/{region}/summary.txt",
         params:
-            "results/qc/contamination_check/{region}",
+            "results/qc/contamination_check/{region}/",
         shell:
             'grep -v "^#" {params}*selfSM  > {output}'
 

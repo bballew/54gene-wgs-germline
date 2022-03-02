@@ -4,7 +4,10 @@ rule bcftools_extract_final_subject_list:
     vcf file
     """
     input:
-        vcf="results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz",
+        vcf=expand(
+            "results/post_qc_exclusions/samples_excluded.{chrom}.hardfiltered.vcf.gz",
+            chrom=chromList,
+        ),
     output:
         "results/run_summary/final_subject_list.tsv",
     conda:
@@ -26,11 +29,16 @@ if full or jointgeno:
             start_time="results/tat_tracking/start_time.txt",
             output_subject_list="results/run_summary/final_subject_list.tsv",
             r_resources="workflow/scripts/run_summary_resources.R",
-            exclude_list="results/post_qc_exclusions/exclude_list_with_annotation.tsv",
+            exclude_list=expand(
+                "results/post_qc_exclusions/{chrom}/exclude_list_with_annotation.tsv",
+                chrom=chromList,
+            ),
             relatedness="results/qc/relatedness/somalier.pairs.tsv",
             sex="results/qc/relatedness/somalier.samples.tsv",
-            fastqc="results/multiqc/multiqc_data/multiqc_fastqc_1.txt",
-            bcftools_stats="results/qc/bcftools_stats/joint_called_stats.out",
+            #fastqc="results/multiqc/multiqc_data/multiqc_fastqc_1.txt",
+            bcftools_stats=expand(
+                "results/qc/bcftools_stats/{chrom}/joint_called_stats.out", chrom=chromList
+            ),
         output:
             report="results/run_summary/run_summary.html",
         params:

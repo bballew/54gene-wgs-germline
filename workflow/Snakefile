@@ -47,6 +47,9 @@ pathlib.Path("logs/").mkdir(parents=True, exist_ok=True)
 intervals_df = utils.read_in_intervals(intervalsFile)
 intervalList = list(intervals_df.index.values)
 
+# list of canonical chromosomes
+chromList = [f"chr{x}" for x in list(range(1, 23))] + ["chrX", "chrY"]
+
 # configure shell behavior for all rules
 shell.executable("/bin/bash")
 shell.prefix("set -euo pipefail; {}; ".format(global_vars))
@@ -62,18 +65,28 @@ SAMPLES = utils.create_samples_set(sampleDict) if full or fastq_qc_only else sam
 # that rule.
 concurrent_limit = utils.get_batch_limit_number(jobs, max_concurrent)
 
-TARGETS = [
-    "results/multiqc/multiqc.html",
-    "results/run_summary/run_summary.html"
-]
+TARGETS = ["results/multiqc/multiqc.html", "results/run_summary/run_summary.html"]
 
 if full:
 
     TARGETS.append(expand("results/alignment_stats/{sample}.txt", sample=SAMPLES))
-    TARGETS.append(expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES))
+    TARGETS.append(
+        expand(
+            "results/qc/contamination_check/{region}/{sample}.selfSM",
+            sample=SAMPLES,
+            region=config["verifyBamID"]["region"],
+        )
+    )
     # TARGETS.append("results/run_summary/run_summary.html")
-    TARGETS.append("results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz")
-    TARGETS.append("results/qc/bcftools_stats/plots/plot-vcfstats.log")
+    TARGETS.append(
+        expand(
+            "results/post_qc_exclusions/samples_excluded.{chrom}.hardfiltered.vcf.gz",
+            chrom=chromList,
+        )
+    )
+    TARGETS.append(
+        expand("results/qc/bcftools_stats/plots/{chrom}/plot-vcfstats.log", chrom=chromList)
+    )
 
     include: "rules/track_time.smk"
     include: "rules/resources.smk"
@@ -89,8 +102,12 @@ if full:
 elif jointgeno:
 
     # TARGETS.append("results/run_summary/run_summary.html")
-    TARGETS.append("results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz")
-    TARGETS.append("results/qc/bcftools_stats/plots/plot-vcfstats.log")
+    TARGETS.append(
+        expand(
+            "results/post_qc_exclusions/samples_excluded.{chrom}.hardfiltered.vcf.gz",
+            chrom=chromList,
+        )
+    )
 
     include: "rules/track_time.smk"
     include: "rules/resources.smk"
@@ -112,6 +129,7 @@ wildcard_constraints:
     interval="|".join(intervalList),
     sample="|".join(SAMPLES),
     rg="|".join(sampleDict.keys()),
+    chrom="|".join(chromList),
 
 
 rule all:
