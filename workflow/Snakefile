@@ -17,8 +17,11 @@ import pathlib
 from snakemake.utils import validate
 from scripts import utils
 
-label = subprocess.check_output(["git", "describe", "--always"]).strip()
-print(f"54gene WGS germline workflow {label}")
+try:
+    label = subprocess.check_output(["git", "describe", "--always"]).strip()
+    print(f"54gene WGS germline workflow {label}")
+except subprocess.CalledProcessError:
+    print("54gene WGS germline workflow, version not detected!")
 
 
 # reference the config file

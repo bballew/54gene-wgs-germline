@@ -18,12 +18,12 @@ rule bcftools_extract_final_subject_list:
         "bcftools query -l {input} > {output}"
 
 
-if full or jointgeno:
+if full:
 
     rule run_summary:
         """
         Create a run summary report aggregating information
-        about overall run that is poorly captured by multiqc.
+        about overall run that is poorly captured by multiqc for the full run mode.
         """
         input:
             start_time="results/tat_tracking/start_time.txt",
@@ -45,6 +45,37 @@ if full or jointgeno:
             input_samples=SAMPLES,
             out_prefix="results/run_summary/run_summary",
             somalier=config["somalier"],
+            run_mode="full",
+        conda:
+            "../envs/r.yaml"
+        benchmark:
+            "results/performance_benchmarks/run_summary/run_summary.tsv"
+        script:
+            "../scripts/run_summary.Rmd"
+
+
+if jointgeno:
+
+    rule run_summary:
+        """
+        Create a run summary report aggregating information
+        about overall run that is poorly captured by multiqc for the joint-genotyping run mode.
+        """
+        input:
+            start_time="results/tat_tracking/start_time.txt",
+            output_subject_list="results/run_summary/final_subject_list.tsv",
+            r_resources="workflow/scripts/run_summary_resources.R",
+            exclude_list="results/post_qc_exclusions/exclude_list_with_annotation.tsv",
+            relatedness="results/qc/relatedness/somalier.pairs.tsv",
+            sex="results/qc/relatedness/somalier.samples.tsv",
+            bcftools_stats="results/qc/bcftools_stats/joint_called_stats.out",
+        output:
+            report="results/run_summary/run_summary.html",
+        params:
+            input_samples=SAMPLES,
+            out_prefix="results/run_summary/run_summary",
+            somalier=config["somalier"],
+            run_mode="jointgeno",
         conda:
             "../envs/r.yaml"
         benchmark:
@@ -58,7 +89,7 @@ if fastq_qc_only:
     rule run_summary:
         """
         Create a run summary report aggregating information
-        about overall run that is poorly captured by multiqc.
+        about overall run that is poorly captured by multiqc for the fastqc only mode.
         """
         input:
             start_time="results/tat_tracking/start_time.txt",
@@ -70,6 +101,7 @@ if fastq_qc_only:
             input_samples=SAMPLES,
             out_prefix="results/run_summary/run_summary",
             somalier=False,
+            run_mode="fastq_qc_only",
         conda:
             "../envs/r.yaml"
         benchmark:

@@ -54,6 +54,7 @@ fastqc.filename <- snakemake@input[["fastqc"]]
 bcftools.stats.filename <- snakemake@input[["bcftools_stats"]]
 tsv.path <- snakemake@params[["out_prefix"]]
 start.time.filename <- snakemake@input[["start_time"]]
+run.mode <- snakemake@params[["run_mode"]]
 ```
 
 ```{r configure.variables, eval=TRUE, echo=FALSE}
@@ -70,7 +71,11 @@ A total of `r length(input.subjects)` subjects were queued up for analysis in th
 
 ```{r report.before.after.subjects, eval=TRUE, echo=FALSE, results="asis"}
 res <- prepare.subject.tracking.table(input.subjects, output.subjects.filename, exclude.reasons.filename)
-res <- add.fastqc.data(res, fastqc.filename)
+
+if (!run.mode == "jointgeno"){
+  res <- add.fastqc.data(res, fastqc.filename)
+}
+
 res <- add.coverage(res, bcftools.stats.filename)
 res <- res[order(res[, "Subject"]), ]
 rownames(res) <- NULL

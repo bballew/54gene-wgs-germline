@@ -185,9 +185,7 @@ rule HC_genotype_gvcfs:
 rule HC_split_intervals_chrom:
     """Separate the VCFs joint-called over intervals by chromosome."""
     input:
-        vcfList=expand(
-            "results/HaplotypeCaller/genotyped/{interval}.vcf.gz", interval=intervalList
-        ),
+        vcfList=expand("results/HaplotypeCaller/genotyped/{interval}.vcf.gz", interval=intervalList),
         indexList=expand(
             "results/HaplotypeCaller/genotyped/{interval}.vcf.gz.tbi", interval=intervalList
         ),

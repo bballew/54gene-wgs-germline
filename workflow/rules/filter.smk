@@ -170,6 +170,27 @@ rule hard_filter_indels:
 
 if full:
 
+<<<<<<< HEAD
+=======
+    rule subset_for_contam_check:
+        input:
+            vcf="results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz",
+            i="results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz.tbi",
+        output:
+            vcf=temp("results/qc/contamination_check/subset.snps.hardfiltered.vcf.gz"),
+            i=temp("results/qc/contamination_check/subset.snps.hardfiltered.vcf.gz.tbi"),
+        params:
+            region=",".join(config["verifyBamID"]["region"]),
+        benchmark:
+            "results/performance_benchmarks/subset_for_contam_check/subset.tsv"
+        threads: config["bcftools"]["threads"]
+        conda:
+            "../envs/bcftools_tabix.yaml"
+        shell:
+            "bcftools view --threads {threads} -r {params.region} -Oz -o {output.vcf} {input.vcf} && "
+            "tabix -p vcf {output.vcf}"
+
+>>>>>>> origin/fix_jointgeno_multiqc
     rule contamination_check:
         input:
             vcf=expand(
@@ -286,7 +307,8 @@ rule picard_metrics:
             * config["picardCollectVariantCallingMetrics"]["memory"]
         ),
         xmx=(
-            lambda wildcards, attempt: attempt * config["picardCollectVariantCallingMetrics"]["xmx"]
+            lambda wildcards, attempt: attempt
+            * config["picardCollectVariantCallingMetrics"]["xmx"]
         ),
     shell:
         'export _JAVA_OPTIONS="" && '

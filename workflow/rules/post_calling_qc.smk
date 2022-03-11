@@ -248,7 +248,7 @@ if full:
 if jointgeno:
 
     rule multiqc:
-        """Generate one multiQC report for all input fastqs.
+        """Generate one multiQC report for joint genotyping run mode.
         Should add samtools stats output and possibly others eventually,
         dedup metrics, ...
 
@@ -271,7 +271,6 @@ if jointgeno:
             mqc_config="config/multiqc.yaml",
         output:
             "results/multiqc/multiqc.html",
-            #"results/multiqc/multiqc_data/multiqc_fastqc_1.txt",
         benchmark:
             "results/performance_benchmarks/multiqc/benchmarks.tsv"
         params:
