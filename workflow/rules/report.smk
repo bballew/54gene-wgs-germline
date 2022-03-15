@@ -35,7 +35,7 @@ if full:
             ),
             relatedness="results/qc/relatedness/somalier.pairs.tsv",
             sex="results/qc/relatedness/somalier.samples.tsv",
-            #fastqc="results/multiqc/multiqc_data/multiqc_fastqc_1.txt",
+            fastqc="results/multiqc/multiqc_data/multiqc_fastqc_1.txt",
             bcftools_stats=expand(
                 "results/qc/bcftools_stats/{chrom}/joint_called_stats.out", chrom=chromList
             ),

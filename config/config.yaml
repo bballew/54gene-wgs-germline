@@ -70,6 +70,8 @@ genotypeGVCFs:
 bcftools:
   memory: 4000
   threads: 8
+  variant_stat_regions: # specify which chroms to generate stats for
+    - chr21
 selectVariants:
   memory: 6000
   xmx: 1000

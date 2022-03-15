@@ -253,9 +253,15 @@ properties:
       threads:
         type: integer
         minimum: 1
+      variant_stat_regions:
+        type: array
+        items:
+          type: string
+          pattern: "^chr[1-9]$|^chr1[0-9]$|^chr2[0-2]$|^chr[XYM]$"
     required:
       - memory
       - threads
+      - variant_stat_regions
     additionalProperties: false
   selectVariants:
     type: object

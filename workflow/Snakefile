@@ -51,7 +51,8 @@ intervals_df = utils.read_in_intervals(intervalsFile)
 intervalList = list(intervals_df.index.values)
 
 # list of canonical chromosomes
-chromList = [f"chr{x}" for x in list(range(1, 23))] + ["chrX", "chrY"]
+#chromList = [f"chr{x}" for x in list(range(1, 23))] + ["chrX", "chrY"]
+chromList = ["chr21"] # FOR TESTING
 
 # configure shell behavior for all rules
 shell.executable("/bin/bash")

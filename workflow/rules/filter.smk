@@ -14,9 +14,7 @@ rule split_multiallelics:
         ref="resources/Homo_sapiens_assembly38.fasta",
         fai="resources/Homo_sapiens_assembly38.fasta.fai",
     output:
-        vcf=temp(
-            "results/HaplotypeCaller/genotyped/chrom_vcfs/{chrom}_split_multiallelics.vcf.gz"
-        ),
+        vcf=temp("results/HaplotypeCaller/genotyped/chrom_vcfs/{chrom}_split_multiallelics.vcf.gz"),
         index=temp(
             "results/HaplotypeCaller/genotyped/chrom_vcfs/{chrom}_split_multiallelics.vcf.gz.tbi"
         ),
@@ -170,8 +168,6 @@ rule hard_filter_indels:
 
 if full:
 
-<<<<<<< HEAD
-=======
     rule subset_for_contam_check:
         input:
             vcf="results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz",
@@ -190,7 +186,6 @@ if full:
             "bcftools view --threads {threads} -r {params.region} -Oz -o {output.vcf} {input.vcf} && "
             "tabix -p vcf {output.vcf}"
 
->>>>>>> origin/fix_jointgeno_multiqc
     rule contamination_check:
         input:
             vcf=expand(
@@ -252,7 +247,8 @@ rule merge_calls:
             "results/HaplotypeCaller/filtered/{chrom}_snps.hardfiltered.vcf.gz", chrom=chromList
         ),
         s_index=expand(
-            "results/HaplotypeCaller/filtered/{chrom}_snps.hardfiltered.vcf.gz.tbi", chrom=chromList
+            "results/HaplotypeCaller/filtered/{chrom}_snps.hardfiltered.vcf.gz.tbi",
+            chrom=chromList,
         ),
         indels=expand(
             "results/HaplotypeCaller/filtered/{chrom}_indels.hardfiltered.vcf.gz", chrom=chromList

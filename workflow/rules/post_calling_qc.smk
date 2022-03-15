@@ -3,10 +3,12 @@ rule variant_stats:
         r="resources/Homo_sapiens_assembly38.fasta",
         f="resources/Homo_sapiens_assembly38.fasta.fai",
         vcfList=expand(
-            "results/HaplotypeCaller/filtered/{chrom}.hardfiltered.vcf.gz", chrom=chromList
+            "results/HaplotypeCaller/filtered/{chrom}.hardfiltered.vcf.gz",
+            chrom=config["bcftools"]["variant_stat_regions"],
         ),
         indexList=expand(
-            "results/HaplotypeCaller/filtered/{chrom}.hardfiltered.vcf.gz.tbi", chrom=chromList
+            "results/HaplotypeCaller/filtered/{chrom}.hardfiltered.vcf.gz.tbi",
+            chrom=config["bcftools"]["variant_stat_regions"],
         ),
     output:
         "results/qc/bcftools_stats/{chrom}/joint_called_stats.out",
