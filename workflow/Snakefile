@@ -47,7 +47,11 @@ pathlib.Path(tempDir).mkdir(parents=True, exist_ok=True)
 pathlib.Path("logs/").mkdir(parents=True, exist_ok=True)
 
 # generate list of interval names from the interval file dataframe
-intervals_df = utils.read_in_intervals(intervalsFile)
+try:
+    intervals_df = utils.read_in_intervals(intervalsFile)
+except ValueError:
+    sys.exit(f"Duplicate interval names are not allowed in {intervalsFile}.")
+
 intervalList = list(intervals_df.index.values)
 
 # configure shell behavior for all rules
