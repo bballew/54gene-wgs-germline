@@ -20,6 +20,7 @@ require(RColorBrewer, quietly=TRUE)
 require(dplyr, quietly = TRUE)
 require(gluedown, quietly = TRUE)
 require(gridExtra, quietly = TRUE)
+require(lubridate, quietly = TRUE)
 
 # set input variable from snakemake
 benchmarks.table <- snakemake@input[["benchmarks"]]
@@ -71,7 +72,20 @@ create.boxjitter.plot <- function(df, df.subset, xvar, yvar, xlab, ylab) {
           axis.text = element_text(size = 12))
   bd.plot
 }
+
+create.subset.plot <- function(subdf, xvar, yvar, xlab, ylab, title){
+  sb.plot <- ggplot(data = subdf, aes_string(x = xvar, y = yvar)) +
+    geom_boxplot(aes_string(fill=xvar), show.legend = FALSE) +
+    geom_point(position = "identity", show.legend = FALSE, alpha=1/2, size=1) +
+    labs(x=xlab, y=ylab, title=title) +
+    theme_minimal() +
+    theme(axis.text.x=element_text(angle = 90, vjust=0.5, hjust=1),
+          axis.title = element_text(size = 14),
+          axis.text = element_text(size = 12))
+  sb.plot
+}
 ```
+
 Cluster version used: `r cat(cluster.config)`
 
 This is a (development version) R Markdown report that can generated for the pipeline with visualizations for the specified rules and their performance benchmarks.
@@ -114,6 +128,7 @@ max.pss.all <- create.boxjitter.plot(dataset, subset.df, "rule", "max_pss",
   scale_y_continuous(n.breaks = 12)
 max.pss.all
 ```
+
 ##### USS
 Unique Set Size: The amount of memory occupied by a process, unshared and unique to only that process.
 ```{r max.uss.all, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
@@ -122,6 +137,7 @@ max.uss.all <- create.boxjitter.plot(dataset, subset.df, "rule", "max_uss",
   scale_y_continuous(n.breaks = 12)
 max.uss.all
 ```
+
 ##### RSS
 Resident Set Size: The amount of memory non-swapped physical memory occupied by a process.
 ```{r max.rss.all, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
@@ -130,6 +146,7 @@ max.rss.all <- create.boxjitter.plot(dataset, subset.df, "rule", "max_rss",
   scale_y_continuous(n.breaks = 12)
 max.rss.all
 ```
+
 ##### VMS
 Virtual Memory Size: The amount of virtual memory occupied by a process.
 ```{r max.vms.all, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
@@ -152,7 +169,7 @@ cat(paste0("Time threshold (minutes): ", time.param))
 #### Memory {.tabset .tabset-pills}
 These plots display memory usage in the form of maximum "Proportional Set Size (PSS)", "Unique Set Size (USS)", "Resident Set Size (RSS)", "Virtual Memory Size (VMS)" for rules that **only** meet the user-specified time threshold.
 
- ##### PSS
+##### PSS
 Proportional Set Size: The amount of memory occupied for a particular process plus the shared memory across one or more other processes.
 ```{r max.pss.detailed, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
 # plot the memory usage with boxplots for rules with >1 process otherwise
@@ -161,6 +178,7 @@ max.pss.detail <- create.boxjitter.plot(filtered.df, subset.df, "rule", "max_pss
   scale_y_continuous(n.breaks = 12)
 max.pss.detail
 ```
+
 ##### USS
 Unique Set Size: The amount of memory occupied by a process, unshared and unique to only that process.
 ```{r max.uss.detailed, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
@@ -168,6 +186,7 @@ max.uss.detail <- create.boxjitter.plot(filtered.df, subset.df, "rule", "max_uss
   scale_y_continuous(n.breaks = 12)
 max.uss.detail
 ```
+
 ##### RSS
 Resident Set Size: The amount of memory non-swapped physical memory occupied by a process.
 ```{r max.rss.detailed, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
@@ -175,6 +194,7 @@ max.rss.detail <- create.boxjitter.plot(dataset, subset.df, "rule", "max_rss", "
   scale_y_continuous(n.breaks = 12)
 max.rss.detail
 ```
+
 ##### VMS
 Virtual Memory Size: The amount of virtual memory occupied by a process.
 ```{r max.vms.detailed, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
@@ -183,7 +203,7 @@ max.vms.detail <- create.boxjitter.plot(filtered.df, subset.df, "rule", "max_vms
 max.vms.detail
 ```
 ##### Detailed view
-Rules using relatively high or low amounts of memory (based on max_pss).
+Rules using relatively high or low amounts of memory (based on max pss).
 ```{r mem.det.grid, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
 # plot detailed grid view
 mem.df1 <- subset(filtered.df, max_pss > 5000)
@@ -193,6 +213,8 @@ max.pss.subset1 <- create.subset.plot(mem.df1, "rule", "max_pss", "Rule", "max_p
 max.pss.subset2 <- create.subset.plot(mem.df2, "rule", "max_pss", "Rule", "max_pss (MB)", "Rules using memory <5GB")
 grid.arrange(max.pss.subset1, max.pss.subset2, nrow=1)
 ```
+
+
 
 #### I/O {.tabset .tabset-pills}
 The amount of information processed by the system through I/O (input-output) operations.
@@ -212,6 +234,7 @@ The amount of information cumulatively written by the system for each process in
 io.write <- create.boxjitter.plot(filtered.df, subset.df, "rule", "io_out", "Rule", "Cumulative GB Written")
 io.write
 ```
+
 ##### Detailed view
 ```{r io.grid, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
 # plot detailed grid view

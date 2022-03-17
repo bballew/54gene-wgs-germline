@@ -11,3 +11,4 @@ dependencies:
   - r-tidyverse
   - r-lubridate
   - r-gluedown
+  - r-gridExtra
