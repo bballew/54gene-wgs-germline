@@ -246,7 +246,6 @@ if full:
             "multiqc --force -o {params.outDir} -n {params.outName} --config {input.mqc_config} {params.inDirs} {params.relatedness}"
 
 
-
 if jointgeno:
 
     rule multiqc:
@@ -305,8 +304,18 @@ if fastq_qc_only:
         shell:
             "multiqc --force -o {params.outDir} --config {input.mqc_config} -n {params.outName} {params.inDirs}"
 
-# TODO: (EJ) There is likely a much more elegant and better solution to the way
-# I have expanded on the tsv files for the specified rules. Need to improve this.
+
+## To resolve the situation where performance benchmark placeholder files are
+## not available at DAG construction, and to prevent race conditions, defer
+## evaluation of the input to combine_benchmarks until the final report is complete.
+
+
+def aggregate_benchmark_files(wildcards):
+    """
+    defer evaluation of benchmark file targets until after the pipeline is run
+    """
+    checkpoint_output = checkpoints.run_summary.get(**wildcards).output[0]
+    return [j for i in expand("results/performance_benchmarks/*/*.tsv") for j in glob(i)]
 
 
 rule combine_benchmarks:
@@ -315,7 +324,7 @@ rule combine_benchmarks:
     and append the rule name and process (i.e. sample name) to the file as columns.
     """
     input:
-        tsv=[j for i in expand("results/performance_benchmarks/*/*.tsv") for j in glob(i)],
+        tsv=aggregate_benchmark_files,
     output:
         benchmarks="results/performance_benchmarks/combined_benchmarks.tsv",
     conda:
