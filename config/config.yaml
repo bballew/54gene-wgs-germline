@@ -1,5 +1,5 @@
 sampleFile: "config/manifest.txt"
-jobs: 1000
+jobs: 2
 tempDir: "temp/"
 runType:
   full: yes
@@ -11,11 +11,11 @@ compute_queue: "spot"
 memory_queue: "mem"
 bed: "resources/Homo_sapiens_assembly38.bed"
 max_concurrent: 40  # max concurrent running jobs for especially high-bandwidth rules, to control hitting the fsx bandwidth cap 
-
 # QC thresholds for sample removal:
 max_het_ratio: 2.5
 min_avg_depth: 20.0
 max_contam: 0.03  # N/A for joint_genotyping
+time_threshold: 5 # exclude rules from benchmarking report if below this elapsed time threshold in minutes
 
 fastqc:
   threads: 8
@@ -76,3 +76,4 @@ picardCollectVariantCallingMetrics:
   memory: 6000
   xmx: 1000
   java_opts:
+          

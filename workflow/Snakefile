@@ -19,6 +19,16 @@ from scripts import utils
 label = subprocess.check_output(["git", "describe", "--always"]).strip()
 print(f"54gene WGS germline workflow {label}")
 
+# get current cluster config info
+clusterconfig = (
+    subprocess.check_output(
+        ["git", "-C", "/fsx/resources/parallelcluster_docs", "describe", "--all", "--long"]
+    )
+    .decode()
+    .strip()
+)
+print(f"Cluster version: {clusterconfig}")
+
 
 # reference the config file
 configfile: "config/config.yaml"
@@ -35,6 +45,7 @@ jointgeno = config["runType"]["joint_genotyping"]
 global_vars = config["global_vars"]
 bed = config["bed"]
 max_concurrent = config["max_concurrent"]
+
 
 # create temp and log dirs if needed
 pathlib.Path(tempDir).mkdir(parents=True, exist_ok=True)
@@ -64,6 +75,7 @@ TARGETS = [
     # "results/qc/sex_check/ploidy.png",
     "results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz",
     "results/multiqc/multiqc.html",
+    "results/performance_benchmarks/benchmarking_report.html",
 ]
 
 if full:

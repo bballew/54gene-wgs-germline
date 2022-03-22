@@ -1,3 +1,6 @@
+from glob import glob
+
+
 rule variant_stats:
     input:
         r="resources/Homo_sapiens_assembly38.fasta",
@@ -176,6 +179,7 @@ rule exclude_samples:
 
 
 if full:
+
     rule multiqc:
         """Generate one multiQC report for all input fastqs.
         Should add samtools stats output and possibly others eventually,
@@ -189,7 +193,7 @@ if full:
             "results/qc/bcftools_stats/joint_called_stats.out",
             expand("results/paired_trimmed_reads/{rg}_fastp.json", rg=sampleDict.keys()),
             expand("results/dedup/{sample}.metrics.txt", sample=SAMPLES),
-            expand("results/bqsr/{sample}.recal_table",sample=SAMPLES),
+            expand("results/bqsr/{sample}.recal_table", sample=SAMPLES),
             expand("results/alignment_stats/{sample}.txt", sample=SAMPLES),
             expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES),
             "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
@@ -207,7 +211,9 @@ if full:
         shell:
             "multiqc --force -o {params.outDir} -n {params.outName} {params.inDirs}"
 
+
 if jointgeno:
+
     rule multiqc:
         """Generate one multiQC report for all input fastqs.
         Should add samtools stats output and possibly others eventually,
@@ -231,3 +237,42 @@ if jointgeno:
             "../envs/fastqc_multiqc.yaml"
         shell:
             "multiqc --force -o {params.outDir} -n {params.outName} {params.inDirs}"
+
+
+# TODO: (EJ) There is likely a much more elegant and better solution to the way
+# I have expanded on the tsv files for the specified rules. Need to improve this.
+
+
+rule combine_benchmarks:
+    """Create a concatenated file with all the benchmarking stats generated for
+    a specified set of rules defined in a list within the config as 'benchmarks',
+    and append the rule name and process (i.e. sample name) to the file as columns.
+    """
+    input:
+        tsv=[j for i in expand("results/performance_benchmarks/*/*.tsv") for j in glob(i)],
+    output:
+        benchmarks="results/performance_benchmarks/combined_benchmarks.tsv",
+    conda:
+        "../envs/r.yaml"
+    script:
+        "../scripts/combine_benchmarks.R"
+
+
+rule benchmarking_report:
+    """Take the concatenated benchmark file and generate a standard HTML report for it
+    with standard plots for each metric. This report is definitely a work in progress
+    and there is plenty of room for improvement in the visualizations.
+
+    The concatenated benchmark file is passed as an input using the snakemake object in R.
+    """
+    input:
+        benchmarks="results/performance_benchmarks/combined_benchmarks.tsv",
+    output:
+        "results/performance_benchmarks/benchmarking_report.html",
+    params:
+        threshold=config["time_threshold"],
+        clusterVersion=clusterconfig,
+    conda:
+        "../envs/r.yaml"
+    script:
+        "../scripts/benchmarking_report.Rmd"
