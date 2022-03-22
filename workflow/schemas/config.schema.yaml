@@ -56,6 +56,9 @@ properties:
     type: number
     minimum: 0
     maximum: 1
+  time_threshold:
+    type: number
+    minimum: 1
   somalier:
     type: boolean
   fastqc:
