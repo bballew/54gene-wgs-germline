@@ -1,0 +1,4 @@
+#sample_a	sample_b	relatedness	ibs0
+A	C	0.4	123
+A	F	0.2	345
+C	F	0.99	876

@@ -1,4 +1,5 @@
 # Project Folders and logs
+package*json
 temp
 results/*
 !tests/unit/*/results/*

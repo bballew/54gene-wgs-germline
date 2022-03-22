@@ -1,0 +1,16 @@
+## This configuration file controls the order of processing
+## of multiqc report modules. There are many permutations of
+## these settings that will break multiqc's functionality.
+## Please do not change this configuration file unless you
+## know exactly what you're doing.
+module_order:
+  - fastqc:
+      name: 'FastQC (raw)'
+      target: ''
+      path_filters:
+        - 'results/fastqc/*_fastqc.zip'
+  - fastqc:
+      name: 'FastQC (trimmed)'
+      target: ''
+      path_filters:
+        - 'results/post_trimming_fastqc/*_fastqc.zip'

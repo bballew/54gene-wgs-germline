@@ -4,10 +4,12 @@ import glob
 import os
 import sys
 
+import pandas as pd
+
 sampleDict = {}
 
 
-def read_in_manifest(s, full):
+def read_in_manifest(s, full, fastq_qc_only):
     """Parse whitespace delimited manifest file.
 
     Note the distinct requirements for the two different run types.
@@ -18,7 +20,7 @@ def read_in_manifest(s, full):
     global sampleDict
     with open(s) as f:
         for line in f:
-            if full:
+            if full or fastq_qc_only:
                 (rg, sm, read1, read2) = line.split()
                 sampleDict[rg] = sm, read1, read2
             else:
@@ -136,18 +138,6 @@ def get_batch_limit_number(jobs, n):
     return limit
 
 
-def get_chrom_list(bed):
-    """Retrieve list of chromosomes from bed file in config
-
-    The user provides a bed file (e.g. each chromosome's start and end for
-    WGS, or a list of targeted regions for WES).  This function returns a
-    list of unique chromosomes included in the bed for parallelization.
-    """
-    with open(bed) as file:
-        chromList = list(set([line.split()[0] for line in file]))
-    return sorted(chromList, key=_karyotypic_sort)
-
-
 def _karyotypic_sort(c):
     """"""
     c = c.replace("chr", "")
@@ -167,16 +157,16 @@ def get_DBImport_path1(wildcards):
     """Define input files for rule HC_genotype_gvcfs."""
     return glob.glob(
         "results/HaplotypeCaller/DBImport/"
-        + wildcards.chrom
+        + wildcards.interval
         + "/"
-        + wildcards.chrom
+        + wildcards.interval
         + "*/genomicsdb_meta_dir/genomicsdb_meta*.json"
     )
 
 
 def get_DBImport_path2(wildcards):
     """Define input files for rule HC_genotype_gvcfs."""
-    path = "".join(glob.glob("results/HaplotypeCaller/DBImport/" + wildcards.chrom + "/*/__*/"))
+    path = "".join(glob.glob("results/HaplotypeCaller/DBImport/" + wildcards.interval + "/*/__*/"))
     myList = []
     if os.path.exists(path):
         myList = [
@@ -225,3 +215,11 @@ def get_DBImport_path2(wildcards):
 
 def allow_blanks(c):
     return c if c is not None else ""
+
+
+def read_in_intervals(file):
+    """Read in the intervals.tsv file specified in the config as a dataframe and return the dataframe if the interval names are unique."""
+    intervals_df = pd.read_table(file).set_index("interval_name", drop=True)
+    if not intervals_df.index.is_unique:
+        raise ValueError
+    return intervals_df

@@ -56,4 +56,4 @@ rule get_resources:
         "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz resources/ --no-sign-request && "
         "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz.tbi resources/ --no-sign-request && "
         "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf resources/ --no-sign-request && "
-        "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf.idx resources/ --no-sign-request"
+        "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf.idx resources/ --no-sign-request "

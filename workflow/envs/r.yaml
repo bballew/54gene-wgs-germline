@@ -12,3 +12,11 @@ dependencies:
   - r-lubridate
   - r-gluedown
   - r-gridExtra
+  - r-car
+  - r-stringr
+  - r-ggplot2
+  - r-cairo
+  - xorg-libxau
+  - mscorefonts
+  - r-kableextra
+  - r-r.utils

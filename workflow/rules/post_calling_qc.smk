@@ -56,30 +56,55 @@ rule plot_variant_stats:
 # ID and exclude samples with het/hom above....x?  Make tunable for WGS vs WES?  Use some outlier threshold?
 
 
-rule check_relatedness:
+rule create_ped:
     input:
-        vcf="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
-        r="resources/Homo_sapiens_assembly38.fasta",
+        linker=config["sexLinker"],
     output:
-        sites="results/qc/relatedness/sites.hg38.vcf.gz",
-        s="results/qc/relatedness/somalier",
-        o1="results/qc/relatedness/somalier.html",
-        o2="results/qc/relatedness/somalier.pairs.tsv",
-        o3="results/qc/relatedness/somalier.samples.tsv",
+        ped="results/qc/relatedness/sex_linker.ped",
     params:
-        d="results/qc/relatedness/extracted/",
-        o="results/qc/relatedness/somalier",
+        prefix="results/qc/relatedness/sex_linker",
     benchmark:
-        "results/performance_benchmarks/check_relatedness/check_relatedness.tsv"
+        "results/performance_benchmarks/create_ped/create_ped.tsv"
     shell:
-        "wget -O {output.s} https://github.com/brentp/somalier/releases/download/v0.2.12/somalier && "
-        "wget -O {output.sites} https://github.com/brentp/somalier/files/3412456/sites.hg38.vcf.gz && "
-        "chmod +x {output.s} && "
-        "./results/qc/relatedness/somalier extract "
-        "-d {params.d} "
-        "--sites {output.sites} "
-        "-f {input.r} {input.vcf} && "
-        "./results/qc/relatedness/somalier relate -o {params.o} {params.d}/*.somalier"
+        "python workflow/scripts/generate_ped.py {input} {params.prefix}"
+
+
+if config["somalier"]:
+
+    rule check_relatedness:
+        input:
+            vcf="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
+            r="resources/Homo_sapiens_assembly38.fasta",
+            ped="results/qc/relatedness/sex_linker.ped",
+        output:
+            o1="results/qc/relatedness/somalier.html",
+            o2="results/qc/relatedness/somalier.pairs.tsv",
+            o3="results/qc/relatedness/somalier.samples.tsv",
+        params:
+            d="results/qc/relatedness/extracted/",
+            o="results/qc/relatedness/somalier",
+        benchmark:
+            "results/performance_benchmarks/check_relatedness/check_relatedness.tsv"
+        conda:
+            "../envs/somalier.yaml"
+        shell:
+            "somalier extract "
+            "-d {params.d} "
+            "--sites $CONDA_PREFIX/share/somalier/sites.hg38.vcf.gz "
+            "-f {input.r} {input.vcf} && "
+            "somalier relate --ped {input.ped} -o {params.o} {params.d}/*.somalier"
+
+
+else:
+
+    rule mock_somalier_outputs:
+        """"""
+        output:
+            o1=temp("results/qc/relatedness/somalier.html"),
+            o2=temp("results/qc/relatedness/somalier.pairs.tsv"),
+            o3=temp("results/qc/relatedness/somalier.samples.tsv"),
+        shell:
+            "touch {output}"
 
 
 # rule per_base_coverage:
@@ -184,10 +209,16 @@ if full:
         """Generate one multiQC report for all input fastqs.
         Should add samtools stats output and possibly others eventually,
         dedup metrics, ...
+
+        update 13jan2022: combine previously split out pre-trimming qc
+        data into the same report, in a second fastqc processing pass,
+        and inform multiqc of how to handle this using a config yaml.
         """
         input:
             expand("results/fastqc/{rg}_r1_fastqc.zip", rg=sampleDict.keys()),
             expand("results/fastqc/{rg}_r2_fastqc.zip", rg=sampleDict.keys()),
+            expand("results/post_trimming_fastqc/{rg}_r1_fastqc.zip", rg=sampleDict.keys()),
+            expand("results/post_trimming_fastqc/{rg}_r2_fastqc.zip", rg=sampleDict.keys()),
             "results/qc/sex_check/ploidy.txt",
             "results/qc/relatedness/somalier.pairs.tsv",
             "results/qc/bcftools_stats/joint_called_stats.out",
@@ -195,29 +226,38 @@ if full:
             expand("results/dedup/{sample}.metrics.txt", sample=SAMPLES),
             expand("results/bqsr/{sample}.recal_table", sample=SAMPLES),
             expand("results/alignment_stats/{sample}.txt", sample=SAMPLES),
-            # expand("results/qc/contamination_check/{sample}.selfSM"), sample=SAMPLES,  # only if full mode
+            expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES),
             "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
             "results/HaplotypeCaller/filtered/HC.variant_calling_summary_metrics",
+            mqc_config="config/multiqc.yaml",
         output:
             "results/multiqc/multiqc.html",
+            "results/multiqc/multiqc_data/multiqc_fastqc_1.txt",
         benchmark:
             "results/performance_benchmarks/multiqc/benchmarks.tsv"
         params:
             outDir="results/multiqc/",
             outName="multiqc.html",
-            inDirs="results/fastqc results/qc results/paired_trimmed_reads results/dedup results/bqsr results/alignment_stats results/HaplotypeCaller/filtered",
+            inDirs="results/fastqc results/post_trimming_fastqc results/qc/sex_check results/qc/bcftools_stats results/qc/contamination_check results/paired_trimmed_reads results/dedup results/bqsr results/alignment_stats results/HaplotypeCaller/filtered",
+            relatedness="results/qc/relatedness" if config["somalier"] else "",
         conda:
             "../envs/fastqc_multiqc.yaml"
         shell:
-            "multiqc --force -o {params.outDir} -n {params.outName} {params.inDirs}"
+            "multiqc --force -o {params.outDir} -n {params.outName} --config {input.mqc_config} {params.inDirs} {params.relatedness}"
+
 
 
 if jointgeno:
 
     rule multiqc:
-        """Generate one multiQC report for all input fastqs.
+        """Generate one multiQC report for joint genotyping run mode.
         Should add samtools stats output and possibly others eventually,
         dedup metrics, ...
+
+        note that the multiqc configuration file config/multiqc.yaml
+        is not meant for use with this variant of the multiqc rule.
+        depending on later use cases, there may need to be two separate
+        config yamls for the two different instances of the rule.
         """
         input:
             "results/qc/sex_check/ploidy.txt",
@@ -225,6 +265,7 @@ if jointgeno:
             "results/qc/bcftools_stats/joint_called_stats.out",
             "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
             "results/HaplotypeCaller/filtered/HC.variant_calling_summary_metrics",
+            mqc_config="config/multiqc.yaml",
         output:
             "results/multiqc/multiqc.html",
         benchmark:
@@ -232,12 +273,37 @@ if jointgeno:
         params:
             outDir="results/multiqc/",
             outName="multiqc.html",
-            inDirs="results/qc results/HaplotypeCaller/filtered",
+            inDirs="results/qc/sex_check results/qc/bcftools_stats results/HaplotypeCaller/filtered",
+            relatedness="results/qc/relatedness" if config["somalier"] else "",
         conda:
             "../envs/fastqc_multiqc.yaml"
         shell:
-            "multiqc --force -o {params.outDir} -n {params.outName} {params.inDirs}"
+            "multiqc --force -o {params.outDir} --config {input.mqc_config} -n {params.outName} {params.inDirs} {params.relatedness}"
 
+
+if fastq_qc_only:
+
+    rule multiqc:
+        """Generate one multiQC report for all input fastqs."""
+        input:
+            expand("results/fastqc/{rg}_r1_fastqc.zip", rg=sampleDict.keys()),
+            expand("results/fastqc/{rg}_r2_fastqc.zip", rg=sampleDict.keys()),
+            expand("results/post_trimming_fastqc/{rg}_r1_fastqc.zip", rg=sampleDict.keys()),
+            expand("results/post_trimming_fastqc/{rg}_r2_fastqc.zip", rg=sampleDict.keys()),
+            mqc_config="config/multiqc.yaml",
+        output:
+            "results/multiqc/multiqc.html",
+            "results/multiqc/multiqc_data/multiqc_fastqc_1.txt",
+        benchmark:
+            "results/performance_benchmarks/multiqc/benchmarks.tsv"
+        params:
+            outDir="results/multiqc/",
+            outName="multiqc.html",
+            inDirs="results/fastqc results/post_trimming_fastqc",
+        conda:
+            "../envs/fastqc_multiqc.yaml"
+        shell:
+            "multiqc --force -o {params.outDir} --config {input.mqc_config} -n {params.outName} {params.inDirs}"
 
 # TODO: (EJ) There is likely a much more elegant and better solution to the way
 # I have expanded on the tsv files for the specified rules. Need to improve this.
