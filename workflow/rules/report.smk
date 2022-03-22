@@ -17,7 +17,7 @@ rule bcftools_extract_final_subject_list:
 
 if full:
 
-    rule run_summary:
+    checkpoint run_summary:
         """
         Create a run summary report aggregating information
         about overall run that is poorly captured by multiqc for the full run mode.
@@ -48,7 +48,7 @@ if full:
 
 if jointgeno:
 
-    rule run_summary:
+    checkpoint run_summary:
         """
         Create a run summary report aggregating information
         about overall run that is poorly captured by multiqc for the joint-genotyping run mode.
@@ -78,7 +78,7 @@ if jointgeno:
 
 if fastq_qc_only:
 
-    rule run_summary:
+    checkpoint run_summary:
         """
         Create a run summary report aggregating information
         about overall run that is poorly captured by multiqc for the fastqc only mode.
