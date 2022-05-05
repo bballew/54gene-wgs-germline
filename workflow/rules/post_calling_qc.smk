@@ -242,6 +242,8 @@ if full:
             relatedness="results/qc/relatedness" if config["somalier"] else "",
         conda:
             "../envs/fastqc_multiqc.yaml"
+        resources:
+            mem_mb=lambda wildcards, attempt: attempt * config["multiqc"]["memory"],
         shell:
             "multiqc --force -o {params.outDir} -n {params.outName} --config {input.mqc_config} {params.inDirs} {params.relatedness}"
 
@@ -276,6 +278,8 @@ if jointgeno:
             relatedness="results/qc/relatedness" if config["somalier"] else "",
         conda:
             "../envs/fastqc_multiqc.yaml"
+        resources:
+            mem_mb=lambda wildcards, attempt: attempt * config["multiqc"]["memory"],
         shell:
             "multiqc --force -o {params.outDir} --config {input.mqc_config} -n {params.outName} {params.inDirs} {params.relatedness}"
 
@@ -301,6 +305,8 @@ if fastq_qc_only:
             inDirs="results/fastqc results/post_trimming_fastqc",
         conda:
             "../envs/fastqc_multiqc.yaml"
+        resources:
+            mem_mb=lambda wildcards, attempt: attempt * config["multiqc"]["memory"],
         shell:
             "multiqc --force -o {params.outDir} --config {input.mqc_config} -n {params.outName} {params.inDirs}"
 
