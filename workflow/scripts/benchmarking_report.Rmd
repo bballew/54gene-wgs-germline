@@ -56,6 +56,9 @@ filtered.df <- dataset %>% group_by(rule) %>% filter(s >= time.threshold)
 
 # cluster config version
 cluster.config <- snakemake@params[["clusterVersion"]]
+
+# start time to calculate elapsed time
+tat.file <- snakemake@input[["start_time"]]
 ```
 
 ```{r plot.functions, eval=TRUE, echo=FALSE}
@@ -107,7 +110,12 @@ md_bullet(inlines)
 
 ##### Execution time
 Total elapsed time displayed in hours for all rules in this workflow.
-
+```{r elapsed.time, eval=TRUE, echo=FALSE}
+start.time <- read.table(tat.file, header=FALSE)[1,1]
+end.time <- as.integer(format(Sys.time(), "%s"))
+elapsed.time <- round((end.time - start.time) / 3600, 2)
+```
+The total elapsed time for this pipeline was: `r elapsed.time` hours.
 ```{r all.time.exec, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
 # plot walltime for all rules benchmarked
 exec.time.all <- create.boxjitter.plot(dataset, subset.df, "rule", "walltime", "Rule", "Total walltime in hours for all rules")
