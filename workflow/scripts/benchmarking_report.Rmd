@@ -245,12 +245,9 @@ ioout.df1 <- subset(filtered.df, io_out > 10)
 ioout.df2 <- subset(filtered.df, io_out < 10)
 
 ioin.subset1 <- create.subset.plot(ioin.df1, "rule", "io_in", "Rule", "Cumulative GB Written", "Rules with >10GB Read")
-ioin.subset2 <- create.subset.plot(ioin.df2, "rule", "io_in", "Rule", "Cumulative GB Written", "Rules with <10GB Read")
-
 ioout.subset1 <- create.subset.plot(ioout.df1, "rule", "io_out", "Rule", "Cumulative GB Written", "Rules with >10GB Written")
-ioout.subset2 <- create.subset.plot(ioout.df2, "rule", "io_out", "Rule", "Cumulative GB Written", "Rules with <10GB Written")
 
-grid.arrange(ioin.subset1, ioin.subset2, ioout.subset1, ioout.subset2, nrow=2)
+grid.arrange(ioin.subset1, ioout.subset1, nrow=2)
 ```
 
 #### CPU Time {.tabset .tabset-pills}
