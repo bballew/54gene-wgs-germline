@@ -277,3 +277,10 @@ CPU/s ≈ *N* indicates the process saturated the allocated number of processors
 cpuwall.ratio <- create.boxjitter.plot(filtered.df, subset.df, "rule", "cpuwall_ratio", "Rule", "CPU/second")
 cpuwall.ratio
 ```
+
+#### Session Info
+Summary of the R configuration used to create this report.
+
+```{r session.info, eval=TRUE, echo=TRUE}
+sessionInfo()
+```
