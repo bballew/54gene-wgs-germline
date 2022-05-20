@@ -22,6 +22,8 @@ rule HC_call_variants:
     params:
         t=tempDir,
         java_opts=utils.allow_blanks(config["haplotypeCaller"]["java_opts"]),
+    wildcard_constraints:
+        interval="|".join(intervalList),
     benchmark:
         "results/performance_benchmarks/HC_call_variants/{sample}_{interval}.tsv"
     conda:
