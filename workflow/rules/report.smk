@@ -101,9 +101,11 @@ if fastq_qc_only:
         script:
             "../scripts/run_initial_summary.Rmd"
 
+
 ## To resolve the situation where performance benchmark placeholder files are
 ## not available at DAG construction, and to prevent race conditions, defer
 ## evaluation of the input to combine_benchmarks until the final report is complete.
+
 
 def aggregate_benchmark_files(wildcards):
     """
@@ -111,6 +113,7 @@ def aggregate_benchmark_files(wildcards):
     """
     checkpoint_output = checkpoints.run_summary.get().output[0]
     return [j for i in expand("results/performance_benchmarks/*/*.tsv") for j in glob(i)]
+
 
 rule combine_benchmarks:
     """Create a concatenated file with all the benchmarking stats generated for

@@ -303,4 +303,3 @@ if fastq_qc_only:
             "../envs/fastqc_multiqc.yaml"
         shell:
             "multiqc --force -o {params.outDir} --config {input.mqc_config} -n {params.outName} {params.inDirs}"
-
