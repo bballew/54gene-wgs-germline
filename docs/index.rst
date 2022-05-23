@@ -12,7 +12,8 @@ Welcome to 54gene's WGS-germline documentation!
 
    introduction.rst
    installation.rst
-
+   .. usage.rst
+   investigateresults.rst
 
 
 
