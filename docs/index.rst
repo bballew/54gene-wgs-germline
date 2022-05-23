@@ -3,12 +3,16 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to 54gene-wgs-germline's documentation!
+Welcome to 54gene's WGS-germline documentation!
 ===============================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+
+   introduction.rst
+   installation.rst
+
 
 
 

@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = '54gene-wgs-germline'
-copyright = '2022, Bari Jane Ballew, Cameron Palmer, Esha Joshi'
+copyright = '2022, 54gene'
 author = 'Bari Jane Ballew, Cameron Palmer, Esha Joshi'
 
 
