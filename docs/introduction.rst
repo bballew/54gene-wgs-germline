@@ -15,4 +15,4 @@ Features:
 To install the latest release, type::
     git clone <link here>
 
-See the :ref:`Installation guide` and :ref:`Usage` for details.
+See the :doc:`installation` and :doc:`usage` for details.
