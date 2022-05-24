@@ -9,7 +9,7 @@ Below are descriptions and usage options for the various config parameters speci
 | sampleFile    |     Y     |      NA        |  Manifest file with IDs   |
 +---------------+-----------+----------------+---------------------------+
 | intervalsFile |     Y     |      NA        | File with interval names  |
-|               |           |                |  and file paths           |
+|               |           |                | and file paths            |
 +---------------+-----------+----------------+---------------------------+ 
 | jobs          |     Y     |     1000       | Jobs to submit to cluster |
 +---------------+-----------+----------------+---------------------------+
@@ -34,8 +34,8 @@ Below are descriptions and usage options for the various config parameters speci
 |               |           |                | with nodes for memory-    |
 |               |           |                | intensive jobs            |
 +---------------+-----------+----------------+---------------------------+
-| bed           |     N     | Homo_sapiens_  | Split genome by chromosome|
-|               |           | assembly38.bed | when calling variants     |
+| bed           |     N     | `Homo_sapiens_ | Split genome by chromosome|
+|               |           | assembly38.bed`| when calling variants     |
 +---------------+-----------+----------------+---------------------------+
 | max_concurent |     Y     |      40        |Max concurrent running jobs|
 +---------------+-----------+----------------+---------------------------+
