@@ -16,8 +16,8 @@ Step 2. Install the run-time conda environment
 ----------------------------------------------
 If you don't already have conda installed, follow this guide `here <https://docs.conda.io/en/latest/miniconda.html#installing>`_ to install Miniconda.
 
-Once installed, create the run-time conda environment with minimal dependencies defined in the `environment.yaml`
-::
+Once installed, create the run-time conda environment with minimal dependencies defined using the following command::
+    
     conda env create -f environment.yaml
 
 Step 3. Configure the workflow
