@@ -20,7 +20,7 @@
 project = '54gene-wgs-germline'
 copyright = '2022, 54gene'
 author = 'Bari Jane Ballew, Cameron Palmer, Esha Joshi'
-
+version = '1.0.0'
 
 # -- General configuration ---------------------------------------------------
 
