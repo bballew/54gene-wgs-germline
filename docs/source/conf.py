@@ -50,3 +50,9 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# Path to custom.css style sheet with 54gene branding
+html_css_files = ['custom.css']
+
+# Path to the 54gene logo displayed on the left hand static panel
+html_logo = "images/54gene_logo.png"
