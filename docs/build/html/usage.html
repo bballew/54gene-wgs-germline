@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Usage and Running the pipeline &mdash; 54gene-wgs-germline  documentation</title>
+  <title>Usage and Execution &mdash; 54gene-wgs-germline  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -15,7 +15,6 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -45,10 +44,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation and Setup</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage and Running the pipeline</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#resource-allocation">Resource Allocation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage and Execution</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#config-parameters">1. Config Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#resource-allocation">2. Resource Allocation</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="investigateresults.html">Investigate the Results</a></li>
@@ -70,7 +70,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Usage and Running the pipeline</li>
+      <li>Usage and Execution</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/usage.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -80,8 +80,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="usage-and-running-the-pipeline">
-<h1>Usage and Running the pipeline<a class="headerlink" href="#usage-and-running-the-pipeline" title="Permalink to this heading"></a></h1>
+  <section id="usage-and-execution">
+<h1>Usage and Execution<a class="headerlink" href="#usage-and-execution" title="Permalink to this headline"></a></h1>
+<section id="config-parameters">
+<h2>1. Config Parameters<a class="headerlink" href="#config-parameters" title="Permalink to this headline"></a></h2>
 <p>Below are descriptions and usage options for the various config parameters specified in <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>.</p>
 <table class="docutils align-default">
 <colgroup>
@@ -189,16 +191,17 @@ sample</p></td>
 </tr>
 </tbody>
 </table>
+</section>
 <section id="resource-allocation">
-<h2>Resource Allocation<a class="headerlink" href="#resource-allocation" title="Permalink to this heading"></a></h2>
-<p>This pipeline was originally developed to be run on an Unix-like HPC system for scalable and efficient analyses. As a result, there are several configuration options available for allocating resources and running jobs within the workflow.</p>
+<h2>2. Resource Allocation<a class="headerlink" href="#resource-allocation" title="Permalink to this headline"></a></h2>
+<p>This pipeline was originally developed to be run on an Unix-based HPC system for scalable and efficient analyses. As a result, there are several configuration options available for allocating resources and running jobs within the workflow.</p>
 <p>Within the <code class="docutils literal notranslate"><span class="pre">config/config.yaml</span></code> there are several options for allocating memory, threads, and setting Java-specific variables (for GATK suite of tools) for the various tools used in the workflow.</p>
 <ul class="simple">
 <li><p>To modify the number of maximum jobs to run, you can specify a number for <code class="docutils literal notranslate"><span class="pre">jobs</span></code></p></li>
 <li><p>Set a maximum number of jobs to run concurrently if you have bandwith constraints using the <code class="docutils literal notranslate"><span class="pre">max_concurrent</span></code> variable</p></li>
 <li><p>Specify which paritions/queues to submit your jobs to, depending on your HPC using the <code class="docutils literal notranslate"><span class="pre">default_queue</span></code>, <code class="docutils literal notranslate"><span class="pre">compute_queue</span></code> and <code class="docutils literal notranslate"><span class="pre">memory_queue</span></code> variables (some jobs such as alignment, require more memory and can use nodes with more memory available when specified with these variables)</p></li>
 <li><p>Specify the number of threads and memroy in MB for each tool, where available using the <code class="docutils literal notranslate"><span class="pre">threads</span></code> and <code class="docutils literal notranslate"><span class="pre">memory</span></code> variables</p></li>
-<li><p>Specify the space to allocate for Java lass metadata using the <code class="docutils literal notranslate"><span class="pre">global_vars</span></code> variable</p></li>
+<li><p>Specify the space to allocate for Java class metadata using the <code class="docutils literal notranslate"><span class="pre">global_vars</span></code> variable</p></li>
 </ul>
 </section>
 </section>
@@ -214,7 +217,7 @@ sample</p></td>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, 54gene.</p>
+    <p>&#169; Copyright 2022, B.Ballew, C.Palmer, E.Joshi, 54gene.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

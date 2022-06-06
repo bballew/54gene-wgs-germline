@@ -10,7 +10,7 @@ Welcome to 54gene's WGS-germline documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   introduction.rst
+   overview.rst
    installation.rst
    usage.rst
    investigateresults.rst

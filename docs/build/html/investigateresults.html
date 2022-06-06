@@ -15,13 +15,12 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Tests" href="tests.html" />
-    <link rel="prev" title="Usage and Running the pipeline" href="usage.html" /> 
+    <link rel="prev" title="Usage and Execution" href="usage.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,9 +44,9 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation and Setup</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage and Running the pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage and Execution</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Investigate the Results</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#assessing-completion">Assessing completion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#outputs-and-results">Outputs and Results</a></li>
@@ -83,13 +82,13 @@
            <div itemprop="articleBody">
              
   <section id="investigate-the-results">
-<h1>Investigate the Results<a class="headerlink" href="#investigate-the-results" title="Permalink to this heading"></a></h1>
+<h1>Investigate the Results<a class="headerlink" href="#investigate-the-results" title="Permalink to this headline"></a></h1>
 <section id="assessing-completion">
-<h2>Assessing completion<a class="headerlink" href="#assessing-completion" title="Permalink to this heading"></a></h2>
+<h2>Assessing completion<a class="headerlink" href="#assessing-completion" title="Permalink to this headline"></a></h2>
 <p>Upon pipeline completion, verify that all steps have completed without error by checking the top-level log <code class="docutils literal notranslate"><span class="pre">WGS_&lt;datestamp&gt;.out</span></code>.  The bottom few lines of the file should contain something like nnn of nnn steps (100%) done.  Additional job logs (when run on a high-performance computing cluster) are stored in the <code class="docutils literal notranslate"><span class="pre">logs/</span></code> sub-directory.</p>
 </section>
 <section id="outputs-and-results">
-<h2>Outputs and Results<a class="headerlink" href="#outputs-and-results" title="Permalink to this heading"></a></h2>
+<h2>Outputs and Results<a class="headerlink" href="#outputs-and-results" title="Permalink to this headline"></a></h2>
 <p>All pipeline results are stored in the <code class="docutils literal notranslate"><span class="pre">results/</span></code> directory.</p>
 <ul class="simple">
 <li><p>The hard-filtered, joint-called VCF can be found in <code class="docutils literal notranslate"><span class="pre">results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz</span></code></p></li>
@@ -105,7 +104,7 @@
 <p>The record of sample exclusions, along with reasons for exclusion, is found at <code class="docutils literal notranslate"><span class="pre">results/post_qc_exclusions/exclude_list_with_annotation.tsv</span></code>.  Samples are excluded for at least one of the following reasons.  Values listed are defaults, but can be changed in the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>.</p>
 </section>
 <section id="qc">
-<h2>QC<a class="headerlink" href="#qc" title="Permalink to this heading"></a></h2>
+<h2>QC<a class="headerlink" href="#qc" title="Permalink to this headline"></a></h2>
 <p>The following QC metrics are available:</p>
 <ul class="simple">
 <li><p>fastqc at <code class="docutils literal notranslate"><span class="pre">results/fastqc/</span></code></p></li>
@@ -126,14 +125,14 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="usage.html" class="btn btn-neutral float-left" title="Usage and Running the pipeline" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="usage.html" class="btn btn-neutral float-left" title="Usage and Execution" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="tests.html" class="btn btn-neutral float-right" title="Tests" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, 54gene.</p>
+    <p>&#169; Copyright 2022, B.Ballew, C.Palmer, E.Joshi, 54gene.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

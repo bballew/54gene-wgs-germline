@@ -1,5 +1,8 @@
-Usage and Running the pipeline
+Usage and Execution
 ==============================
+
+1. Config Parameters
+--------------------
 
 Below are descriptions and usage options for the various config parameters specified in ``config.yaml``.
 
@@ -50,9 +53,10 @@ Below are descriptions and usage options for the various config parameters speci
 
 
 
-Resource Allocation
--------------------
-This pipeline was originally developed to be run on an Unix-like HPC system for scalable and efficient analyses. As a result, there are several configuration options available for allocating resources and running jobs within the workflow.
+2. Resource Allocation
+----------------------
+
+This pipeline was originally developed to be run on an Unix-based HPC system for scalable and efficient analyses. As a result, there are several configuration options available for allocating resources and running jobs within the workflow.
 
 
 Within the ``config/config.yaml`` there are several options for allocating memory, threads, and setting Java-specific variables (for GATK suite of tools) for the various tools used in the workflow.
@@ -61,5 +65,5 @@ Within the ``config/config.yaml`` there are several options for allocating memor
 - Set a maximum number of jobs to run concurrently if you have bandwith constraints using the ``max_concurrent`` variable
 - Specify which paritions/queues to submit your jobs to, depending on your HPC using the ``default_queue``, ``compute_queue`` and ``memory_queue`` variables (some jobs such as alignment, require more memory and can use nodes with more memory available when specified with these variables)
 - Specify the number of threads and memroy in MB for each tool, where available using the ``threads`` and ``memory`` variables
-- Specify the space to allocate for Java lass metadata using the ``global_vars`` variable 
+- Specify the space to allocate for Java class metadata using the ``global_vars`` variable 
   

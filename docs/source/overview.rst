@@ -1,4 +1,4 @@
-Introduction
+Overview
 ===============
 
 This workflow was designed by the Genomics & Data Science team at 54gene and is used to analyze germline whole-genome sequencing data in the form of either FASTQs or gVCFs. This pipeline emit a joint-called multi-sample VCF. It is currently optimized to be run on HPC infrastructure and was developed on AWS' ParallelCluster.
@@ -13,6 +13,7 @@ Features:
 - Generate a multiQC report 
 
 To install the latest release, type::
+    
     git clone <link here>
 
-See the :doc:`installation` and :doc:`usage` for details.
+See the :doc:`installation` and :doc:`usage` for details on setting up and running the pipeline.

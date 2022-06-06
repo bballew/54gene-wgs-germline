@@ -15,13 +15,12 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Usage and Running the pipeline" href="usage.html" />
-    <link rel="prev" title="Introduction" href="introduction.html" /> 
+    <link rel="next" title="Usage and Execution" href="usage.html" />
+    <link rel="prev" title="Overview" href="overview.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,7 +44,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation and Setup</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#step-1-obtain-a-copy-of-this-workflow">Step 1. Obtain a copy of this workflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#step-2-install-the-run-time-conda-environment">Step 2. Install the run-time conda environment</a></li>
@@ -56,7 +55,7 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage and Running the pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage and Execution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="investigateresults.html">Investigate the Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fordevelopers.html">For developers</a></li>
@@ -87,18 +86,18 @@
            <div itemprop="articleBody">
              
   <section id="installation-and-setup">
-<h1>Installation and Setup<a class="headerlink" href="#installation-and-setup" title="Permalink to this heading"></a></h1>
+<h1>Installation and Setup<a class="headerlink" href="#installation-and-setup" title="Permalink to this headline"></a></h1>
 <p>This workflow was designed to use <cite>conda`</cite> for dependency management and utilizes <cite>Snakemake</cite> as the workflow management system, ensuring reproducible and scalable analyses.</p>
 <p>This installation guide is designed for Unix/Linux environments.</p>
 <section id="step-1-obtain-a-copy-of-this-workflow">
-<h2>Step 1. Obtain a copy of this workflow<a class="headerlink" href="#step-1-obtain-a-copy-of-this-workflow" title="Permalink to this heading"></a></h2>
+<h2>Step 1. Obtain a copy of this workflow<a class="headerlink" href="#step-1-obtain-a-copy-of-this-workflow" title="Permalink to this headline"></a></h2>
 <p>If you haven’t already, clone this repository to your local system, into the place where you want to perform the data analysis:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@gitlab</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">data</span><span class="o">-</span><span class="n">analysis5</span><span class="o">/</span><span class="mi">54</span><span class="n">gene</span><span class="o">-</span><span class="n">wgs</span><span class="o">-</span><span class="n">germline</span><span class="o">.</span><span class="n">git</span>
 </pre></div>
 </div>
 </section>
 <section id="step-2-install-the-run-time-conda-environment">
-<h2>Step 2. Install the run-time conda environment<a class="headerlink" href="#step-2-install-the-run-time-conda-environment" title="Permalink to this heading"></a></h2>
+<h2>Step 2. Install the run-time conda environment<a class="headerlink" href="#step-2-install-the-run-time-conda-environment" title="Permalink to this headline"></a></h2>
 <p>If you don’t already have conda installed, follow this guide <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html#installing">here</a> to install Miniconda.</p>
 <p>Once installed, create the run-time conda environment with minimal dependencies defined using the following command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">environment</span><span class="o">.</span><span class="n">yaml</span>
@@ -106,10 +105,10 @@
 </div>
 </section>
 <section id="step-3-configure-the-workflow">
-<h2>Step 3. Configure the workflow<a class="headerlink" href="#step-3-configure-the-workflow" title="Permalink to this heading"></a></h2>
+<h2>Step 3. Configure the workflow<a class="headerlink" href="#step-3-configure-the-workflow" title="Permalink to this headline"></a></h2>
 <p>The workflow needs to configured to perform the analysis of your choice by editing the following files in the <cite>config/</cite> folder:</p>
 <section id="a-config-file">
-<h3>A. Config file<a class="headerlink" href="#a-config-file" title="Permalink to this heading"></a></h3>
+<h3>A. Config file<a class="headerlink" href="#a-config-file" title="Permalink to this headline"></a></h3>
 <p>As of v1.0, the pipeline offers three run modes. Please specify the run mode in <cite>config.yaml</cite>.</p>
 <ul class="simple">
 <li><p><strong>full</strong>: This mode starts with fastqs and emits a joint-called, filtered, multi-sample VCF</p></li>
@@ -118,7 +117,7 @@
 </ul>
 </section>
 <section id="a-manifest-file">
-<h3>A. Manifest file<a class="headerlink" href="#a-manifest-file" title="Permalink to this heading"></a></h3>
+<h3>A. Manifest file<a class="headerlink" href="#a-manifest-file" title="Permalink to this headline"></a></h3>
 <p>You will need to provide a headerless, white-space delimited manifest file to run the pipeline for all three run-modes.</p>
 <p>For <strong>full</strong> and <strong>fastqc_only</strong> mode:</p>
 <p>The <cite>manifest.txt</cite> would include the following columns:</p>
@@ -189,14 +188,14 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="usage.html" class="btn btn-neutral float-right" title="Usage and Running the pipeline" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="overview.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="usage.html" class="btn btn-neutral float-right" title="Usage and Execution" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, 54gene.</p>
+    <p>&#169; Copyright 2022, B.Ballew, C.Palmer, E.Joshi, 54gene.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
