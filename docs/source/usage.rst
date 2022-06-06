@@ -50,6 +50,14 @@ Below are descriptions and usage options for the various config parameters speci
 +---------------+-----------+----------------+---------------------------+
 | max_contam    |     Y     |      0.03      | Max % of contam allowed   |
 +---------------+-----------+----------------+---------------------------+
+|time_threshold |     Y     |    5 (mins)    | Exclude rules from the    |
+|               |           |                | benchmarking report if    | 
+|               |           |                | elapsed time is below this|
++---------------+-----------+----------------+---------------------------+
+| somalier      |     Y     |      True      | Check relatedness and sex |
+|               |           |                | discordance with Somalier |
+|               |           |                | (requires sex_linker.tsv) |
++---------------+-----------+----------------+---------------------------+
 
 
 

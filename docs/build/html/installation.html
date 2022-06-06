@@ -50,7 +50,10 @@
 <li class="toctree-l2"><a class="reference internal" href="#step-2-install-the-run-time-conda-environment">Step 2. Install the run-time conda environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#step-3-configure-the-workflow">Step 3. Configure the workflow</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#a-config-file">A. Config file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#a-manifest-file">A. Manifest file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#b-manifest-file">B. Manifest file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c-intervals-file">C. Intervals file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#d-sex-linker-file">D. Sex linker file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#d-multiqc-yaml">D. MultiQC yaml</a></li>
 </ul>
 </li>
 </ul>
@@ -116,11 +119,17 @@
 <li><p><strong>fastqc_only</strong>: This mode starts with fastqs and emits trimmed fastqs as well as a multiQC report for raw and trimmed reads. This run mode is meant for performing QC on fastq data before further downstream analysis.</p></li>
 </ul>
 </section>
-<section id="a-manifest-file">
-<h3>A. Manifest file<a class="headerlink" href="#a-manifest-file" title="Permalink to this headline"></a></h3>
+<section id="b-manifest-file">
+<h3>B. Manifest file<a class="headerlink" href="#b-manifest-file" title="Permalink to this headline"></a></h3>
 <p>You will need to provide a headerless, white-space delimited manifest file to run the pipeline for all three run-modes.</p>
 <p>For <strong>full</strong> and <strong>fastqc_only</strong> mode:</p>
 <p>The <cite>manifest.txt</cite> would include the following columns:</p>
+<ul class="simple">
+<li><p>First column with the readgroup for each sample (contains the full sample ID, barcode, and lane)</p></li>
+<li><p>Second column with only the sample ID</p></li>
+<li><p>Third column with the path to the read 1 FASTQ file</p></li>
+<li><p>Fourth column with the path to the read 2 FASTQ file</p></li>
+</ul>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 21%" />
@@ -156,6 +165,10 @@
 </table>
 <p>For <strong>joint_genotyping</strong> mode:</p>
 <p>The <cite>manifest.txt</cite> would include the following two columns:</p>
+<ul class="simple">
+<li><p>First column with the sample IDs for each gVCF</p></li>
+<li><p>Second column with the paths to the gVCFs</p></li>
+</ul>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 31%" />
@@ -181,6 +194,60 @@
 </table>
 <p><em>Note</em>: The gVCFs should be zipped and indexed.</p>
 </section>
+<section id="c-intervals-file">
+<h3>C. Intervals file<a class="headerlink" href="#c-intervals-file" title="Permalink to this headline"></a></h3>
+<p>For <strong>full</strong> and <strong>joint_genotyping</strong> modes only.</p>
+<p>Joint-calling for a large number of samples can be computationally expensive and very time-consuming. This pipeline was designed to mitigate these issues by parallelizing joint-calling over multiple intervals of the genome. To specify the number of intervals, and which regions to parallelize over, a 2-column tab-delmited <code class="docutils literal notranslate"><span class="pre">intervals.tsv</span></code> file can be specified.</p>
+<p>This file contains two columns:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">interval_name</span></code> for the name of the particular interval or region</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">file_path</span></code> full path to the interval/region BED file, Picard-style <code class="docutils literal notranslate"><span class="pre">.interval_list</span></code>, VCF file, or GATK-style <code class="docutils literal notranslate"><span class="pre">.list</span></code> or <code class="docutils literal notranslate"><span class="pre">.intervals</span></code> file (see further details on these formats <a class="reference external" href="https://gatk.broadinstitute.org/hc/en-us/articles/360035531852-Intervals-and-interval-lists">here</a>)</p></li>
+</ul>
+<p>For example:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 79%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>interval_name</p></td>
+<td><p>file_path</p></td>
+</tr>
+<tr class="row-even"><td><p>interval_1</p></td>
+<td><p>/resources/scattered_calling_intervals/interval_1.bed</p></td>
+</tr>
+</tbody>
+</table>
+<p>The pipeline will supply these interval files to the GATK <code class="docutils literal notranslate"><span class="pre">HaplotypeCaller</span></code>, <code class="docutils literal notranslate"><span class="pre">GenomicsDBImport</span></code> and <code class="docutils literal notranslate"><span class="pre">GenotypeGVCFs</span></code> steps to run concurrent instances of these rules at each specified interval(s), reducing overall execution time.</p>
+<p>We recommend specifying regions of equal size for parallelization.</p>
+</section>
+<section id="d-sex-linker-file">
+<h3>D. Sex linker file<a class="headerlink" href="#d-sex-linker-file" title="Permalink to this headline"></a></h3>
+<p>The pipeline provides an option to check the relatdness amongst the samples using Somalier in the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> (see <code class="docutils literal notranslate"><span class="pre">check_relatedness</span></code> parameter in <a class="reference internal" href="usage.html"><span class="doc">Usage and Execution</span></a>). This requires a 2-column, tab-delimited <code class="docutils literal notranslate"><span class="pre">sex_linker.tsv</span></code> file provided and specified in the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>. This file will have:</p>
+<ul class="simple">
+<li><p>First column with the header <code class="docutils literal notranslate"><span class="pre">Sample</span></code> with all sample names</p></li>
+<li><p>Second column with the header <code class="docutils literal notranslate"><span class="pre">Sex</span></code> containing one-letter formattted sex of all samples</p></li>
+</ul>
+<p>For example:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 64%" />
+<col style="width: 36%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Sample</p></td>
+<td><p>Sex</p></td>
+</tr>
+<tr class="row-even"><td><p>NA12878</p></td>
+<td><p>F</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="d-multiqc-yaml">
+<h3>D. MultiQC yaml<a class="headerlink" href="#d-multiqc-yaml" title="Permalink to this headline"></a></h3>
+<p>A configuration file for MultiQC can be found in <code class="docutils literal notranslate"><span class="pre">config/multiqc.yaml</span></code> and is used for generating and specifying the order of the various modules in the multiQC report from the pipeline. We <strong>do not</strong> recommend modifying this file unless you understand how this configuration file is setup or how multiQC works.</p>
+</section>
 </section>
 </section>
 
@@ -195,7 +262,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, B.Ballew, C.Palmer, E.Joshi, 54gene.</p>
+    <p>&#169; Copyright 2022, B. Ballew, C. Palmer, E. Joshi, 54gene.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

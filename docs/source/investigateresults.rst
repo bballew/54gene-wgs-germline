@@ -39,5 +39,8 @@ The following QC metrics are available:
 - Picard metrics at ``results/HaplotypeCaller/filtered/``
 - bcftools stats at ``results/qc/bcftools_stats/``
 - multiqc report at ``results/multiqc/``
+- benchmarking report of pipeline performance statistics (i.e. elapsed time, memory and CPU utilization for rules above ``time_threshold`` in ``config.yaml``) at ``performance_benchmarks/benchmarking_report.html``
+- Run summary report for the pipeline, excluded samples and discordances at ``results/run_summary/run_summary.html``
+  
 
 

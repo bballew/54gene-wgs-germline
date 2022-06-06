@@ -32,7 +32,7 @@ As of v1.0, the pipeline offers three run modes. Please specify the run mode in 
 - **joint_genotyping**: This mode starts with gVCFs and runs joint-calling and filtering, emitting a multi-sample VCF. In the event you have analyzed batches of samples in the full-run mode, these batches can then jointly re-genotyped with this run mode.
 - **fastqc_only**: This mode starts with fastqs and emits trimmed fastqs as well as a multiQC report for raw and trimmed reads. This run mode is meant for performing QC on fastq data before further downstream analysis.
 
-A. Manifest file
+B. Manifest file
 ^^^^^^^^^^^^^^^^
 You will need to provide a headerless, white-space delimited manifest file to run the pipeline for all three run-modes. 
 
@@ -40,6 +40,11 @@ For **full** and **fastqc_only** mode:
 
 The `manifest.txt` would include the following columns:
 
+- First column with the readgroup for each sample (contains the full sample ID, barcode, and lane)
+- Second column with only the sample ID 
+- Third column with the path to the read 1 FASTQ file
+- Fourth column with the path to the read 2 FASTQ file 
+  
 +------------+-----------+----------------+-----------------+
 | readgroup  | sample_ID |path/to/r1.fastq| path/to/r2.fastq|
 +------------+-----------+----------------+-----------------+
@@ -56,6 +61,9 @@ For **joint_genotyping** mode:
 
 The `manifest.txt` would include the following two columns:
 
+- First column with the sample IDs for each gVCF
+- Second column with the paths to the gVCFs
+
 +-------------+-----------------------------+
 | sample_ID   |  path/to/sample_ID.g.vcf.gz |
 +-------------+-----------------------------+
@@ -67,3 +75,50 @@ For example:
 +---------------+-----------------------------+
 
 *Note*: The gVCFs should be zipped and indexed. 
+
+C. Intervals file
+^^^^^^^^^^^^^^^^^
+
+For **full** and **joint_genotyping** modes only.
+
+Joint-calling for a large number of samples can be computationally expensive and very time-consuming. This pipeline was designed to mitigate these issues by parallelizing joint-calling over multiple intervals of the genome. To specify the number of intervals, and which regions to parallelize over, a 2-column tab-delmited ``intervals.tsv`` file can be specified. 
+
+This file contains two columns:
+
+- ``interval_name`` for the name of the particular interval or region 
+- ``file_path`` full path to the interval/region BED file, Picard-style ``.interval_list``, VCF file, or GATK-style ``.list`` or ``.intervals`` file (see further details on these formats `here <https://gatk.broadinstitute.org/hc/en-us/articles/360035531852-Intervals-and-interval-lists>`_)
+
+For example:
+
++---------------+-------------------------------------------------------+
+| interval_name |  file_path                                            |
++---------------+-------------------------------------------------------+
+| interval_1    | /resources/scattered_calling_intervals/interval_1.bed |
++---------------+-------------------------------------------------------+
+
+
+The pipeline will supply these interval files to the GATK ``HaplotypeCaller``, ``GenomicsDBImport`` and ``GenotypeGVCFs`` steps to run concurrent instances of these rules at each specified interval(s), reducing overall execution time.
+
+We recommend specifying regions of equal size for parallelization.
+
+D. Sex linker file
+^^^^^^^^^^^^^^^^^^
+
+The pipeline provides an option to check the relatdness amongst the samples using Somalier in the ``config.yaml`` (see ``check_relatedness`` parameter in :doc:`usage`). This requires a 2-column, tab-delimited ``sex_linker.tsv`` file provided and specified in the ``config.yaml``. This file will have:
+
+- First column with the header ``Sample`` with all sample names 
+- Second column with the header ``Sex`` containing one-letter formattted sex of all samples 
+
+For example:
+
++---------+-----+
+| Sample  | Sex |
++---------+-----+
+| NA12878 | F   |
++---------+-----+
+
+
+D. MultiQC yaml
+^^^^^^^^^^^^^^^
+
+A configuration file for MultiQC can be found in ``config/multiqc.yaml`` and is used for generating and specifying the order of the various modules in the multiQC report from the pipeline. We **do not** recommend modifying this file unless you understand how this configuration file is setup or how multiQC works. 
