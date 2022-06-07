@@ -42,7 +42,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#inputs">Inputs</a></li>
@@ -53,7 +53,13 @@
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage and Execution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="investigateresults.html">Investigate the Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">About:</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="fordevelopers.html">For developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releasenotes.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="corepipeline.html">Core pipeline</a></li>
 </ul>
 
         </div>
@@ -82,7 +88,7 @@
              
   <section id="overview">
 <h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline"></a></h1>
-<p>This workflow was designed by the Genomics &amp; Data Science team at 54gene and is used to analyze germline whole-genome sequencing data in the form of either FASTQs or gVCFs. This pipeline emit a joint-called multi-sample VCF. It is currently optimized to be run on HPC infrastructure and was developed on AWS’ ParallelCluster.</p>
+<p>This workflow was designed by the Genomics &amp; Data Science team at 54gene and is used to analyze germline whole-genome sequencing data in the form of either FASTQs or gVCFs. This pipeline emits a joint-called multi-sample VCF. It is currently optimized to be run on HPC infrastructure and was developed on AWS’ <a class="reference external" href="https://aws.amazon.com/hpc/parallelcluster/">ParallelCluster</a>.</p>
 <p>Features:</p>
 <ul class="simple">
 <li><p>Read filtering and trimming</p></li>
@@ -98,11 +104,13 @@
 </div>
 <section id="inputs">
 <h2>Inputs<a class="headerlink" href="#inputs" title="Permalink to this headline"></a></h2>
-<p>The pipeline requires the following inputs:
-- A headerless, whitespace delimited <code class="docutils literal notranslate"><span class="pre">manifest.txt</span></code> file with sample names and paths (columns dependent on the run-mode)
-- Config file with the run-mode specified and other pipeline parameters configured (see default config provided in <code class="docutils literal notranslate"><span class="pre">config/config.yaml</span></code>)
-- A tab-delimited <code class="docutils literal notranslate"><span class="pre">intervals.tsv</span></code> file with names of intervals and paths to region (BED) files of the genome you want to parallelize the variant calling and joint-calling steps by (i.e. 50 BED files of 50 intervals to parallelize by)
-- A tab-delimited <code class="docutils literal notranslate"><span class="pre">sex_linker.tsv</span></code> file with the sample names in one column and sex in the other to identify discordances</p>
+<p>The pipeline requires the following inputs:</p>
+<ul class="simple">
+<li><p>A headerless, whitespace delimited <code class="docutils literal notranslate"><span class="pre">manifest.txt</span></code> file with sample names and paths (columns dependent on the run-mode)</p></li>
+<li><p>Config file with the run-mode specified and other pipeline parameters configured (see default config provided in <code class="docutils literal notranslate"><span class="pre">config/config.yaml</span></code>)</p></li>
+<li><p>A tab-delimited <code class="docutils literal notranslate"><span class="pre">intervals.tsv</span></code> file with names of intervals and paths to region (BED) files of the genome you want to parallelize the variant calling and joint-calling steps by (i.e. 50 BED files of 50 intervals to parallelize by)</p></li>
+<li><p>A tab-delimited <code class="docutils literal notranslate"><span class="pre">sex_linker.tsv</span></code> file with the sample names in one column and sex in the other to identify discordances</p></li>
+</ul>
 </section>
 <section id="outputs">
 <h2>Outputs<a class="headerlink" href="#outputs" title="Permalink to this headline"></a></h2>

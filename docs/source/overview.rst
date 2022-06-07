@@ -1,7 +1,7 @@
 Overview
 ===============
 
-This workflow was designed by the Genomics & Data Science team at 54gene and is used to analyze germline whole-genome sequencing data in the form of either FASTQs or gVCFs. This pipeline emit a joint-called multi-sample VCF. It is currently optimized to be run on HPC infrastructure and was developed on AWS' ParallelCluster.
+This workflow was designed by the Genomics & Data Science team at 54gene and is used to analyze germline whole-genome sequencing data in the form of either FASTQs or gVCFs. This pipeline emits a joint-called multi-sample VCF. It is currently optimized to be run on HPC infrastructure and was developed on AWS' `ParallelCluster <https://aws.amazon.com/hpc/parallelcluster/>`_.
 
 Features:
 
@@ -20,6 +20,7 @@ Inputs
 ------
 
 The pipeline requires the following inputs:
+
 - A headerless, whitespace delimited ``manifest.txt`` file with sample names and paths (columns dependent on the run-mode)
 - Config file with the run-mode specified and other pipeline parameters configured (see default config provided in ``config/config.yaml``)
 - A tab-delimited ``intervals.tsv`` file with names of intervals and paths to region (BED) files of the genome you want to parallelize the variant calling and joint-calling steps by (i.e. 50 BED files of 50 intervals to parallelize by)

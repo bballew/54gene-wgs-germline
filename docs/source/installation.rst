@@ -118,7 +118,7 @@ For example:
 +---------+-----+
 
 
-D. MultiQC yaml
+E. MultiQC yaml
 ^^^^^^^^^^^^^^^
 
 A configuration file for MultiQC can be found in ``config/multiqc.yaml`` and is used for generating and specifying the order of the various modules in the multiQC report from the pipeline. We **do not** recommend modifying this file unless you understand how this configuration file is setup or how multiQC works. 

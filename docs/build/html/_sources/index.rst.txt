@@ -8,16 +8,22 @@ Welcome to 54gene's WGS-germline documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: User Guide
 
    overview.rst
    installation.rst
    usage.rst
    investigateresults.rst
    tests.rst
+
+.. toctree:: 
+   :maxdepth: 4
+   :caption: About
+
+   corepipeline.rst
+   releasenotes.rst
+   license.rst
    fordevelopers.rst
-
-
 
 Indices and tables
 ==================
