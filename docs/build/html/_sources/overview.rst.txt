@@ -1,7 +1,7 @@
 Overview
 ===============
 
-This workflow was designed by the Genomics & Data Science team at 54gene and is used to analyze germline whole-genome sequencing data in the form of either FASTQs or gVCFs. This pipeline emits a joint-called multi-sample VCF. It is currently optimized to be run on HPC infrastructure and was developed on AWS' `ParallelCluster <https://aws.amazon.com/hpc/parallelcluster/>`_.
+This workflow was designed by the Genomics & Data Science team at 54gene and is used to analyze germline whole-genome sequencing data in the form of either FASTQs or gVCFs. This pipeline emits a joint-called multi-sample VCF. It is currently optimized to be run on HPC infrastructure and was developed and tested on AWS' `ParallelCluster <https://aws.amazon.com/hpc/parallelcluster/>`_ and Snakemake version 6.15.5.
 
 Features:
 
@@ -14,7 +14,7 @@ Features:
 
 To install the latest release, type::
 
-    git clone <link here>
+    git clone https://gitlab.com/data-analysis5/dna-sequencing/54gene-wgs-germline.git
 
 Inputs
 ------

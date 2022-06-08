@@ -42,20 +42,27 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation and Setup</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Usage and Execution</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#config-parameters">1. Config Parameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#resource-allocation">2. Resource Allocation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#config-parameters">Config Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#resource-allocation">Resource Allocation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#execution">Execution</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#deploying-the-pipeline">Deploying the pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#logging">Logging</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="investigateresults.html">Investigate the Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">About:</span></p>
+<p class="caption" role="heading"><span class="caption-text">About</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="corepipeline.html">Core pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releasenotes.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fordevelopers.html">For developers</a></li>
 </ul>
 
@@ -86,7 +93,7 @@
   <section id="usage-and-execution">
 <h1>Usage and Execution<a class="headerlink" href="#usage-and-execution" title="Permalink to this headline"></a></h1>
 <section id="config-parameters">
-<h2>1. Config Parameters<a class="headerlink" href="#config-parameters" title="Permalink to this headline"></a></h2>
+<h2>Config Parameters<a class="headerlink" href="#config-parameters" title="Permalink to this headline"></a></h2>
 <p>Below are descriptions and usage options for the various config parameters specified in <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>.</p>
 <table class="docutils align-default">
 <colgroup>
@@ -143,7 +150,9 @@ sexes of each sample ID</p></td>
 <tr class="row-odd"><td><p>cluster_mode</p></td>
 <td><p>N</p></td>
 <td><p>As specified</p></td>
-<td><p>Used to submit jobs</p></td>
+<td><p>Used to submit jobs to a
+cluster. See
+<a class="reference internal" href="#execution"><span class="std std-ref">Execution</span></a></p></td>
 </tr>
 <tr class="row-even"><td><p>default_queue</p></td>
 <td><p>Y</p></td>
@@ -160,7 +169,7 @@ with compute-heavy nodes</p></td>
 <tr class="row-even"><td><p>memory_queue</p></td>
 <td><p>Y</p></td>
 <td><p>“big”</p></td>
-<td><p>Name of queue/parition
+<td><p>Name of queue/partition
 with nodes for memory-
 intensive jobs</p></td>
 </tr>
@@ -174,7 +183,10 @@ when calling variants</p></td>
 <tr class="row-even"><td><p>max_concurent</p></td>
 <td><p>Y</p></td>
 <td><p>40</p></td>
-<td><p>Max concurrent running jobs</p></td>
+<td><p>Max concurrent running jobs
+to run at once. Allows you
+to throttle heavy rules
+depending on your env</p></td>
 </tr>
 <tr class="row-odd"><td><p>max_het_ratio</p></td>
 <td><p>Y</p></td>
@@ -204,22 +216,43 @@ elapsed time is below this</p></td>
 <td><p>True</p></td>
 <td><p>Check relatedness and sex
 discordance with Somalier
-(requires sex_linker.tsv)</p></td>
+(requires sex_linker.tsv)
+only available in full
+run mode</p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="resource-allocation">
-<h2>2. Resource Allocation<a class="headerlink" href="#resource-allocation" title="Permalink to this headline"></a></h2>
+<h2>Resource Allocation<a class="headerlink" href="#resource-allocation" title="Permalink to this headline"></a></h2>
 <p>This pipeline was originally developed to be run on an Unix-based HPC system for scalable and efficient analyses. As a result, there are several configuration options available for allocating resources and running jobs within the workflow.</p>
 <p>Within the <code class="docutils literal notranslate"><span class="pre">config/config.yaml</span></code> there are several options for allocating memory, threads, and setting Java-specific variables (for GATK suite of tools) for the various tools used in the workflow.</p>
 <ul class="simple">
 <li><p>To modify the number of maximum jobs to run, you can specify a number for <code class="docutils literal notranslate"><span class="pre">jobs</span></code></p></li>
-<li><p>Set a maximum number of jobs to run concurrently if you have bandwith constraints using the <code class="docutils literal notranslate"><span class="pre">max_concurrent</span></code> variable</p></li>
+<li><p>Set a maximum number of jobs to run concurrently if you have bandwidth constraints using the <code class="docutils literal notranslate"><span class="pre">max_concurrent</span></code> variable</p></li>
 <li><p>Specify which paritions/queues to submit your jobs to, depending on your HPC using the <code class="docutils literal notranslate"><span class="pre">default_queue</span></code>, <code class="docutils literal notranslate"><span class="pre">compute_queue</span></code> and <code class="docutils literal notranslate"><span class="pre">memory_queue</span></code> variables (some jobs such as alignment, require more memory and can use nodes with more memory available when specified with these variables)</p></li>
-<li><p>Specify the number of threads and memroy in MB for each tool, where available using the <code class="docutils literal notranslate"><span class="pre">threads</span></code> and <code class="docutils literal notranslate"><span class="pre">memory</span></code> variables</p></li>
+<li><p>Specify the number of threads and memory in MB for each tool, where available using the <code class="docutils literal notranslate"><span class="pre">threads</span></code> and <code class="docutils literal notranslate"><span class="pre">memory</span></code> variables</p></li>
 <li><p>Specify the space to allocate for Java class metadata using the <code class="docutils literal notranslate"><span class="pre">global_vars</span></code> variable</p></li>
 </ul>
+<section id="execution">
+<span id="id1"></span><h3>Execution<a class="headerlink" href="#execution" title="Permalink to this headline"></a></h3>
+</section>
+</section>
+<section id="deploying-the-pipeline">
+<h2>Deploying the pipeline<a class="headerlink" href="#deploying-the-pipeline" title="Permalink to this headline"></a></h2>
+<p>With the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> configured to your run-mode of choice with paths to the necessary manifest and input files, the workflow can be executed on any infrastructure using the <code class="docutils literal notranslate"><span class="pre">snakemake</span></code> command, supplied with further Snakemake command-line arguments (i.e. specifying a profile with <code class="docutils literal notranslate"><span class="pre">--profile</span></code> or <code class="docutils literal notranslate"><span class="pre">--cluster</span></code> to submit jobs to an HPC) depending on your environment.</p>
+<p>Fr example, you may execute the workflow on a cluster using something like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snakemake</span> <span class="o">--</span><span class="n">use</span><span class="o">-</span><span class="n">conda</span> <span class="o">--</span><span class="n">cluster</span> <span class="n">qsub</span> <span class="o">--</span><span class="n">jobs</span> <span class="mi">100</span>
+</pre></div>
+</div>
+<p>The pipeline is configured to automatically create a subdirectory for logs in <code class="docutils literal notranslate"><span class="pre">logs/</span></code> and temp for the path specified for <code class="docutils literal notranslate"><span class="pre">tempDir</span></code> in the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>.</p>
+<p>We have provided two convenience scripts in 54gene-wgs-germline repository to execute the workflow in a cluster environment, <code class="docutils literal notranslate"><span class="pre">run.sh</span></code> and <code class="docutils literal notranslate"><span class="pre">wrapper.sh</span></code>. The <code class="docutils literal notranslate"><span class="pre">wrapper.sh</span></code> script embeds the <code class="docutils literal notranslate"><span class="pre">snakemake</span></code> command and other command-line flags to control submission of jobs to an HPC using the <code class="docutils literal notranslate"><span class="pre">cluster_mode</span></code> string pulled from the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>. This script also directs all stdout from Snakemake to a log file named <code class="docutils literal notranslate"><span class="pre">WGS_${DATE}.out</span></code> which will include the latest git tag and version of the pipeline, if cloned from our repository. For additional logging information, see <a class="reference internal" href="#logging"><span class="std std-ref">Logging</span></a>.</p>
+<p>This wrapper script can be edited to your needs and run using <code class="docutils literal notranslate"><span class="pre">bash</span> <span class="pre">run.sh</span></code>.</p>
+</section>
+<section id="logging">
+<span id="id2"></span><h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline"></a></h2>
+<p>All job-specific logs will be directed to a <code class="docutils literal notranslate"><span class="pre">logs/</span></code> subdirectory in the home analysis directory of the pipeline. This directory automatically created for you by the pipeline.</p>
+<p>If you choose to use the <code class="docutils literal notranslate"><span class="pre">wrapper.sh</span></code> script provided and modified for your environment, a <code class="docutils literal notranslate"><span class="pre">WGS_${DATE}.out</span></code> log file containing all stdout from snakemake will also be available in the home analysis directory.</p>
 </section>
 </section>
 

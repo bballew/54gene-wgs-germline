@@ -1,8 +1,8 @@
 Usage and Execution
 ==============================
 
-1. Config Parameters
---------------------
+Config Parameters
+-----------------
 
 Below are descriptions and usage options for the various config parameters specified in ``config.yaml``.
 
@@ -13,11 +13,11 @@ Below are descriptions and usage options for the various config parameters speci
 +---------------+-----------+----------------+---------------------------+
 | intervalsFile |     Y     |      NA        | File with interval names  |
 |               |           |                | and file paths            |
-+---------------+-----------+----------------+---------------------------+ 
++---------------+-----------+----------------+---------------------------+
 | jobs          |     Y     |     1000       | Jobs to submit to cluster |
 +---------------+-----------+----------------+---------------------------+
 | sexLinker     |     Y     |      NA        | File with reported sex of |
-|               |           |                | sexes of each sample ID   |     
+|               |           |                | sexes of each sample ID   |
 +---------------+-----------+----------------+---------------------------+
 | tempDir       |     Y     |     temp/      | Location of temp directory|
 +---------------+-----------+----------------+---------------------------+
@@ -25,7 +25,9 @@ Below are descriptions and usage options for the various config parameters speci
 +---------------+-----------+----------------+---------------------------+
 | global_vars   |     N     |  As specified  | Set global java options   |
 +---------------+-----------+----------------+---------------------------+
-| cluster_mode  |     N     |  As specified  | Used to submit jobs       |
+| cluster_mode  |     N     |  As specified  | Used to submit jobs to a  |
+|               |           |                | cluster. See              |
+|               |           |                | :ref:`execution`          |
 +---------------+-----------+----------------+---------------------------+
 | default_queue |     Y     |     "big"      | Name of your default      |
 |               |           |                | cluster partition/queue   |
@@ -33,7 +35,7 @@ Below are descriptions and usage options for the various config parameters speci
 | compute_queue |     Y     |     "big"      | Name of queue/partition   |
 |               |           |                | with compute-heavy nodes  |
 +---------------+-----------+----------------+---------------------------+
-| memory_queue  |     Y     |     "big"      | Name of queue/parition    |
+| memory_queue  |     Y     |     "big"      | Name of queue/partition   |
 |               |           |                | with nodes for memory-    |
 |               |           |                | intensive jobs            |
 +---------------+-----------+----------------+---------------------------+
@@ -41,6 +43,9 @@ Below are descriptions and usage options for the various config parameters speci
 |               |           | assembly38.bed`| when calling variants     |
 +---------------+-----------+----------------+---------------------------+
 | max_concurent |     Y     |      40        |Max concurrent running jobs|
+|               |           |                |to run at once. Allows you |
+|               |           |                |to throttle heavy rules    |
+|               |           |                |depending on your env      |
 +---------------+-----------+----------------+---------------------------+
 | max_het_ratio |     Y     |      2.5       | Max het/hom ratio to allow|
 |               |           |                |                           |
@@ -51,18 +56,18 @@ Below are descriptions and usage options for the various config parameters speci
 | max_contam    |     Y     |      0.03      | Max % of contam allowed   |
 +---------------+-----------+----------------+---------------------------+
 |time_threshold |     Y     |    5 (mins)    | Exclude rules from the    |
-|               |           |                | benchmarking report if    | 
+|               |           |                | benchmarking report if    |
 |               |           |                | elapsed time is below this|
 +---------------+-----------+----------------+---------------------------+
 | somalier      |     Y     |      True      | Check relatedness and sex |
 |               |           |                | discordance with Somalier |
 |               |           |                | (requires sex_linker.tsv) |
+|               |           |                | only available in full    |
+|               |           |                | run mode                  |
 +---------------+-----------+----------------+---------------------------+
 
-
-
-2. Resource Allocation
-----------------------
+Resource Allocation
+-------------------
 
 This pipeline was originally developed to be run on an Unix-based HPC system for scalable and efficient analyses. As a result, there are several configuration options available for allocating resources and running jobs within the workflow.
 
@@ -70,8 +75,39 @@ This pipeline was originally developed to be run on an Unix-based HPC system for
 Within the ``config/config.yaml`` there are several options for allocating memory, threads, and setting Java-specific variables (for GATK suite of tools) for the various tools used in the workflow.
 
 - To modify the number of maximum jobs to run, you can specify a number for ``jobs``
-- Set a maximum number of jobs to run concurrently if you have bandwith constraints using the ``max_concurrent`` variable
+- Set a maximum number of jobs to run concurrently if you have bandwidth constraints using the ``max_concurrent`` variable
 - Specify which paritions/queues to submit your jobs to, depending on your HPC using the ``default_queue``, ``compute_queue`` and ``memory_queue`` variables (some jobs such as alignment, require more memory and can use nodes with more memory available when specified with these variables)
-- Specify the number of threads and memroy in MB for each tool, where available using the ``threads`` and ``memory`` variables
-- Specify the space to allocate for Java class metadata using the ``global_vars`` variable 
-  
+- Specify the number of threads and memory in MB for each tool, where available using the ``threads`` and ``memory`` variables
+- Specify the space to allocate for Java class metadata using the ``global_vars`` variable
+
+.. _execution:
+
+Execution
+*********
+
+Deploying the pipeline
+----------------------
+
+With the ``config.yaml`` configured to your run-mode of choice with paths to the necessary manifest and input files, the workflow can be executed on any infrastructure using the ``snakemake`` command, supplied with further Snakemake command-line arguments (i.e. specifying a profile with ``--profile`` or ``--cluster`` to submit jobs to an HPC) depending on your environment.
+
+Fr example, you may execute the workflow on a cluster using something like::
+
+    snakemake --use-conda --cluster qsub --jobs 100
+
+The pipeline is configured to automatically create a subdirectory for logs in ``logs/`` and temp for the path specified for ``tempDir`` in the ``config.yaml``.
+
+Wrapper scripts
+^^^^^^^^^^^^^^^
+
+We have provided two convenience scripts in 54gene-wgs-germline repository to execute the workflow in a cluster environment, ``run.sh`` and ``wrapper.sh``. The ``wrapper.sh`` script embeds the ``snakemake`` command and other command-line flags to control submission of jobs to an HPC using the ``cluster_mode`` string pulled from the ``config.yaml``. This script also directs all stdout from Snakemake to a log file named ``WGS_${DATE}.out`` which will include the latest git tag and version of the pipeline, if cloned from our repository. For additional logging information, see :ref:`logging`.
+
+This wrapper script can be edited to your needs and run using ``bash run.sh``.
+
+.. _logging:
+
+Logging
+-------
+
+All job-specific logs will be directed to a ``logs/`` subdirectory in the home analysis directory of the pipeline. This directory automatically created for you by the pipeline.
+
+If you choose to use the ``wrapper.sh`` script provided and modified for your environment, a ``WGS_${DATE}.out`` log file containing all stdout from snakemake will also be available in the home analysis directory.

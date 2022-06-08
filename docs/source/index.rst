@@ -22,7 +22,6 @@ Welcome to 54gene's WGS-germline documentation!
 
    corepipeline.rst
    releasenotes.rst
-   license.rst
    fordevelopers.rst
 
 Indices and tables
