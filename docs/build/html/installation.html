@@ -15,6 +15,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -28,19 +29,24 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> 54gene-wgs-germline
-            <img src="_static/54gene_logo.png" class="logo" alt="Logo"/>
-          </a>
-              <div class="version">
-                1.0.0
-              </div>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
+
+<a href="index.html" class="icon icon-home"> 54gene-wgs-germline
+
+<a href="https://54gene.com">
+    <img src="_static/54gene_logo.png" class="logo" alt="Logo"/>
+  </a>
+
+
+  
+  
+  
+    <div class="version">
+      1.0.0
+    </div>
+  
+
+
+
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul class="current">
@@ -94,18 +100,18 @@
            <div itemprop="articleBody">
              
   <section id="installation-and-setup">
-<h1>Installation and Setup<a class="headerlink" href="#installation-and-setup" title="Permalink to this headline"></a></h1>
+<h1>Installation and Setup<a class="headerlink" href="#installation-and-setup" title="Permalink to this heading"></a></h1>
 <p>This workflow was designed to use <cite>conda`</cite> for dependency management and utilizes <cite>Snakemake</cite> as the workflow management system, ensuring reproducible and scalable analyses.</p>
 <p>This installation guide is designed for Unix/Linux environments.</p>
 <section id="step-1-obtain-a-copy-of-this-workflow">
-<h2>Step 1. Obtain a copy of this workflow<a class="headerlink" href="#step-1-obtain-a-copy-of-this-workflow" title="Permalink to this headline"></a></h2>
+<h2>Step 1. Obtain a copy of this workflow<a class="headerlink" href="#step-1-obtain-a-copy-of-this-workflow" title="Permalink to this heading"></a></h2>
 <p>If you haven’t already, clone this repository to your local system, into the place where you want to perform the data analysis:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@gitlab</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">data</span><span class="o">-</span><span class="n">analysis5</span><span class="o">/</span><span class="mi">54</span><span class="n">gene</span><span class="o">-</span><span class="n">wgs</span><span class="o">-</span><span class="n">germline</span><span class="o">.</span><span class="n">git</span>
 </pre></div>
 </div>
 </section>
 <section id="step-2-install-the-run-time-conda-environment">
-<h2>Step 2. Install the run-time conda environment<a class="headerlink" href="#step-2-install-the-run-time-conda-environment" title="Permalink to this headline"></a></h2>
+<h2>Step 2. Install the run-time conda environment<a class="headerlink" href="#step-2-install-the-run-time-conda-environment" title="Permalink to this heading"></a></h2>
 <p>If you don’t already have conda installed, follow this guide <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html#installing">here</a> to install Miniconda.</p>
 <p>Once installed, create the run-time conda environment with minimal dependencies defined using the following command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">environment</span><span class="o">.</span><span class="n">yaml</span>
@@ -113,10 +119,10 @@
 </div>
 </section>
 <section id="step-3-configure-the-workflow">
-<h2>Step 3. Configure the workflow<a class="headerlink" href="#step-3-configure-the-workflow" title="Permalink to this headline"></a></h2>
+<h2>Step 3. Configure the workflow<a class="headerlink" href="#step-3-configure-the-workflow" title="Permalink to this heading"></a></h2>
 <p>The workflow needs to configured to perform the analysis of your choice by editing the following files in the <cite>config/</cite> folder:</p>
 <section id="a-config-file">
-<h3>A. Config file<a class="headerlink" href="#a-config-file" title="Permalink to this headline"></a></h3>
+<h3>A. Config file<a class="headerlink" href="#a-config-file" title="Permalink to this heading"></a></h3>
 <p>As of v1.0, the pipeline offers three run modes. Please specify the run mode in <cite>config.yaml</cite>.</p>
 <ul class="simple">
 <li><p><strong>full</strong>: This mode starts with fastqs and emits a joint-called, filtered, multi-sample VCF</p></li>
@@ -125,7 +131,7 @@
 </ul>
 </section>
 <section id="b-manifest-file">
-<h3>B. Manifest file<a class="headerlink" href="#b-manifest-file" title="Permalink to this headline"></a></h3>
+<h3>B. Manifest file<a class="headerlink" href="#b-manifest-file" title="Permalink to this heading"></a></h3>
 <p>You will need to provide a headerless, white-space delimited manifest file to run the pipeline for all three run-modes.</p>
 <p>For <strong>full</strong> and <strong>fastqc_only</strong> mode:</p>
 <p>The <cite>manifest.txt</cite> would include the following columns:</p>
@@ -200,7 +206,7 @@
 <p><em>Note</em>: The gVCFs should be zipped and indexed.</p>
 </section>
 <section id="c-intervals-file">
-<h3>C. Intervals file<a class="headerlink" href="#c-intervals-file" title="Permalink to this headline"></a></h3>
+<h3>C. Intervals file<a class="headerlink" href="#c-intervals-file" title="Permalink to this heading"></a></h3>
 <p>For <strong>full</strong> and <strong>joint_genotyping</strong> modes only.</p>
 <p>Joint-calling for a large number of samples can be computationally expensive and very time-consuming. This pipeline was designed to mitigate these issues by parallelizing joint-calling over multiple intervals of the genome. To specify the number of intervals, and which regions to parallelize over, a 2-column tab-delmited <code class="docutils literal notranslate"><span class="pre">intervals.tsv</span></code> file can be specified.</p>
 <p>This file contains two columns:</p>
@@ -227,7 +233,7 @@
 <p>We recommend specifying regions of equal size for parallelization.</p>
 </section>
 <section id="d-sex-linker-file">
-<h3>D. Sex linker file<a class="headerlink" href="#d-sex-linker-file" title="Permalink to this headline"></a></h3>
+<h3>D. Sex linker file<a class="headerlink" href="#d-sex-linker-file" title="Permalink to this heading"></a></h3>
 <p>The pipeline provides an option to check the relatdness amongst the samples using Somalier in the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> (see <code class="docutils literal notranslate"><span class="pre">check_relatedness</span></code> parameter in <a class="reference internal" href="usage.html"><span class="doc">Usage and Execution</span></a>). This requires a 2-column, tab-delimited <code class="docutils literal notranslate"><span class="pre">sex_linker.tsv</span></code> file provided and specified in the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>. This file will have:</p>
 <ul class="simple">
 <li><p>First column with the header <code class="docutils literal notranslate"><span class="pre">Sample</span></code> with all sample names</p></li>
@@ -250,7 +256,7 @@
 </table>
 </section>
 <section id="e-multiqc-yaml">
-<h3>E. MultiQC yaml<a class="headerlink" href="#e-multiqc-yaml" title="Permalink to this headline"></a></h3>
+<h3>E. MultiQC yaml<a class="headerlink" href="#e-multiqc-yaml" title="Permalink to this heading"></a></h3>
 <p>A configuration file for MultiQC can be found in <code class="docutils literal notranslate"><span class="pre">config/multiqc.yaml</span></code> and is used for generating and specifying the order of the various modules in the multiQC report from the pipeline. We <strong>do not</strong> recommend modifying this file unless you understand how this configuration file is setup or how multiQC works.</p>
 </section>
 </section>
@@ -260,22 +266,21 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="overview.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="usage.html" class="btn btn-neutral float-right" title="Usage and Execution" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <a href="overview.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <a href="usage.html" class="btn btn-neutral float-right" title="Usage and Execution" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+      </div>
+  
+    <hr/>
+  
+    <div role="contentinfo">
+      <p>&#169; Copyright 2022, B. Ballew, C. Palmer, E. Joshi, 54gene.</p>
     </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2022, B. Ballew, C. Palmer, E. Joshi, 54gene.</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
+  
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
+      
+     
+  </footer>
+  
         </div>
       </div>
     </section>

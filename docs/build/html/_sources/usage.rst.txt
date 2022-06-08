@@ -97,7 +97,7 @@ Fr example, you may execute the workflow on a cluster using something like::
 The pipeline is configured to automatically create a subdirectory for logs in ``logs/`` and temp for the path specified for ``tempDir`` in the ``config.yaml``.
 
 Wrapper scripts
-^^^^^^^^^^^^^^^
+---------------
 
 We have provided two convenience scripts in 54gene-wgs-germline repository to execute the workflow in a cluster environment, ``run.sh`` and ``wrapper.sh``. The ``wrapper.sh`` script embeds the ``snakemake`` command and other command-line flags to control submission of jobs to an HPC using the ``cluster_mode`` string pulled from the ``config.yaml``. This script also directs all stdout from Snakemake to a log file named ``WGS_${DATE}.out`` which will include the latest git tag and version of the pipeline, if cloned from our repository. For additional logging information, see :ref:`logging`.
 

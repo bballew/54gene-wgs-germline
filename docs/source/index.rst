@@ -16,7 +16,7 @@ Welcome to 54gene's WGS-germline documentation!
    investigateresults.rst
    tests.rst
 
-.. toctree:: 
+.. toctree::
    :maxdepth: 4
    :caption: About
 

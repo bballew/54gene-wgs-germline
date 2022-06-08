@@ -24,7 +24,7 @@ version = '1.0.0'
 
 # -- General configuration ---------------------------------------------------
 
-# Autosection feature extension to allow reference sections using their title 
+# Autosection feature extension to allow reference sections using their title
 extensions = [
     'sphinx.ext.autosectionlabel'
 ]
