@@ -143,7 +143,6 @@ rule benchmarking_report:
         "results/performance_benchmarks/benchmarking_report.html",
     params:
         threshold=config["time_threshold"],
-        clusterVersion=clusterconfig,
     conda:
         "../envs/r.yaml"
     script:

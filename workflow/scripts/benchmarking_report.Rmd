@@ -53,9 +53,6 @@ subset.df <- dataset %>% group_by(rule) %>% filter(n() > 1)
 time.param <- snakemake@params[["threshold"]]
 time.threshold <- time.param * 60
 filtered.df <- dataset %>% group_by(rule) %>% filter(s >= time.threshold)
-
-# cluster config version
-cluster.config <- snakemake@params[["clusterVersion"]]
 ```
 
 ```{r plot.functions, eval=TRUE, echo=FALSE}
@@ -85,8 +82,6 @@ create.subset.plot <- function(subdf, xvar, yvar, xlab, ylab, title){
   sb.plot
 }
 ```
-
-Cluster version used: `r cat(cluster.config)`
 
 This is a (development version) R Markdown report that can generated for the pipeline with visualizations for the specified rules and their performance benchmarks.
 
