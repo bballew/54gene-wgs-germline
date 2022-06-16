@@ -11,7 +11,7 @@ run_fastqc:
   stage: build
   before_script:
     - source /home/ubuntu/miniconda3/etc/profile.d/conda.sh
-    - conda activate 54gene-wgs-germline
+    - conda activate /home/ubuntu/.conda/envs/54gene-wgs-germline
   script:
     - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/fastqc_only_mode/config/* config/
     - cp /54gene-gds/gitlab_runner/54gene-wgs-test-data/run_local_test.sh .
