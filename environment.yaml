@@ -5,7 +5,7 @@ channels:
   - defaults
 dependencies:
   - snakemake
-  - mamba
+  - mamba=0.22.0
   - git
   - python-magic
   - libmagic
