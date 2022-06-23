@@ -4,14 +4,16 @@ workflow:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 stages:
-   - build
-   - test
+    - test
 
-run_fastqc:
-  stage: build
+.before_script_template:
   before_script:
     - source /home/ubuntu/miniconda3/etc/profile.d/conda.sh
     - conda activate /home/ubuntu/.conda/envs/54gene-wgs-germline
+
+test_integration1:
+  extends: .before_script_template
+  stage: test
   script:
     - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/fastqc_only_mode/config/* config/
     - cp /54gene-gds/gitlab_runner/54gene-wgs-test-data/run_local_test.sh .
@@ -20,10 +22,32 @@ run_fastqc:
   tags:
     - shell
 
-run_pytest:
+test_integration2:
+  extends: .before_script_template
   stage: test
-  image: cpalmer718/snakemake-gcc
+  script:
+    - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/joint_geno_mode/config/* config/
+    - cp /54gene-gds/gitlab_runner/54gene-wgs-test-data/run_local_test.sh .
+    - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/resources .
+    - bash run_local_test.sh
+  tags:
+    - shell
+
+test_integration3:
+  extends: .before_script_template
+  stage: test
+  script:
+    - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/full_mode/config/* config/
+    - cp /54gene-gds/gitlab_runner/54gene-wgs-test-data/run_local_test.sh .
+    - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/resources .
+    - bash run_local_test.sh
+  tags:
+    - shell
+
+unit_tests:
+  extends: .before_script_template
+  stage: test
   script:
     - python -m pytest workflow/scripts/tests/
   tags:
-    - docker
+    - shell
