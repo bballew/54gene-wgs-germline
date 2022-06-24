@@ -48,7 +48,7 @@ unit_tests:
   extends: .before_script_template
   stage: test
   script:
-    - coverage run -m pytest test*.py
+    - coverage run -m pytest workflow/scripts/tests/test*.py
     - coverage report | tee coverage.txt
   artifacts:
     paths:
