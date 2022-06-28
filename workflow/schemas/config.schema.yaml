@@ -319,6 +319,14 @@ properties:
       - xmx
       - java_opts
     additionalProperties: false
+  multiqc:
+    type: object
+    properties:
+      memory:
+        type: number
+    required:
+      - memory
+    additionalProperties: false
 # entries that have to be in the config file for successful validation
 required:
   - sampleFile
@@ -354,4 +362,5 @@ required:
   - variantFiltration
   - verifyBamID
   - picardCollectVariantCallingMetrics
+  - multiqc
 additionalProperties: false
