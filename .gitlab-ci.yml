@@ -66,5 +66,6 @@ functional_unit_test3:
     - snakemake_unit_tests.out -c /54gene-gds/gitlab_runner/snakemake_unit_tests/config.full_run.yaml -s ${CI_BUILDS_DIR}/${CI_RUNNER_SHORT_TOKEN}/"${FULL_JOB_ID}"/${CI_PROJECT_PATH}/workflow/Snakefile -p {CI_BUILDS_DIR}/${CI_RUNNER_SHORT_TOKEN}/"${FULL_JOB_ID}"/${CI_PROJECT_PATH} -l {CI_BUILDS_DIR}/${CI_RUNNER_SHORT_TOKEN}/"${FULL_JOB_ID}"/${CI_PROJECT_PATH}/WGS_log.out --update-all
     - pytest /54gene-gds/gitlab_runner/snakemake_unit_tests/full_mode/unit/test*.py
   needs:
-    - test_integration3
+    - job: test_integration3
+      artifacts: true
 
