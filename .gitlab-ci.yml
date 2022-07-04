@@ -37,7 +37,9 @@ test_integration3:
   extends: .before_script_template
   stage: test
   script:
-    - echo "$FULL_JOB_ID=$CI_CONCURRENT_ID" >> full.env
+    - echo "$CI_CONCURRENT_ID"
+    - "JOB_ID=$(echo $CI_CONCURRENT_ID)"
+    - echo "FULL_JOB_ID=$JOB_ID" >> full.env
     - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/full_mode/config/* config/
     - cp /54gene-gds/gitlab_runner/54gene-wgs-test-data/run_local_test.sh .
     - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/resources .
