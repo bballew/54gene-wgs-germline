@@ -37,7 +37,7 @@ test_integration3:
   extends: .before_script_template
   stage: test
   script:
-    - "FULL_JOB_ID=$(echo $CI_JOB_ID)"
+    - "FULL_JOB_ID=$(echo $CI_CONCURRENT_ID)"
     - echo "$FULL_JOB_ID" >> full.env
     - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/full_mode/config/* config/
     - cp /54gene-gds/gitlab_runner/54gene-wgs-test-data/run_local_test.sh .
@@ -65,6 +65,6 @@ functional_unit_test3:
     - echo "$FULL_JOB_ID"
     - snakemake_unit_tests.out -c /54gene-gds/gitlab_runner/snakemake_unit_tests/config.full_run.yaml -s ${CI_BUILDS_DIR}/${CI_RUNNER_SHORT_TOKEN}/"${FULL_JOB_ID}"/${CI_PROJECT_PATH}/workflow/Snakefile -p {CI_BUILDS_DIR}/${CI_RUNNER_SHORT_TOKEN}/"${FULL_JOB_ID}"/${CI_PROJECT_PATH} -l {CI_BUILDS_DIR}/${CI_RUNNER_SHORT_TOKEN}/"${FULL_JOB_ID}"/${CI_PROJECT_PATH}/WGS_log.out --update-all
     - pytest /54gene-gds/gitlab_runner/snakemake_unit_tests/full_mode/unit/test*.py
-  dependencies:
+  needs:
     - test_integration3
 
