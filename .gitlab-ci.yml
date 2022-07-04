@@ -10,6 +10,8 @@ stages:
   before_script:
     - source /home/ubuntu/miniconda3/etc/profile.d/conda.sh
     - conda activate /home/ubuntu/.conda/envs/54gene-wgs-germline
+  tags:
+    - shell
 
 test_integration1:
   extends: .before_script_template
@@ -19,8 +21,7 @@ test_integration1:
     - cp /54gene-gds/gitlab_runner/54gene-wgs-test-data/run_local_test.sh .
     - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/resources .
     - bash run_local_test.sh
-  tags:
-    - shell
+
 
 test_integration2:
   extends: .before_script_template
@@ -30,8 +31,7 @@ test_integration2:
     - cp /54gene-gds/gitlab_runner/54gene-wgs-test-data/run_local_test.sh .
     - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/resources .
     - bash run_local_test.sh
-  tags:
-    - shell
+
 
 test_integration3:
   extends: .before_script_template
@@ -45,8 +45,6 @@ test_integration3:
   artifacts:
     reports:
       dotenv: full.env
-  tags:
-    - shell
 
 unit_tests:
   extends: .before_script_template
@@ -58,15 +56,13 @@ unit_tests:
     paths:
       - coverage.txt
   coverage: '/TOTAL.*\s+(\d+\%)/'
-  tags:
-    - shell
 
 functional_unit_test3:
   extends: .before_script_template
   stage: test
   script:
     - echo "$FULL_JOB_ID"
-    - snakemake_unit_tests.out -c /54gene-gds/gitlab_runner/54gene-wgs-test-data/config.full_run.yaml
-    - pytest /home/gitlab-runner/builds/dq_f2xRs/"${FULL_JOB}"/data-analysis5/dna-sequencing/54gene-wgs-germline/tests/unit/test_*py
-  tags:
-    - shell
+    - export
+    - snakemake_unit_tests.out -c /54gene-gds/gitlab_runner/54gene-wgs-test-data/config.full_run.yaml -s ${builds_dir}/dq_f2xRs/"${FULL_JOB}"/data-analysis5/dna-sequencing/54gene-wgs-germline/workflow/Snakefile -p ${builds_dir}/dq_f2xRs/"${FULL_JOB}"/data-analysis5/dna-sequencing/54gene-wgs-germline/ -l ${builds_dir}/dq_f2xRs/"${FULL_JOB}"/data-analysis5/dna-sequencing/54gene-wgs-germline/WGS_log.out --update-all
+    - pytest /54gene-gds/gitlab_runner/snakemake_unit_tests/full_mode/unit/test*.py
+
