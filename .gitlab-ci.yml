@@ -37,7 +37,8 @@ test_integration3:
   extends: .before_script_template
   stage: test
   script:
-    - echo "FULL_JOB_ID=$CI_JOB_ID" >> full.env
+    - "FULL_JOB_ID=$(echo $CI_JOB_ID)"
+    - echo "$FULL_JOB_ID" >> full.env
     - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/full_mode/config/* config/
     - cp /54gene-gds/gitlab_runner/54gene-wgs-test-data/run_local_test.sh .
     - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/resources .
@@ -62,7 +63,8 @@ functional_unit_test3:
   stage: test
   script:
     - echo "$FULL_JOB_ID"
-    - export
-    - snakemake_unit_tests.out -c /54gene-gds/gitlab_runner/snakemake_unit_tests/config.full_run.yaml -s ${CI_BUILDS_DIR}/${CI_RUNNER_SHORT_TOKEN}/"${FULL_JOB}"/${CI_PROJECT_PATH}/workflow/Snakefile -p {CI_BUILDS_DIR}/${CI_RUNNER_SHORT_TOKEN}/"${FULL_JOB}"/${CI_PROJECT_PATH} -l {CI_BUILDS_DIR}/${CI_RUNNER_SHORT_TOKEN}/"${FULL_JOB}"/${CI_PROJECT_PATH}/WGS_log.out --update-all
+    - snakemake_unit_tests.out -c /54gene-gds/gitlab_runner/snakemake_unit_tests/config.full_run.yaml -s ${CI_BUILDS_DIR}/${CI_RUNNER_SHORT_TOKEN}/"${FULL_JOB_ID}"/${CI_PROJECT_PATH}/workflow/Snakefile -p {CI_BUILDS_DIR}/${CI_RUNNER_SHORT_TOKEN}/"${FULL_JOB_ID}"/${CI_PROJECT_PATH} -l {CI_BUILDS_DIR}/${CI_RUNNER_SHORT_TOKEN}/"${FULL_JOB_ID}"/${CI_PROJECT_PATH}/WGS_log.out --update-all
     - pytest /54gene-gds/gitlab_runner/snakemake_unit_tests/full_mode/unit/test*.py
+  dependencies:
+    - test_integration3
 
