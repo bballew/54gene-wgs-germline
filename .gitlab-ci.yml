@@ -45,11 +45,13 @@ test_integration3:
     - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/resources .
     - bash run_local_test.sh
   artifacts:
-    untracked: true
-    paths:
-      - $CI_PROJECT_DIR/*
     reports:
       dotenv: full.env
+  cache:
+    key: full-run-cache
+    untracked: true 
+    paths:
+      - $CI_PROJECT_DIR/*
 
 unit_tests:
   extends: .before_script_template
@@ -73,4 +75,6 @@ functional_unit_test3:
   needs:
     - job: test_integration3
       artifacts: true
+  cache:
+    key: full-run-cache
 
