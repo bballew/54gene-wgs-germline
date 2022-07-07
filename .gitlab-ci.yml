@@ -1,7 +1,6 @@
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 stages:
     - test
@@ -49,7 +48,8 @@ test_integration3:
       dotenv: full.env
   cache:
     key: full-run-cache
-    untracked: true 
+    untracked: true
+    policy: push
     paths:
       - $CI_PROJECT_DIR/*
 
