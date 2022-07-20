@@ -131,6 +131,10 @@ wildcard_constraints:
     rg="|".join(sampleDict.keys()),
 
 
+localrules:
+    combine_benchmarks,
+    benchmarking_report,
+    
 rule all:
     input:
         TARGETS,
