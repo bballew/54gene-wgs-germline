@@ -68,6 +68,8 @@ functional_unit_test3:
   extends: .before_script_template
   stage: test
   script:
+    - whoami
+    - env
     - echo "$FULL_JOB_ID"
     - cp /54gene-gds/gitlab_runner/snakemake_unit_tests/config.full_run.yaml .
     - snakemake_unit_tests.out -c config.full_run.yaml -o /home/ubuntu/builds/tests/full_mode/54gene-wgs-germline/tests -s ${CI_BUILDS_DIR}/${CI_RUNNER_SHORT_TOKEN}/"${FULL_JOB_ID}"/${CI_PROJECT_PATH}/workflow/Snakefile -p ${CI_BUILDS_DIR}/${CI_RUNNER_SHORT_TOKEN}/"${FULL_JOB_ID}"/${CI_PROJECT_PATH} -l ${CI_BUILDS_DIR}/${CI_RUNNER_SHORT_TOKEN}/"${FULL_JOB_ID}"/${CI_PROJECT_PATH}/WGS_log.out --update-all
