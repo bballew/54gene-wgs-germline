@@ -70,7 +70,6 @@ functional_unit_test3:
   script:
     - whoami
     - sudo ls /root
-    - env
     - echo "$FULL_JOB_ID"
     - ls /home/ubuntu/builds/tests/full_mode/54gene-wgs-germline/tests
     - ls ${CI_BUILDS_DIR}/${CI_RUNNER_SHORT_TOKEN}/"${FULL_JOB_ID}"/${CI_PROJECT_PATH}/
