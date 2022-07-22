@@ -10,9 +10,9 @@
         {%- endif %}
       </div>
     {%- endif %}
-  
+
     <hr/>
-  
+
     <div role="contentinfo">
     {%- block contentinfo %}
       <p>
@@ -23,7 +23,7 @@
           {%- trans copyright=copyright|e %}&#169; Copyright {{ copyright }}.{% endtrans %}
         {%- endif %}
       {%- endif %}
-  
+
       {%- if build_id and build_url %}
         <span class="build">
           {#- Translators: Build is a noun, not a verb -#}
@@ -41,11 +41,11 @@
           {%- trans last_updated=last_updated|e %}Last updated on {{ last_updated }}.{% endtrans %}
         </span>
       {%- endif -%}
-  
+
       </p>
     {%- endblock %}
     </div>
-  
+
     {% if show_sphinx %}
       {%- set sphinx_web = '<a href="https://www.sphinx-doc.org/">Sphinx</a>' %}
       {%- set readthedocs_web = '<a href="https://readthedocs.org">Read the Docs</a>'  %}
@@ -55,7 +55,6 @@
       {#- Translators: this is always used as "provided by Read the Docs", and should not imply Read the Docs is an author of the generated documentation. #}
       {% trans %}{% endtrans %}
     {% endif %}
-  
+
     {%- block extrafooter %} {% endblock %}
   </footer>
-  
