@@ -1,7 +1,7 @@
 Overview
 ===============
 
-This workflow was designed by the Genomics & Data Science team at 54gene and is used to analyze germline whole-genome sequencing data in the form of either FASTQs or gVCFs. This pipeline emits a joint-called multi-sample VCF. It is currently optimized to be run on HPC infrastructure and was developed and tested on AWS' `ParallelCluster <https://aws.amazon.com/hpc/parallelcluster/>`_ and Snakemake version 6.15.5.
+This workflow was designed by the Genomics & Data Science team (GDS) at 54gene and is used to analyze germline whole-genome sequencing data.  This pipeline is designed to first be deployed in small batches (e.g. per flow cell), starting with FASTQs and resulting in gVCFs and a small batch joint-called VCF.  A second run of the pipeline can receive a larger batch of gVCFs (e.g. gVCFs derived from many flow cells), and generates a large batch joint-called VCF.  The workflow, which is designed to support reproducible bioinformatics, is written in `Snakemake <https://snakemake.readthedocs.io/en/stable/>`_ and is platform-agnostic.  All dependencies are installed by the pipeline as-needed using `conda <https://docs.conda.io/en/latest/>`_.  Development and testing has been predominantly on AWS' `ParallelCluster <https://aws.amazon.com/hpc/parallelcluster/>`_ using Snakemake version 7.8.2.
 
 Features:
 

@@ -1,6 +1,108 @@
 Usage and Execution
 ==============================
 
+Configure the workflow
+------------------------------
+
+The workflow needs to configured to perform the analysis of your choice by editing the following files in the ``config/`` folder:
+
+Configuration file
+^^^^^^^^^^^^^^^^^^
+
+As of v1.0, the pipeline offers three run modes. Please specify the run mode in ``config.yaml``.
+
+- **full**: This mode starts with fastqs and emits a joint-called, filtered, multi-sample VCF.
+- **joint_genotyping**: This mode starts with gVCFs and runs joint-calling and filtering, emitting a multi-sample VCF. In the event you have analyzed batches of samples in the full-run mode, these batches can then jointly re-genotyped with this run mode.
+- **fastqc_only**: This mode starts with fastqs and emits trimmed fastqs as well as a multiQC report for raw and trimmed reads. This run mode is meant for performing QC on fastq data before further downstream analysis.
+
+B. Manifest file
+^^^^^^^^^^^^^^^^
+You will need to provide a headerless, white-space delimited manifest file to run the pipeline for all three run-modes. 
+
+For **full** and **fastqc_only** mode, the ``manifest.txt`` requires the following columns:
+
+- First column with the readgroup for each sample
+- Second column with only the sample ID 
+- Third column with the path to the read 1 FASTQ file
+- Fourth column with the path to the read 2 FASTQ file 
+  
++------------+-----------+----------------+-----------------+
+| readgroup  | sample_ID |path/to/r1.fastq| path/to/r2.fastq|
++------------+-----------+----------------+-----------------+
+
+Where `readgroup` values are unique (i.e. sampleID_barcode) and `sample_ID` values are the same for all fastq pairs from a single sample and can be different from the fastq filenames themselves.
+
+For example:
+
++--------------------+-----------+-----------------------------------+---+
+| Sample001_S1_L001  | Sample001 | fastqs/Sample_001_S1_L004_R1.fastq|...|
++--------------------+-----------+-----------------+-----------------+---+
+
+For **joint_genotyping** mode:
+
+The `manifest.txt` would include the following two columns:
+
+- First column with the sample IDs for each gVCF
+- Second column with the paths to the gVCFs
+
++-------------+-----------------------------+
+| sample_ID   |  path/to/sample_ID.g.vcf.gz |
++-------------+-----------------------------+
+
+For example:
+
++---------------+-----------------------------+
+| Sample_001    |  vcfs/Sample_001.g.vcf.gz   |
++---------------+-----------------------------+
+
+*Note*: The gVCFs should be zipped and indexed. 
+
+C. Intervals file
+^^^^^^^^^^^^^^^^^
+
+For **full** and **joint_genotyping** modes only.
+
+Joint-calling for a large number of samples can be computationally expensive and very time-consuming. This pipeline was designed to mitigate these issues by parallelizing joint-calling over multiple intervals of the genome. To specify the number of intervals, and which regions to parallelize over, a 2-column tab-delmited ``intervals.tsv`` file can be specified. 
+
+This file contains two columns:
+
+- ``interval_name`` for the name of the particular interval or region 
+- ``file_path`` full path to the interval/region BED file, Picard-style ``.interval_list``, VCF file, or GATK-style ``.list`` or ``.intervals`` file (see further details on these formats `here <https://gatk.broadinstitute.org/hc/en-us/articles/360035531852-Intervals-and-interval-lists>`_)
+
+For example:
+
++---------------+-------------------------------------------------------+
+| interval_name |  file_path                                            |
++---------------+-------------------------------------------------------+
+| interval_1    | /resources/scattered_calling_intervals/interval_1.bed |
++---------------+-------------------------------------------------------+
+
+
+The pipeline will supply these interval files to the GATK ``HaplotypeCaller``, ``GenomicsDBImport`` and ``GenotypeGVCFs`` steps to run concurrent instances of these rules at each specified interval(s), reducing overall execution time.
+
+We recommend specifying regions of equal size for parallelization.
+
+D. Sex linker file
+^^^^^^^^^^^^^^^^^^
+
+The pipeline provides an option to check the relatdness amongst the samples using Somalier in the ``config.yaml`` (see ``check_relatedness`` parameter in :doc:`usage`). This requires a 2-column, tab-delimited ``sex_linker.tsv`` file provided and specified in the ``config.yaml``. This file will have:
+
+- First column with the header ``Sample`` with all sample names 
+- Second column with the header ``Sex`` containing one-letter formattted sex of all samples 
+
+For example:
+
++---------+-----+
+| Sample  | Sex |
++---------+-----+
+| NA12878 | F   |
++---------+-----+
+
+
+E. MultiQC yaml
+^^^^^^^^^^^^^^^
+
+A configuration file for MultiQC can be found in ``config/multiqc.yaml`` and is used for generating and specifying the order of the various modules in the multiQC report from the pipeline. We **do not** recommend modifying this file unless you understand how this configuration file is setup or how multiQC works. 
 Config Parameters
 -----------------
 
@@ -80,34 +182,3 @@ Within the ``config/config.yaml`` there are several options for allocating memor
 - Specify the number of threads and memory in MB for each tool, where available using the ``threads`` and ``memory`` variables
 - Specify the space to allocate for Java class metadata using the ``global_vars`` variable
 
-.. _execution:
-
-Execution
-*********
-
-Deploying the pipeline
-----------------------
-
-With the ``config.yaml`` configured to your run-mode of choice with paths to the necessary manifest and input files, the workflow can be executed on any infrastructure using the ``snakemake`` command, supplied with further Snakemake command-line arguments (i.e. specifying a profile with ``--profile`` or ``--cluster`` to submit jobs to an HPC) depending on your environment.
-
-Fr example, you may execute the workflow on a cluster using something like::
-
-    snakemake --use-conda --cluster qsub --jobs 100
-
-The pipeline is configured to automatically create a subdirectory for logs in ``logs/`` and temp for the path specified for ``tempDir`` in the ``config.yaml``.
-
-Wrapper scripts
----------------
-
-We have provided two convenience scripts in 54gene-wgs-germline repository to execute the workflow in a cluster environment, ``run.sh`` and ``wrapper.sh``. The ``wrapper.sh`` script embeds the ``snakemake`` command and other command-line flags to control submission of jobs to an HPC using the ``cluster_mode`` string pulled from the ``config.yaml``. This script also directs all stdout from Snakemake to a log file named ``WGS_${DATE}.out`` which will include the latest git tag and version of the pipeline, if cloned from our repository. For additional logging information, see :ref:`logging`.
-
-This wrapper script can be edited to your needs and run using ``bash run.sh``.
-
-.. _logging:
-
-Logging
--------
-
-All job-specific logs will be directed to a ``logs/`` subdirectory in the home analysis directory of the pipeline. This directory automatically created for you by the pipeline.
-
-If you choose to use the ``wrapper.sh`` script provided and modified for your environment, a ``WGS_${DATE}.out`` log file containing all stdout from snakemake will also be available in the home analysis directory.
