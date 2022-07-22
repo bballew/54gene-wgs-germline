@@ -68,14 +68,10 @@ functional_unit_test3:
   extends: .before_script_template
   stage: test
   script:
-    - whoami
-    - sudo ls /root
     - echo "$FULL_JOB_ID"
-    - ls /home/ubuntu/builds/tests/full_mode/54gene-wgs-germline/tests
-    - ls ${CI_BUILDS_DIR}/${CI_RUNNER_SHORT_TOKEN}/"${FULL_JOB_ID}"/${CI_PROJECT_PATH}/
     - cp /54gene-gds/gitlab_runner/snakemake_unit_tests/config.full_run.yaml .
     - snakemake_unit_tests.out -c config.full_run.yaml -o /home/ubuntu/builds/tests/full_mode/54gene-wgs-germline/tests -s ${CI_BUILDS_DIR}/${CI_RUNNER_SHORT_TOKEN}/"${FULL_JOB_ID}"/${CI_PROJECT_PATH}/workflow/Snakefile -p ${CI_BUILDS_DIR}/${CI_RUNNER_SHORT_TOKEN}/"${FULL_JOB_ID}"/${CI_PROJECT_PATH} -l ${CI_BUILDS_DIR}/${CI_RUNNER_SHORT_TOKEN}/"${FULL_JOB_ID}"/${CI_PROJECT_PATH}/WGS_log.out --update-all
-    - pytest /home/ubuntu/builds/tests/full_mode/54gene-wgs-germline/tests/unit/test*.py
+    - bash /home/ubuntu/builds/tests/full_mode/54gene-wgs-germline/tests/unit/pytest_runner.bash
   needs:
     - job: test_integration3
       artifacts: true
