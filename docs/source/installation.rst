@@ -18,10 +18,9 @@ Install the run-time environment
 If needed, follow this `guide <https://docs.conda.io/en/latest/miniconda.html#installing>`_ to install Miniconda.
 
 Once installed, create the run-time conda environment with minimal dependencies defined using the following command::
-    
+
     conda env create -f environment.yaml
 
 Activate the environment as follows::
 
     conda activate 54gene-wgs-germline
-
