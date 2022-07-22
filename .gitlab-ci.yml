@@ -58,14 +58,11 @@ unit_tests:
   stage: test
   script:
     - coverage run -m pytest workflow/scripts/tests/test*.py
-    - coverage report
-    - coverage xml
-  coverage: '/TOTAL.*\s([.\d]+)%/'
+    - coverage report | tee coverage.txt
   artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage.xml
+    paths:
+      - coverage.txt
+  coverage: '/Code coverage: TOTAL.*\s+(\d+%)/'
 
 functional_unit_test3:
   extends: .before_script_template
