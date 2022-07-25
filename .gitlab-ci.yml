@@ -80,5 +80,3 @@ functional_unit_test3:
       artifacts: true
   cache:
     key: full-run-cache
-    policy: pull
-
