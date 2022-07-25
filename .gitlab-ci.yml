@@ -30,7 +30,8 @@ test_integration2:
     - cp /54gene-gds/gitlab_runner/54gene-wgs-test-data/run_local_test.sh .
     - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/resources .
     - bash run_local_test.sh
-
+  needs:
+    - test_integration1
 
 test_integration3:
   extends: .before_script_template
@@ -43,6 +44,8 @@ test_integration3:
     - cp /54gene-gds/gitlab_runner/54gene-wgs-test-data/run_local_test.sh .
     - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/resources .
     - bash run_local_test.sh
+  needs:
+    - test_integration2
   artifacts:
     reports:
       dotenv: full.env
