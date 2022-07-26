@@ -139,11 +139,11 @@ rule benchmarking_report:
     """
     input:
         benchmarks="results/performance_benchmarks/combined_benchmarks.tsv",
+        start_time="results/tat_tracking/start_time.txt",
     output:
         "results/performance_benchmarks/benchmarking_report.html",
     params:
         threshold=config["time_threshold"],
-        clusterVersion=clusterconfig,
     conda:
         "../envs/r.yaml"
     script:
