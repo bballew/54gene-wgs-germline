@@ -102,7 +102,12 @@ md_bullet(inlines)
 
 ##### Execution time
 Total elapsed time displayed in hours for all rules in this workflow.
-
+```{r elapsed.time, eval=TRUE, echo=FALSE}
+start.time <- read.table(tat.file, header=FALSE)[1,1]
+end.time <- as.integer(format(Sys.time(), "%s"))
+elapsed.time <- round((end.time - start.time) / 3600, 2)
+```
+The total elapsed time for this pipeline was: `r elapsed.time` hours.
 ```{r all.time.exec, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
 # plot walltime for all rules benchmarked
 exec.time.all <- create.boxjitter.plot(dataset, subset.df, "rule", "walltime", "Rule", "Total walltime in hours for all rules")
@@ -240,12 +245,9 @@ ioout.df1 <- subset(filtered.df, io_out > 10)
 ioout.df2 <- subset(filtered.df, io_out < 10)
 
 ioin.subset1 <- create.subset.plot(ioin.df1, "rule", "io_in", "Rule", "Cumulative GB Written", "Rules with >10GB Read")
-ioin.subset2 <- create.subset.plot(ioin.df2, "rule", "io_in", "Rule", "Cumulative GB Written", "Rules with <10GB Read")
-
 ioout.subset1 <- create.subset.plot(ioout.df1, "rule", "io_out", "Rule", "Cumulative GB Written", "Rules with >10GB Written")
-ioout.subset2 <- create.subset.plot(ioout.df2, "rule", "io_out", "Rule", "Cumulative GB Written", "Rules with <10GB Written")
 
-grid.arrange(ioin.subset1, ioin.subset2, ioout.subset1, ioout.subset2, nrow=2)
+grid.arrange(ioin.subset1, ioout.subset1, nrow=2)
 ```
 
 #### CPU Time {.tabset .tabset-pills}
@@ -274,4 +276,11 @@ CPU/s ≈ *N* indicates the process saturated the allocated number of processors
 # plot cpu to walltime ratio (i.e. CPU/s)
 cpuwall.ratio <- create.boxjitter.plot(filtered.df, subset.df, "rule", "cpuwall_ratio", "Rule", "CPU/second")
 cpuwall.ratio
+```
+
+#### Session Info
+Summary of the R configuration used to create this report.
+
+```{r session.info, eval=TRUE, echo=TRUE}
+sessionInfo()
 ```

@@ -85,3 +85,5 @@ picardCollectVariantCallingMetrics:
   memory: 5000
   xmx: 1000
   java_opts:
+multiqc:
+  memory: 3000
