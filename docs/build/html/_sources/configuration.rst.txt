@@ -140,6 +140,8 @@ Below are descriptions and usage options for the various config parameters speci
 | ``memory_queue``        |     Y     | Name of queue/partition best suited for memory-intensive   |
 |                         |           | jobs; can be ``~``                                         |
 +-------------------------+-----------+------------------------------------------------------------+
+| ``center_id``           |     Y     | Name of sequencing center for use in ``@RG`` tag in bams   |
++-------------------------+-----------+------------------------------------------------------------+
 | ``max_concurrent``      |     Y     | Max concurrent jobs for specific high-bandwidth rules,     |
 |                         |           | to avoid potentially hitting bandwidth caps if deployed    |
 |                         |           | in a cloud environment; see wrapper script for an example  |

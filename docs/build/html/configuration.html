@@ -11,7 +11,7 @@
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
-
+  
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
@@ -20,10 +20,10 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Execution" href="execution.html" />
-    <link rel="prev" title="Installation" href="installation.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -87,7 +87,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-
+             
   <section id="configuration">
 <h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline"></a></h1>
 <p>The workflow needs to be configured to perform the analysis of your choice by editing the following files in the <code class="docutils literal notranslate"><span class="pre">config/</span></code> folder.  Each file is described in more detail below.</p>
@@ -246,7 +246,11 @@ intensive jobs; can be <code class="docutils literal notranslate"><span class="p
 <td><p>Name of queue/partition best suited for memory-intensive
 jobs; can be <code class="docutils literal notranslate"><span class="pre">~</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">max_concurrent</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">center_id</span></code></p></td>
+<td><p>Y</p></td>
+<td><p>Name of sequencing center for use in <code class="docutils literal notranslate"><span class="pre">&#64;RG</span></code> tag in bams</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">max_concurrent</span></code></p></td>
 <td><p>Y</p></td>
 <td><p>Max concurrent jobs for specific high-bandwidth rules,
 to avoid potentially hitting bandwidth caps if deployed
@@ -255,24 +259,24 @@ of how to pass this in to snakemake.  Set to the same
 number as <code class="docutils literal notranslate"><span class="pre">jobs</span></code> if you don’t want to limit concurrent
 rules in this way</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">max_het_ratio</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">max_het_ratio</span></code></p></td>
 <td><p>Y</p></td>
 <td><p>Max het/hom ratio to allow through post-calling QC</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">min_avg_depth</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">min_avg_depth</span></code></p></td>
 <td><p>Y</p></td>
 <td><p>Minimum depth required for sample to pass post-calling QC</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">max_contam</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">max_contam</span></code></p></td>
 <td><p>Y</p></td>
 <td><p>Max % contamination to allow through post-calling QC</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">time_threshold</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">time_threshold</span></code></p></td>
 <td><p>Y</p></td>
 <td><p>(minutes) Exclude rules from the benchmarking report if
 elapsed time is below this threshold</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">somalier</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">somalier</span></code></p></td>
 <td><p>Y</p></td>
 <td><p>Check relatedness and sex discordance with Somalier
 (requires sex_linker.tsv) only available in full run
@@ -304,8 +308,8 @@ want to set this to False on a Mac</p></td>
     </div>
 
     Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
-
-
+      
+     
   </footer>
         </div>
       </div>
@@ -315,7 +319,7 @@ want to set this to False on a Mac</p></td>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
+  </script> 
 
 </body>
 </html>
