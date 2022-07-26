@@ -49,6 +49,8 @@ properties:
     oneOf:
      - type: string
      - type: null
+  center_id:
+    type: string
   max_concurrent:
     type: integer
     minimum: 1
@@ -346,6 +348,7 @@ required:
   - default_queue
   - compute_queue
   - memory_queue
+  - center_id
   - max_concurrent
   - max_het_ratio
   - min_avg_depth
