@@ -10,9 +10,10 @@ Documentation of WGS variant calling at `54gene <https://54gene.com/>`_
 
    overview.rst
    installation.rst
-   usage.rst
+   configuration.rst
+   execution.rst
    investigateresults.rst
    tests.rst
    corepipeline.rst
-   releasenotes.rst
+   changelog.rst
    fordevelopers.rst
