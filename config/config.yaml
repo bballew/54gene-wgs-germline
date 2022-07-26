@@ -12,7 +12,6 @@ cluster_mode: "sbatch -o logs/%x.o%j -p {resources.queue} --mem-per-cpu={resourc
 default_queue: "big"
 compute_queue: "big"
 memory_queue: "big"
-bed: "resources/Homo_sapiens_assembly38.bed"
 max_concurrent: 40  # max concurrent running jobs for especially high-bandwidth rules, to control hitting the fsx bandwidth cap
 # QC thresholds for sample removal:
 max_het_ratio: 2.5
