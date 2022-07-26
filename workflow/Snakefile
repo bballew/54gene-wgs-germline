@@ -23,16 +23,6 @@ try:
 except subprocess.CalledProcessError:
     print("54gene WGS germline workflow, version not detected!")
 
-# get current cluster config info
-clusterconfig = (
-    subprocess.check_output(
-        ["git", "-C", "/fsx/resources/parallelcluster_docs", "describe", "--all", "--long"]
-    )
-    .decode()
-    .strip()
-)
-print(f"Cluster version: {clusterconfig}")
-
 
 # reference the config file
 configfile: "config/config.yaml"
@@ -135,6 +125,10 @@ wildcard_constraints:
     rg="|".join(sampleDict.keys()),
 
 
+localrules:
+    combine_benchmarks,
+    benchmarking_report,
+    
 rule all:
     input:
         TARGETS,
