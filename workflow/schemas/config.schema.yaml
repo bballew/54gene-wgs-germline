@@ -34,15 +34,21 @@ properties:
   global_vars:
     type: string
   cluster_mode:
-    type: string
+    oneOf:
+     - type: string
+     - type: null
   default_queue:
-    type: string
+    oneOf:
+     - type: string
+     - type: null
   compute_queue:
-    type: string
+    oneOf:
+     - type: string
+     - type: null
   memory_queue:
-    type: string
-  bed:
-    type: string
+    oneOf:
+     - type: string
+     - type: null
   max_concurrent:
     type: integer
     minimum: 1
@@ -340,7 +346,6 @@ required:
   - default_queue
   - compute_queue
   - memory_queue
-  - bed
   - max_concurrent
   - max_het_ratio
   - min_avg_depth
