@@ -23,16 +23,6 @@ try:
 except subprocess.CalledProcessError:
     print("54gene WGS germline workflow, version not detected!")
 
-# get current cluster config info
-clusterconfig = (
-    subprocess.check_output(
-        ["git", "-C", "/fsx/resources/parallelcluster_docs", "describe", "--all", "--long"]
-    )
-    .decode()
-    .strip()
-)
-print(f"Cluster version: {clusterconfig}")
-
 
 # reference the config file
 configfile: "config/config.yaml"
@@ -81,7 +71,11 @@ SAMPLES = utils.create_samples_set(sampleDict) if full or fastq_qc_only else sam
 concurrent_limit = utils.get_batch_limit_number(jobs, max_concurrent)
 
 
-TARGETS = ["results/multiqc/multiqc.html", "results/run_summary/run_summary.html", "results/performance_benchmarks/benchmarking_report.html"]
+TARGETS = [
+    "results/multiqc/multiqc.html",
+    "results/run_summary/run_summary.html",
+    "results/performance_benchmarks/benchmarking_report.html",
+]
 
 
 if full:
@@ -131,6 +125,10 @@ wildcard_constraints:
     rg="|".join(sampleDict.keys()),
 
 
+localrules:
+    combine_benchmarks,
+    benchmarking_report,
+    
 rule all:
     input:
         TARGETS,
