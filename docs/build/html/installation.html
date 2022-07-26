@@ -1,77 +1,62 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation and Setup &mdash; 54gene-wgs-germline  documentation</title>
+  <title>Installation &mdash; 54gene-wgs-germline  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Usage and Execution" href="usage.html" />
-    <link rel="prev" title="Overview" href="overview.html" /> 
+    <link rel="next" title="Configuration" href="configuration.html" />
+    <link rel="prev" title="Overview" href="overview.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
 <a href="index.html" class="icon icon-home"> 54gene-wgs-germline
-
 <a href="https://54gene.com">
     <img src="_static/54gene_logo.png" class="logo" alt="Logo"/>
-  </a>
-
-
-  
-  
-  
-    <div class="version">
-      1.0.0
-    </div>
-  
-
-
-
+</a>
+  <div class="version">
+    1.0.0
+  </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
-<ul class="current">
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation and Setup</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#step-1-obtain-a-copy-of-this-workflow">Step 1. Obtain a copy of this workflow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#step-2-install-the-run-time-conda-environment">Step 2. Install the run-time conda environment</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#step-3-configure-the-workflow">Step 3. Configure the workflow</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#a-config-file">A. Config file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#b-manifest-file">B. Manifest file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#c-intervals-file">C. Intervals file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#d-sex-linker-file">D. Sex linker file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#e-multiqc-yaml">E. MultiQC yaml</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#obtain-a-copy-of-this-workflow">Obtain a copy of this workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-the-run-time-environment">Install the run-time environment</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage and Execution</a></li>
-<li class="toctree-l1"><a class="reference internal" href="investigateresults.html">Investigate the Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="execution.html">Execution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="investigateresults.html">Investigate the results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">About</span></p>
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="corepipeline.html">Core pipeline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="releasenotes.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fordevelopers.html">For developers</a></li>
 </ul>
 
@@ -89,7 +74,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Installation and Setup</li>
+      <li>Installation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -98,167 +83,29 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
-  <section id="installation-and-setup">
-<h1>Installation and Setup<a class="headerlink" href="#installation-and-setup" title="Permalink to this heading"></a></h1>
-<p>This workflow was designed to use <cite>conda`</cite> for dependency management and utilizes <cite>Snakemake</cite> as the workflow management system, ensuring reproducible and scalable analyses.</p>
-<p>This installation guide is designed for Unix/Linux environments.</p>
-<section id="step-1-obtain-a-copy-of-this-workflow">
-<h2>Step 1. Obtain a copy of this workflow<a class="headerlink" href="#step-1-obtain-a-copy-of-this-workflow" title="Permalink to this heading"></a></h2>
-<p>If you haven’t already, clone this repository to your local system, into the place where you want to perform the data analysis:</p>
+
+  <section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h1>
+<p>This workflow was designed to use <a class="reference external" href="https://docs.conda.io/en/latest/">conda</a> for dependency management and utilizes  <a class="reference external" href="https://snakemake.readthedocs.io/en/stable/">Snakemake</a> as the workflow management system, ensuring reproducible and scalable analyses.</p>
+<p>This installation guide is designed for Unix/Linux environments; however, this pipeline has been minimally tested on OSX as well.</p>
+<section id="obtain-a-copy-of-this-workflow">
+<h2>Obtain a copy of this workflow<a class="headerlink" href="#obtain-a-copy-of-this-workflow" title="Permalink to this headline"></a></h2>
+<p>Clone this repository to your local system, into the place where you want to perform the data analysis:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@gitlab</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">data</span><span class="o">-</span><span class="n">analysis5</span><span class="o">/</span><span class="mi">54</span><span class="n">gene</span><span class="o">-</span><span class="n">wgs</span><span class="o">-</span><span class="n">germline</span><span class="o">.</span><span class="n">git</span>
 </pre></div>
 </div>
 </section>
-<section id="step-2-install-the-run-time-conda-environment">
-<h2>Step 2. Install the run-time conda environment<a class="headerlink" href="#step-2-install-the-run-time-conda-environment" title="Permalink to this heading"></a></h2>
-<p>If you don’t already have conda installed, follow this guide <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html#installing">here</a> to install Miniconda.</p>
+<section id="install-the-run-time-environment">
+<h2>Install the run-time environment<a class="headerlink" href="#install-the-run-time-environment" title="Permalink to this headline"></a></h2>
+<p>If needed, follow this <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html#installing">guide</a> to install Miniconda.</p>
 <p>Once installed, create the run-time conda environment with minimal dependencies defined using the following command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">environment</span><span class="o">.</span><span class="n">yaml</span>
 </pre></div>
 </div>
-</section>
-<section id="step-3-configure-the-workflow">
-<h2>Step 3. Configure the workflow<a class="headerlink" href="#step-3-configure-the-workflow" title="Permalink to this heading"></a></h2>
-<p>The workflow needs to configured to perform the analysis of your choice by editing the following files in the <cite>config/</cite> folder:</p>
-<section id="a-config-file">
-<h3>A. Config file<a class="headerlink" href="#a-config-file" title="Permalink to this heading"></a></h3>
-<p>As of v1.0, the pipeline offers three run modes. Please specify the run mode in <cite>config.yaml</cite>.</p>
-<ul class="simple">
-<li><p><strong>full</strong>: This mode starts with fastqs and emits a joint-called, filtered, multi-sample VCF</p></li>
-<li><p><strong>joint_genotyping</strong>: This mode starts with gVCFs and runs joint-calling and filtering, emitting a multi-sample VCF. In the event you have analyzed batches of samples in the full-run mode, these batches can then jointly re-genotyped with this run mode.</p></li>
-<li><p><strong>fastqc_only</strong>: This mode starts with fastqs and emits trimmed fastqs as well as a multiQC report for raw and trimmed reads. This run mode is meant for performing QC on fastq data before further downstream analysis.</p></li>
-</ul>
-</section>
-<section id="b-manifest-file">
-<h3>B. Manifest file<a class="headerlink" href="#b-manifest-file" title="Permalink to this heading"></a></h3>
-<p>You will need to provide a headerless, white-space delimited manifest file to run the pipeline for all three run-modes.</p>
-<p>For <strong>full</strong> and <strong>fastqc_only</strong> mode:</p>
-<p>The <cite>manifest.txt</cite> would include the following columns:</p>
-<ul class="simple">
-<li><p>First column with the readgroup for each sample (contains the full sample ID, barcode, and lane)</p></li>
-<li><p>Second column with only the sample ID</p></li>
-<li><p>Third column with the path to the read 1 FASTQ file</p></li>
-<li><p>Fourth column with the path to the read 2 FASTQ file</p></li>
-</ul>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 21%" />
-<col style="width: 20%" />
-<col style="width: 29%" />
-<col style="width: 30%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p>readgroup</p></td>
-<td><p>sample_ID</p></td>
-<td><p>path/to/r1.fastq</p></td>
-<td><p>path/to/r2.fastq</p></td>
-</tr>
-</tbody>
-</table>
-<p>Where <cite>readgroup</cite> values are unique (i.e. sampleID_barcode) and <cite>sample_ID</cite> values are the same for all fastq pairs from a single sample and can be different from the fastq filenames themselves.</p>
-<p>For example:</p>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 29%" />
-<col style="width: 16%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 4%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p>Sample001_S1_L001</p></td>
-<td><p>Sample001</p></td>
-<td colspan="2"><p>fastqs/Sample_001_S1_L004_R1.fastq</p></td>
-<td><p>…</p></td>
-</tr>
-</tbody>
-</table>
-<p>For <strong>joint_genotyping</strong> mode:</p>
-<p>The <cite>manifest.txt</cite> would include the following two columns:</p>
-<ul class="simple">
-<li><p>First column with the sample IDs for each gVCF</p></li>
-<li><p>Second column with the paths to the gVCFs</p></li>
-</ul>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 31%" />
-<col style="width: 69%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p>sample_ID</p></td>
-<td><p>path/to/sample_ID.g.vcf.gz</p></td>
-</tr>
-</tbody>
-</table>
-<p>For example:</p>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 34%" />
-<col style="width: 66%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p>Sample_001</p></td>
-<td><p>vcfs/Sample_001.g.vcf.gz</p></td>
-</tr>
-</tbody>
-</table>
-<p><em>Note</em>: The gVCFs should be zipped and indexed.</p>
-</section>
-<section id="c-intervals-file">
-<h3>C. Intervals file<a class="headerlink" href="#c-intervals-file" title="Permalink to this heading"></a></h3>
-<p>For <strong>full</strong> and <strong>joint_genotyping</strong> modes only.</p>
-<p>Joint-calling for a large number of samples can be computationally expensive and very time-consuming. This pipeline was designed to mitigate these issues by parallelizing joint-calling over multiple intervals of the genome. To specify the number of intervals, and which regions to parallelize over, a 2-column tab-delmited <code class="docutils literal notranslate"><span class="pre">intervals.tsv</span></code> file can be specified.</p>
-<p>This file contains two columns:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">interval_name</span></code> for the name of the particular interval or region</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">file_path</span></code> full path to the interval/region BED file, Picard-style <code class="docutils literal notranslate"><span class="pre">.interval_list</span></code>, VCF file, or GATK-style <code class="docutils literal notranslate"><span class="pre">.list</span></code> or <code class="docutils literal notranslate"><span class="pre">.intervals</span></code> file (see further details on these formats <a class="reference external" href="https://gatk.broadinstitute.org/hc/en-us/articles/360035531852-Intervals-and-interval-lists">here</a>)</p></li>
-</ul>
-<p>For example:</p>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 21%" />
-<col style="width: 79%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p>interval_name</p></td>
-<td><p>file_path</p></td>
-</tr>
-<tr class="row-even"><td><p>interval_1</p></td>
-<td><p>/resources/scattered_calling_intervals/interval_1.bed</p></td>
-</tr>
-</tbody>
-</table>
-<p>The pipeline will supply these interval files to the GATK <code class="docutils literal notranslate"><span class="pre">HaplotypeCaller</span></code>, <code class="docutils literal notranslate"><span class="pre">GenomicsDBImport</span></code> and <code class="docutils literal notranslate"><span class="pre">GenotypeGVCFs</span></code> steps to run concurrent instances of these rules at each specified interval(s), reducing overall execution time.</p>
-<p>We recommend specifying regions of equal size for parallelization.</p>
-</section>
-<section id="d-sex-linker-file">
-<h3>D. Sex linker file<a class="headerlink" href="#d-sex-linker-file" title="Permalink to this heading"></a></h3>
-<p>The pipeline provides an option to check the relatdness amongst the samples using Somalier in the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> (see <code class="docutils literal notranslate"><span class="pre">check_relatedness</span></code> parameter in <a class="reference internal" href="usage.html"><span class="doc">Usage and Execution</span></a>). This requires a 2-column, tab-delimited <code class="docutils literal notranslate"><span class="pre">sex_linker.tsv</span></code> file provided and specified in the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>. This file will have:</p>
-<ul class="simple">
-<li><p>First column with the header <code class="docutils literal notranslate"><span class="pre">Sample</span></code> with all sample names</p></li>
-<li><p>Second column with the header <code class="docutils literal notranslate"><span class="pre">Sex</span></code> containing one-letter formattted sex of all samples</p></li>
-</ul>
-<p>For example:</p>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 64%" />
-<col style="width: 36%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p>Sample</p></td>
-<td><p>Sex</p></td>
-</tr>
-<tr class="row-even"><td><p>NA12878</p></td>
-<td><p>F</p></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="e-multiqc-yaml">
-<h3>E. MultiQC yaml<a class="headerlink" href="#e-multiqc-yaml" title="Permalink to this heading"></a></h3>
-<p>A configuration file for MultiQC can be found in <code class="docutils literal notranslate"><span class="pre">config/multiqc.yaml</span></code> and is used for generating and specifying the order of the various modules in the multiQC report from the pipeline. We <strong>do not</strong> recommend modifying this file unless you understand how this configuration file is setup or how multiQC works.</p>
-</section>
+<p>Activate the environment as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="mi">54</span><span class="n">gene</span><span class="o">-</span><span class="n">wgs</span><span class="o">-</span><span class="n">germline</span>
+</pre></div>
+</div>
 </section>
 </section>
 
@@ -267,20 +114,19 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
           <a href="overview.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-          <a href="usage.html" class="btn btn-neutral float-right" title="Usage and Execution" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <a href="configuration.html" class="btn btn-neutral float-right" title="Configuration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
       </div>
-  
+
     <hr/>
-  
+
     <div role="contentinfo">
-      <p>&#169; Copyright 2022, B. Ballew, C. Palmer, E. Joshi, 54gene.</p>
+      <p>&#169; Copyright 2022, B. Ballew, E. Joshi, C. Palmer, 54gene.</p>
     </div>
-  
+
     Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
-      
-     
+
+
   </footer>
-  
         </div>
       </div>
     </section>
@@ -289,7 +135,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

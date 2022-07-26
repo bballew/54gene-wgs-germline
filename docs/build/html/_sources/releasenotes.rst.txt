@@ -1,4 +1,0 @@
-Release Notes
-=============
-
-Stuff here
