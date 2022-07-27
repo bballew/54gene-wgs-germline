@@ -53,6 +53,9 @@ subset.df <- dataset %>% group_by(rule) %>% filter(n() > 1)
 time.param <- snakemake@params[["threshold"]]
 time.threshold <- time.param * 60
 filtered.df <- dataset %>% group_by(rule) %>% filter(s >= time.threshold)
+
+# start time to calculate elapsed time
+tat.file <- snakemake@input[["start_time"]]
 ```
 
 ```{r plot.functions, eval=TRUE, echo=FALSE}
