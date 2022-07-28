@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Installation &mdash; 54gene-wgs-germline  documentation</title>
@@ -11,19 +11,20 @@
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Configuration" href="configuration.html" />
-    <link rel="prev" title="Overview" href="overview.html" /> 
+    <link rel="prev" title="Overview" href="overview.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -83,20 +84,20 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <section id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h1>
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h1>
 <p>This workflow was designed to use <a class="reference external" href="https://docs.conda.io/en/latest/">conda</a> for dependency management and utilizes  <a class="reference external" href="https://snakemake.readthedocs.io/en/stable/">Snakemake</a> as the workflow management system, ensuring reproducible and scalable analyses.</p>
 <p>This installation guide is designed for Unix/Linux environments; however, this pipeline has been minimally tested on OSX as well.</p>
 <section id="obtain-a-copy-of-this-workflow">
-<h2>Obtain a copy of this workflow<a class="headerlink" href="#obtain-a-copy-of-this-workflow" title="Permalink to this headline"></a></h2>
+<h2>Obtain a copy of this workflow<a class="headerlink" href="#obtain-a-copy-of-this-workflow" title="Permalink to this heading"></a></h2>
 <p>Clone this repository to your local system, into the place where you want to perform the data analysis:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@gitlab</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">data</span><span class="o">-</span><span class="n">analysis5</span><span class="o">/</span><span class="mi">54</span><span class="n">gene</span><span class="o">-</span><span class="n">wgs</span><span class="o">-</span><span class="n">germline</span><span class="o">.</span><span class="n">git</span>
 </pre></div>
 </div>
 </section>
 <section id="install-the-run-time-environment">
-<h2>Install the run-time environment<a class="headerlink" href="#install-the-run-time-environment" title="Permalink to this headline"></a></h2>
+<h2>Install the run-time environment<a class="headerlink" href="#install-the-run-time-environment" title="Permalink to this heading"></a></h2>
 <p>If needed, follow this <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html#installing">guide</a> to install Miniconda.</p>
 <p>Once installed, create the run-time conda environment with minimal dependencies defined using the following command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">environment</span><span class="o">.</span><span class="n">yaml</span>
@@ -124,8 +125,8 @@
     </div>
 
     Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
-      
-     
+
+
   </footer>
         </div>
       </div>
@@ -135,7 +136,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Execution &mdash; 54gene-wgs-germline  documentation</title>
@@ -11,19 +11,20 @@
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Investigate the results" href="investigateresults.html" />
-    <link rel="prev" title="Configuration" href="configuration.html" /> 
+    <link rel="prev" title="Configuration" href="configuration.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -84,11 +85,11 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <section id="execution">
-<h1>Execution<a class="headerlink" href="#execution" title="Permalink to this headline"></a></h1>
+<h1>Execution<a class="headerlink" href="#execution" title="Permalink to this heading"></a></h1>
 <section id="deploying-the-pipeline">
-<h2>Deploying the pipeline<a class="headerlink" href="#deploying-the-pipeline" title="Permalink to this headline"></a></h2>
+<h2>Deploying the pipeline<a class="headerlink" href="#deploying-the-pipeline" title="Permalink to this heading"></a></h2>
 <p>With the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> configured to your run-mode of choice with paths to the necessary manifest and input files, the workflow can be executed on any infrastructure using the <code class="docutils literal notranslate"><span class="pre">snakemake</span></code> command, supplied with further Snakemake command-line arguments (e.g. specifying a profile with <code class="docutils literal notranslate"><span class="pre">--profile</span></code> or <code class="docutils literal notranslate"><span class="pre">--cluster</span></code> to submit jobs to an HPC) depending on your environment.</p>
 <p>Test your configuration by performing a dry-run:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">snakemake</span> <span class="o">--</span><span class="n">use</span><span class="o">-</span><span class="n">conda</span> <span class="o">-</span><span class="n">n</span>
@@ -105,14 +106,14 @@
 <p>The pipeline will automatically create a subdirectory for logs in <code class="docutils literal notranslate"><span class="pre">logs/</span></code> and temporary workspace at the path specified for <code class="docutils literal notranslate"><span class="pre">tempDir</span></code> in the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>.</p>
 </section>
 <section id="wrapper-scripts">
-<h2>Wrapper scripts<a class="headerlink" href="#wrapper-scripts" title="Permalink to this headline"></a></h2>
+<h2>Wrapper scripts<a class="headerlink" href="#wrapper-scripts" title="Permalink to this heading"></a></h2>
 <p>We have provided two convenience scripts in the 54gene-wgs-germline repository to execute the workflow in a cluster environment: <code class="docutils literal notranslate"><span class="pre">run.sh</span></code> and <code class="docutils literal notranslate"><span class="pre">wrapper.sh</span></code>.  You may customize these scripts for your needs, or run using a profile (e.g. <a class="reference external" href="https://github.com/Snakemake-Profiles/slurm">this</a> profile for a slurm job scheduler).</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">wrapper.sh</span></code> script embeds the <code class="docutils literal notranslate"><span class="pre">snakemake</span></code> command and other command-line flags to control submission of jobs to an HPC using the <code class="docutils literal notranslate"><span class="pre">cluster_mode</span></code> string pulled from the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>. This script also directs all stdout from Snakemake to a log file named <code class="docutils literal notranslate"><span class="pre">WGS_${DATE}.out</span></code> which will include the latest git tag and version of the pipeline, if cloned from our repository. For additional logging information, see <a class="reference internal" href="#logging"><span class="std std-ref">Logging</span></a>.</p>
 <p>This wrapper script can be edited to your needs and run using <code class="docutils literal notranslate"><span class="pre">bash</span> <span class="pre">run.sh</span></code>.</p>
 </section>
 <section id="logging">
-<span id="id1"></span><h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline"></a></h2>
-<p>All job-specific logs will be directed to a <code class="docutils literal notranslate"><span class="pre">logs/</span></code> subdirectory in the home analysis directory of the pipeline. This directory automatically created for you by the pipeline.</p>
+<span id="id1"></span><h2>Logging<a class="headerlink" href="#logging" title="Permalink to this heading"></a></h2>
+<p>All job-specific logs will be directed to a <code class="docutils literal notranslate"><span class="pre">logs/</span></code> subdirectory in the home analysis directory of the pipeline. This directory is automatically created for you upon execution of the pipeline. These log files will follow the naming structure of <code class="docutils literal notranslate"><span class="pre">snakejob.&lt;name_of_rule&gt;.&lt;job_number&gt;</span></code>.</p>
 <p>If you choose to use the <code class="docutils literal notranslate"><span class="pre">wrapper.sh</span></code> script provided and modified for your environment, a <code class="docutils literal notranslate"><span class="pre">WGS_${DATE}.out</span></code> log file containing all stdout from snakemake will also be available in the home analysis directory.</p>
 </section>
 </section>
@@ -132,8 +133,8 @@
     </div>
 
     Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
-      
-     
+
+
   </footer>
         </div>
       </div>
@@ -143,7 +144,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

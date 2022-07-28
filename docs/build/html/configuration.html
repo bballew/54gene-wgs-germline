@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Configuration &mdash; 54gene-wgs-germline  documentation</title>
@@ -11,19 +11,20 @@
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Execution" href="execution.html" />
-    <link rel="prev" title="Installation" href="installation.html" /> 
+    <link rel="prev" title="Installation" href="installation.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -87,9 +88,9 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <section id="configuration">
-<h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline"></a></h1>
+<h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading"></a></h1>
 <p>The workflow needs to be configured to perform the analysis of your choice by editing the following files in the <code class="docutils literal notranslate"><span class="pre">config/</span></code> folder.  Each file is described in more detail below.</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#configuration-file"><span class="std std-ref">Configuration file</span></a></p></li>
@@ -99,7 +100,7 @@
 <li><p><a class="reference internal" href="#multiqc-configuration"><span class="std std-ref">MultiQC configuration</span></a></p></li>
 </ul>
 <section id="configuration-file">
-<span id="id1"></span><h2>Configuration file<a class="headerlink" href="#configuration-file" title="Permalink to this headline"></a></h2>
+<span id="id1"></span><h2>Configuration file<a class="headerlink" href="#configuration-file" title="Permalink to this heading"></a></h2>
 <p>The pipeline offers three run modes. Please specify the run mode in <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>.  The name of the file defaults to <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> but you can use other filenames in conjunction with Snakemake’s <code class="docutils literal notranslate"><span class="pre">--configfile</span></code> command line flag.</p>
 <ul class="simple">
 <li><p><strong>full</strong>: This mode starts with FASTQs and emits a joint-called, filtered, multi-sample VCF.</p></li>
@@ -108,7 +109,7 @@
 </ul>
 </section>
 <section id="manifest-file">
-<span id="id2"></span><h2>Manifest file<a class="headerlink" href="#manifest-file" title="Permalink to this headline"></a></h2>
+<span id="id2"></span><h2>Manifest file<a class="headerlink" href="#manifest-file" title="Permalink to this heading"></a></h2>
 <p>You will need to provide a headerless, white-space delimited manifest file to run the pipeline for all three run-modes.  The default name for the file is <code class="docutils literal notranslate"><span class="pre">manifest.txt</span></code> but this is user configurable in the config file under <code class="docutils literal notranslate"><span class="pre">sampleFile</span></code>.</p>
 <p>For <strong>full</strong> and <strong>fastqc_only</strong> mode, the <code class="docutils literal notranslate"><span class="pre">manifest.txt</span></code> requires the following columns:</p>
 <ul class="simple">
@@ -134,7 +135,7 @@
 </div>
 </section>
 <section id="intervals-file">
-<span id="id3"></span><h2>Intervals file<a class="headerlink" href="#intervals-file" title="Permalink to this headline"></a></h2>
+<span id="id3"></span><h2>Intervals file<a class="headerlink" href="#intervals-file" title="Permalink to this heading"></a></h2>
 <p>For <strong>full</strong> and <strong>joint_genotyping</strong> modes only.</p>
 <p>Joint-calling for a large number of samples is computationally expensive and time-consuming. This pipeline was designed to mitigate these issues by parallelizing joint-calling over multiple intervals of the genome.  To specify the number of intervals, and which regions to parallelize over, a 2-column tab-delmited <code class="docutils literal notranslate"><span class="pre">intervals.tsv</span></code> file can be specified.  The filename can be customized and edited in the config file under <code class="docutils literal notranslate"><span class="pre">intervalsFile</span></code>.</p>
 <p>This file contains two columns with headers:</p>
@@ -152,7 +153,7 @@
 <p>We recommend specifying regions of equal size for parallelization.</p>
 </section>
 <section id="sex-linker-file">
-<span id="id4"></span><h2>Sex linker file<a class="headerlink" href="#sex-linker-file" title="Permalink to this headline"></a></h2>
+<span id="id4"></span><h2>Sex linker file<a class="headerlink" href="#sex-linker-file" title="Permalink to this heading"></a></h2>
 <p>The pipeline provides a boolean option <code class="docutils literal notranslate"><span class="pre">somalier</span></code> to estimate relatedness amongst the samples using <a class="reference external" href="https://github.com/brentp/somalier">Somalier</a> in the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> (see <code class="docutils literal notranslate"><span class="pre">check_relatedness</span></code> parameter in <a class="reference internal" href="#"><span class="doc">Configuration</span></a>).  This requires a 2-column, tab-delimited file.  The filename defaults to <code class="docutils literal notranslate"><span class="pre">sex_linker.tsv</span></code> and is specified in the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> under <code class="docutils literal notranslate"><span class="pre">sexLinker</span></code>.  This file requires:</p>
 <ul class="simple">
 <li><p>First column with the header <code class="docutils literal notranslate"><span class="pre">Sample</span></code> with all sample names</p></li>
@@ -167,11 +168,11 @@
 </div>
 </section>
 <section id="multiqc-configuration">
-<span id="id5"></span><h2>MultiQC configuration<a class="headerlink" href="#multiqc-configuration" title="Permalink to this headline"></a></h2>
+<span id="id5"></span><h2>MultiQC configuration<a class="headerlink" href="#multiqc-configuration" title="Permalink to this heading"></a></h2>
 <p>A configuration file for MultiQC can be found in <code class="docutils literal notranslate"><span class="pre">config/multiqc.yaml</span></code> and is used for generating and specifying the order of the various modules in the MultiQC report from the pipeline. We <strong>do not</strong> recommend modifying this file unless you understand how this configuration file is setup or how MultiQC works.</p>
 </section>
 <section id="config-parameters">
-<span id="id6"></span><h2>Config parameters<a class="headerlink" href="#config-parameters" title="Permalink to this headline"></a></h2>
+<span id="id6"></span><h2>Config parameters<a class="headerlink" href="#config-parameters" title="Permalink to this heading"></a></h2>
 <p>Below are descriptions and usage options for the various config parameters specified in <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>.</p>
 <table class="docutils align-default">
 <colgroup>
@@ -308,8 +309,8 @@ want to set this to False on a Mac</p></td>
     </div>
 
     Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
-      
-     
+
+
   </footer>
         </div>
       </div>
@@ -319,7 +320,7 @@ want to set this to False on a Mac</p></td>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

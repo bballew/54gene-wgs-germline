@@ -35,6 +35,6 @@ This wrapper script can be edited to your needs and run using ``bash run.sh``.
 Logging
 -------
 
-All job-specific logs will be directed to a ``logs/`` subdirectory in the home analysis directory of the pipeline. This directory automatically created for you by the pipeline.
+All job-specific logs will be directed to a ``logs/`` subdirectory in the home analysis directory of the pipeline. This directory is automatically created for you upon execution of the pipeline. These log files will follow the naming structure of ``snakejob.<name_of_rule>.<job_number>``.
 
 If you choose to use the ``wrapper.sh`` script provided and modified for your environment, a ``WGS_${DATE}.out`` log file containing all stdout from snakemake will also be available in the home analysis directory.

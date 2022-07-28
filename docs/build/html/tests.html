@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tests &mdash; 54gene-wgs-germline  documentation</title>
@@ -11,19 +11,20 @@
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Core pipeline" href="corepipeline.html" />
-    <link rel="prev" title="Investigate the results" href="investigateresults.html" /> 
+    <link rel="prev" title="Investigate the results" href="investigateresults.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -52,7 +53,9 @@
 <li class="toctree-l1"><a class="reference internal" href="investigateresults.html">Investigate the results</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Tests</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#unit-tests">Unit tests</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#pipeline-tests">Pipeline tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pipeline-integration-tests">Pipeline/Integration tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#snakemake-unit-tests">Snakemake unit tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ci-cd">CI/CD</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="corepipeline.html">Core pipeline</a></li>
@@ -83,24 +86,31 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <section id="tests">
-<h1>Tests<a class="headerlink" href="#tests" title="Permalink to this headline"></a></h1>
+<h1>Tests<a class="headerlink" href="#tests" title="Permalink to this heading"></a></h1>
 <section id="unit-tests">
-<h2>Unit tests<a class="headerlink" href="#unit-tests" title="Permalink to this headline"></a></h2>
-<p>Unit tests for the python modules used in this workflow can be found in <code class="docutils literal notranslate"><span class="pre">workflow/scripts/tests</span></code>.</p>
-<dl class="simple">
-<dt>To run all available unit tests::</dt><dd><p><code class="docutils literal notranslate"><span class="pre">pytest</span> <span class="pre">-s</span> <span class="pre">workflow/scripts/tests/*.py</span></code></p>
-</dd>
-</dl>
-<ul class="simple">
-<li><p>testing deps?  included in runtime env spec?</p></li>
-<li><p>CI?</p></li>
-</ul>
+<h2>Unit tests<a class="headerlink" href="#unit-tests" title="Permalink to this heading"></a></h2>
+<p>Unit tests for the python modules used in this workflow can be found in <code class="docutils literal notranslate"><span class="pre">workflow/scripts/tests</span></code> and run using Pytest which is included in the conda run-time environment for this pipeline.</p>
+<p>To run all available unit tests:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="mi">54</span><span class="n">gene</span><span class="o">-</span><span class="n">wgs</span><span class="o">-</span><span class="n">germline</span>
+<span class="n">pytest</span> <span class="o">-</span><span class="n">s</span> <span class="n">workflow</span><span class="o">/</span><span class="n">scripts</span><span class="o">/</span><span class="n">tests</span><span class="o">/*.</span><span class="n">py</span>
+</pre></div>
+</div>
 </section>
-<section id="pipeline-tests">
-<h2>Pipeline tests<a class="headerlink" href="#pipeline-tests" title="Permalink to this headline"></a></h2>
-<p>TBD</p>
+<section id="pipeline-integration-tests">
+<h2>Pipeline/Integration tests<a class="headerlink" href="#pipeline-integration-tests" title="Permalink to this heading"></a></h2>
+<p>To test the core pipeline, we provide a small test dataset and instructions on how to use this dataset available in a repository <a class="reference external" href="https://gitlab.com/data-analysis5/dna-sequencing/54gene-wgs-test-data">here</a>.</p>
+<p>To summarize, this test dataset contains a small region of chromosome 21 from the NA12878 platinum reference genome. The above repository contains all necessary inputs (configuration file, manifest, intervals, sex_linker files) required to run the pipeline in all three run-modes. The README provides instructions on how to use these files to execute a test using the 54gene-wgs-germline pipeline.</p>
+</section>
+<section id="snakemake-unit-tests">
+<h2>Snakemake unit tests<a class="headerlink" href="#snakemake-unit-tests" title="Permalink to this heading"></a></h2>
+<p><em>In development (TBD)</em></p>
+</section>
+<section id="ci-cd">
+<h2>CI/CD<a class="headerlink" href="#ci-cd" title="Permalink to this heading"></a></h2>
+<p>The aforementioned python unit tests and integration tests (in all three run-modes) are run as part of the <a class="reference external" href="https://docs.gitlab.com/ee/ci/">Gitlab Continuous Integration (CI)</a> pipeline for this codebase. You can find the status of the CI pipeline on the main repository page.</p>
+<p><em>Note</em>: The test suite and CI pipeline are still a work in progress.</p>
 </section>
 </section>
 
@@ -119,8 +129,8 @@
     </div>
 
     Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
-      
-     
+
+
   </footer>
         </div>
       </div>
@@ -130,7 +140,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

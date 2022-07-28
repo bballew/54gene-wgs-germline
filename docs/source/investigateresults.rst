@@ -4,7 +4,7 @@ Investigate the results
 Assessing completion
 --------------------
 
-Upon pipeline completion, verify that all steps have completed without error by checking the top-level log (called  ``WGS_<datestamp>.out`` if using the optional wrapper script; otherwise see Snakemake's documentation for the default location of stdout).  The bottom few lines of the file should contain something like nnn of nnn steps (100%) done.  Additional job logs (when run on a high-performance computing cluster) are stored in the ``logs/`` sub-directory.
+Upon pipeline completion, verify that all steps have completed without error by checking the top-level log (called  ``WGS_<datestamp>.out`` if using the optional wrapper script; otherwise see Snakemake's documentation for the default location of stdout).  The bottom few lines of the file should contain something similar to ``nnn of nnn steps (100%) done``.  Additional job logs (when run on a high-performance computing cluster) are stored in the ``logs/`` sub-directory.
 
 Outputs and results
 -------------------
@@ -31,11 +31,11 @@ The following QC metrics are available (depending on run mode selected):
 - Trimming stats via fastp at ``results/paired_trimmed_reads/``
 - Alignment stats via samtools at ``results/alignment_stats/``
 - Recalibration stats from bqsr at ``results/bqsr/``
-- Relatedness via somalier at ``results/qc/relatedness/``
-- Sample contamination via verifyBamID at ``results/qc/contamination_check/`` (for full runs; **not** included in joint-genotyping only)
+- Relatedness via `Somalier <https://github.com/brentp/somalier>`_ at ``results/qc/relatedness/``
+- Sample contamination via `verifyBamID <https://genome.sph.umich.edu/wiki/VerifyBamID>`_ at ``results/qc/contamination_check/`` (for full runs only; **not** included in joint-genotyping only run mode)
 - Inferred sex via bcftools +guess-ploidy at ``results/qc/sex_check/``
 - Picard metrics at ``results/HaplotypeCaller/filtered/``
 - bcftools stats at ``results/qc/bcftools_stats/``
 - MultiQC report at ``results/multiqc/``
-- Benchmarking report of pipeline performance statistics (i.e. elapsed time, memory and CPU utilization for rules above ``time_threshold`` in ``config.yaml``) at ``performance_benchmarks/benchmarking_report.html``
+- Benchmarking report of pipeline performance statistics (i.e. elapsed time, memory and CPU utilization for rules above specified ``time_threshold`` in ``config.yaml``) at ``performance_benchmarks/benchmarking_report.html``
 - Run summary report for the pipeline, excluded samples and discordances at ``results/run_summary/run_summary.html``

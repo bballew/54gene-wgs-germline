@@ -23,8 +23,8 @@ The pipeline requires the following inputs:
 
 - A headerless, whitespace delimited ``manifest.txt`` file with sample names and paths (columns dependent on the run-mode)
 - Config file with the run-mode specified and other pipeline parameters configured (see default config provided in ``config/config.yaml``)
-- A tab-delimited ``intervals.tsv`` file with names of intervals and paths to region (BED) files of the genome you want to parallelize the variant calling and joint-calling steps by (i.e. 50 BED files of 50 intervals by which to parallelize)
-- A tab-delimited ``sex_linker.tsv`` file with the sample names in one column and sex in the other to identify discordances
+- A tab-delimited ``intervals.tsv`` file with names of intervals and paths to region (BED) files of the genome you want to parallelize the variant calling and joint-calling steps by (i.e. 50 BED files each with a small region of the genome to parallelize by)
+- A tab-delimited ``sex_linker.tsv`` file with the sample names in one column and sex in the other to identify discordances in reported vs. inferred sex
 - A ``multiqc.yaml`` config file for generating MultiQC reports (provided for you)
 
 Outputs
