@@ -39,3 +39,18 @@ The following QC metrics are available (depending on run mode selected):
 - MultiQC report at ``results/multiqc/``
 - Benchmarking report of pipeline performance statistics (i.e. elapsed time, memory and CPU utilization for rules above specified ``time_threshold`` in ``config.yaml``) at ``performance_benchmarks/benchmarking_report.html``
 - Run summary report for the pipeline, excluded samples and discordances at ``results/run_summary/run_summary.html``
+
+Examples
+********
+
+Below is an example of a plot from the ``benchmarking_report.html`` report generated, showing execution time across rules in a pipeline run:
+
+ .. image:: images/benchmarking_report.png
+     :width: 600
+     :alt: Execution time plot example from a benchmarking report
+
+Below is an example of the final subject tracking table generated in the ``run_summary.html`` report, showing QC outcomes for subjects included in a pipeline run:
+
+.. image:: images/run_summary.png
+    :width: 600
+    :alt: Example of final subject tracking table from a run summary report

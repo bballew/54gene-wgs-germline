@@ -53,7 +53,10 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Investigate the results</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#assessing-completion">Assessing completion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#outputs-and-results">Outputs and results</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#qc">QC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qc">QC</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
@@ -124,6 +127,15 @@
 <li><p>Benchmarking report of pipeline performance statistics (i.e. elapsed time, memory and CPU utilization for rules above specified <code class="docutils literal notranslate"><span class="pre">time_threshold</span></code> in <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>) at <code class="docutils literal notranslate"><span class="pre">performance_benchmarks/benchmarking_report.html</span></code></p></li>
 <li><p>Run summary report for the pipeline, excluded samples and discordances at <code class="docutils literal notranslate"><span class="pre">results/run_summary/run_summary.html</span></code></p></li>
 </ul>
+<section id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this heading"></a></h3>
+<p>Below is an example of a plot from the <code class="docutils literal notranslate"><span class="pre">benchmarking_report.html</span></code> report generated, showing execution time across rules in a pipeline run:</p>
+<blockquote>
+<div><a class="reference internal image-reference" href="_images/benchmarking_report.png"><img alt="Execution time plot example from a benchmarking report" src="_images/benchmarking_report.png" style="width: 600px;" /></a>
+</div></blockquote>
+<p>Below is an example of the final subject tracking table generated in the <code class="docutils literal notranslate"><span class="pre">run_summary.html</span></code> report, showing QC outcomes for subjects included in a pipeline run:</p>
+<a class="reference internal image-reference" href="_images/run_summary.png"><img alt="Example of final subject tracking table from a run summary report" src="_images/run_summary.png" style="width: 600px;" /></a>
+</section>
 </section>
 </section>
 
