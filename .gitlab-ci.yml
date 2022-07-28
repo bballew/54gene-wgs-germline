@@ -1,14 +1,59 @@
-image: cpalmer718/snakemake-gcc
-
-stages:
-  - pytest
-
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-run_all:
-  stage: pytest
+stages:
+    - test
+
+.before_script_template:
+  before_script:
+    - source /home/ubuntu/miniconda3/etc/profile.d/conda.sh
+    - conda activate /home/ubuntu/.conda/envs/54gene-wgs-germline
+  tags:
+    - shell
+
+test_integration1:
+  extends: .before_script_template
+  stage: test
   script:
-    - python -m pytest workflow/scripts/tests/
+    - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/fastqc_only_mode/config/* config/
+    - cp /54gene-gds/gitlab_runner/54gene-wgs-test-data/run_local_test.sh .
+    - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/resources .
+    - bash run_local_test.sh
+  retry: 1
+
+
+test_integration2:
+  extends: .before_script_template
+  stage: test
+  script:
+    - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/joint_geno_mode/config/* config/
+    - cp /54gene-gds/gitlab_runner/54gene-wgs-test-data/run_local_test.sh .
+    - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/resources .
+    - bash run_local_test.sh
+  needs:
+    - test_integration1
+  retry: 1
+
+test_integration3:
+  extends: .before_script_template
+  stage: test
+  script:
+    - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/full_mode/config/* config/
+    - cp /54gene-gds/gitlab_runner/54gene-wgs-test-data/run_local_test.sh .
+    - cp -r /54gene-gds/gitlab_runner/54gene-wgs-test-data/resources .
+    - bash run_local_test.sh
+  needs:
+    - test_integration2
+  retry: 1
+
+unit_tests:
+  extends: .before_script_template
+  stage: test
+  script:
+    - coverage run -m pytest workflow/scripts/tests/test*.py
+    - coverage report | tee coverage.txt
+  artifacts:
+    paths:
+      - coverage.txt
+  coverage: '/Code coverage: TOTAL.*\s+(\d+%)/'
