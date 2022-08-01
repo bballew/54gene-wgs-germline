@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Investigate the results &mdash; 54gene-wgs-germline  documentation</title>
@@ -11,20 +11,19 @@
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
-
+  
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Tests" href="tests.html" />
-    <link rel="prev" title="Execution" href="execution.html" />
+    <link rel="prev" title="Execution" href="execution.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -63,6 +62,7 @@
 <li class="toctree-l1"><a class="reference internal" href="corepipeline.html">Core pipeline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fordevelopers.html">For developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
 </ul>
 
         </div>
@@ -88,15 +88,15 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-
+             
   <section id="investigate-the-results">
-<h1>Investigate the results<a class="headerlink" href="#investigate-the-results" title="Permalink to this heading"></a></h1>
+<h1>Investigate the results<a class="headerlink" href="#investigate-the-results" title="Permalink to this headline"></a></h1>
 <section id="assessing-completion">
-<h2>Assessing completion<a class="headerlink" href="#assessing-completion" title="Permalink to this heading"></a></h2>
+<h2>Assessing completion<a class="headerlink" href="#assessing-completion" title="Permalink to this headline"></a></h2>
 <p>Upon pipeline completion, verify that all steps have completed without error by checking the top-level log (called  <code class="docutils literal notranslate"><span class="pre">WGS_&lt;datestamp&gt;.out</span></code> if using the optional wrapper script; otherwise see Snakemake’s documentation for the default location of stdout).  The bottom few lines of the file should contain something similar to <code class="docutils literal notranslate"><span class="pre">nnn</span> <span class="pre">of</span> <span class="pre">nnn</span> <span class="pre">steps</span> <span class="pre">(100%)</span> <span class="pre">done</span></code>.  Additional job logs (when run on a high-performance computing cluster) are stored in the <code class="docutils literal notranslate"><span class="pre">logs/</span></code> sub-directory.</p>
 </section>
 <section id="outputs-and-results">
-<h2>Outputs and results<a class="headerlink" href="#outputs-and-results" title="Permalink to this heading"></a></h2>
+<h2>Outputs and results<a class="headerlink" href="#outputs-and-results" title="Permalink to this headline"></a></h2>
 <p>All pipeline results are stored in the <code class="docutils literal notranslate"><span class="pre">results/</span></code> directory.</p>
 <ul class="simple">
 <li><p>The hard-filtered, joint-called VCF can be found in <code class="docutils literal notranslate"><span class="pre">results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz</span></code></p></li>
@@ -111,7 +111,7 @@
 </ol>
 </section>
 <section id="qc">
-<h2>QC<a class="headerlink" href="#qc" title="Permalink to this heading"></a></h2>
+<h2>QC<a class="headerlink" href="#qc" title="Permalink to this headline"></a></h2>
 <p>The following QC metrics are available (depending on run mode selected):</p>
 <ul class="simple">
 <li><p>Pre- and post-trimming FastQC reports at <code class="docutils literal notranslate"><span class="pre">results/fastqc/</span></code> and <code class="docutils literal notranslate"><span class="pre">results/post_trimming_fastqc/</span></code>, respectively</p></li>
@@ -128,7 +128,7 @@
 <li><p>Run summary report for the pipeline, excluded samples and discordances at <code class="docutils literal notranslate"><span class="pre">results/run_summary/run_summary.html</span></code></p></li>
 </ul>
 <section id="examples">
-<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this heading"></a></h3>
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline"></a></h3>
 <p>Below is an example of a plot from the <code class="docutils literal notranslate"><span class="pre">benchmarking_report.html</span></code> report generated, showing execution time across rules in a pipeline run:</p>
 <blockquote>
 <div><a class="reference internal image-reference" href="_images/benchmarking_report.png"><img alt="Execution time plot example from a benchmarking report" src="_images/benchmarking_report.png" style="width: 600px;" /></a>
@@ -154,8 +154,8 @@
     </div>
 
     Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
-
-
+      
+     
   </footer>
         </div>
       </div>
@@ -165,7 +165,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
+  </script> 
 
 </body>
 </html>

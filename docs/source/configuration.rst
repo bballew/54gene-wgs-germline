@@ -30,7 +30,7 @@ You will need to provide a headerless, white-space delimited manifest file to ru
 For **full** and **fastqc_only** mode, the ``manifest.txt`` requires the following columns:
 
 - Columns: ``readgroup  sample_ID   path/to/r1.fastq    path/to/r2.fastq``
-- ``readgroup`` values should be unique, e.g. sampleID_flowcellID
+- ``readgroup`` values should be unique, e.g. <sampleID>_<barcode>_<lane>
 - ``sample_ID`` should be the same for all FASTQ pairs from a single sample, and can be different from the FASTQ filenames
 
 For example::
@@ -41,7 +41,7 @@ For example::
 For **joint_genotyping** mode:
 
 - Columns: ``sample_ID   path/to/file.g.vcf.gz``
-- ``sample_ID`` values should be unique, and should correspond to the sample IDs in the gVCFs
+- ``sample_ID`` values should be unique, and should correspond to the sample IDs in the gVCF header
 - gVCFs should be bgzipped and indexed
 
 For example::

@@ -15,6 +15,6 @@ Documentation of WGS variant calling at `54gene <https://54gene.com/>`_
    investigateresults.rst
    tests.rst
    corepipeline.rst
-   changelog.rst
+   changelog.md
    fordevelopers.rst
    references.rst

@@ -25,7 +25,7 @@ version = "1.0.0"
 # -- General configuration ---------------------------------------------------
 
 # Autosection feature extension to allow reference sections using their title
-extensions = ["sphinx.ext.autosectionlabel"]
+extensions = ["sphinx.ext.autosectionlabel", "myst_parser"]
 autosectionlabel_prefix_document = True
 
 # Add any paths that contain templates here, relative to this directory.

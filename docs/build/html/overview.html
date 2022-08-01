@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Overview &mdash; 54gene-wgs-germline  documentation</title>
@@ -11,20 +11,19 @@
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
-
+  
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Installation" href="installation.html" />
-    <link rel="prev" title="54gene Whole Genome Sequencing Germline Calling Pipeline" href="index.html" />
+    <link rel="prev" title="54gene Whole Genome Sequencing Germline Calling Pipeline" href="index.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -59,6 +58,7 @@
 <li class="toctree-l1"><a class="reference internal" href="corepipeline.html">Core pipeline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fordevelopers.html">For developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
 </ul>
 
         </div>
@@ -84,9 +84,9 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-
+             
   <section id="overview">
-<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this heading"></a></h1>
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline"></a></h1>
 <p>This workflow was designed by the Genomics &amp; Data Science team (GDS) at 54gene and is used to analyze paired-end short-read germline whole-genome sequencing data.  This pipeline is designed to first be deployed in small batches (e.g. per flow cell), starting with FASTQs and resulting in gVCFs and a small batch joint-called VCF.  A second run of the pipeline can receive a larger batch of gVCFs (e.g. gVCFs derived from many flow cells), and generates a large batch joint-called VCF.  The workflow, which is designed to support reproducible bioinformatics, is written in <a class="reference external" href="https://snakemake.readthedocs.io/en/stable/">Snakemake</a> and is platform-agnostic.  All dependencies are installed by the pipeline as-needed using <a class="reference external" href="https://docs.conda.io/en/latest/">conda</a>.  Development and testing has been predominantly on AWS’ <a class="reference external" href="https://aws.amazon.com/hpc/parallelcluster/">ParallelCluster</a> using <a class="reference external" href="https://aws.amazon.com/amazon-linux-2/">Amazon Linux</a> using Snakemake version 7.8.2.</p>
 <p>Features:</p>
 <ul class="simple">
@@ -102,7 +102,7 @@
 </pre></div>
 </div>
 <section id="inputs">
-<h2>Inputs<a class="headerlink" href="#inputs" title="Permalink to this heading"></a></h2>
+<h2>Inputs<a class="headerlink" href="#inputs" title="Permalink to this headline"></a></h2>
 <p>The pipeline requires the following inputs:</p>
 <ul class="simple">
 <li><p>A headerless, whitespace delimited <code class="docutils literal notranslate"><span class="pre">manifest.txt</span></code> file with sample names and paths (columns dependent on the run-mode)</p></li>
@@ -113,7 +113,7 @@
 </ul>
 </section>
 <section id="outputs">
-<h2>Outputs<a class="headerlink" href="#outputs" title="Permalink to this heading"></a></h2>
+<h2>Outputs<a class="headerlink" href="#outputs" title="Permalink to this headline"></a></h2>
 <p>Depending on which run-mode you have set, you will be able to generate:</p>
 <ul class="simple">
 <li><p>A hard-filtered, multi-sample joint-called VCF in <code class="docutils literal notranslate"><span class="pre">full</span></code> and <code class="docutils literal notranslate"><span class="pre">joint_genotyping</span></code> mode</p></li>
@@ -140,8 +140,8 @@
     </div>
 
     Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
-
-
+      
+     
   </footer>
         </div>
       </div>
@@ -151,7 +151,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
+  </script> 
 
 </body>
 </html>
