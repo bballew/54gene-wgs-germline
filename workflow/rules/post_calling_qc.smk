@@ -1,3 +1,6 @@
+from glob import glob
+
+
 rule variant_stats:
     input:
         r="resources/Homo_sapiens_assembly38.fasta",
@@ -48,9 +51,6 @@ rule plot_variant_stats:
         "../envs/bcftools_tabix.yaml"
     shell:
         "plot-vcfstats -P -p {params.d} {input}"
-
-
-# ID and exclude samples with het/hom above....x?  Make tunable for WGS vs WES?  Use some outlier threshold?
 
 
 rule create_ped:
@@ -104,18 +104,6 @@ else:
             "touch {output}"
 
 
-# rule per_base_coverage:
-#     input:
-#     output:
-#     params:
-#     benchmark:
-#     conda:
-#         "../envs/bedtools.yaml"
-#     resources:
-#     shell:
-#         "bedtools genomecov ...."
-
-
 rule sex_check:
     input:
         vcf="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
@@ -133,11 +121,6 @@ rule sex_check:
         "bcftools +guess-ploidy -g hg38 {input.vcf} -v > {output.txt} && "
         "guess-ploidy.py {output.txt} {params.p}"
 
-
-# rule sex_discordance:
-#     input:
-#     output:
-#     shell:
 
 if full:
 
@@ -220,7 +203,7 @@ if full:
             "results/qc/bcftools_stats/joint_called_stats.out",
             expand("results/paired_trimmed_reads/{rg}_fastp.json", rg=sampleDict.keys()),
             expand("results/dedup/{sample}.metrics.txt", sample=SAMPLES),
-            expand("results/bqsr/{sample}.recal_table",sample=SAMPLES),
+            expand("results/bqsr/{sample}.recal_table", sample=SAMPLES),
             expand("results/alignment_stats/{sample}.txt", sample=SAMPLES),
             expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES),
             "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
@@ -244,6 +227,7 @@ if full:
             "multiqc --force -o {params.outDir} -n {params.outName} --config {input.mqc_config} {params.inDirs} {params.relatedness}"
 
 if jointgeno:
+
     rule multiqc:
         """Generate one multiQC report for joint genotyping run mode.
         Should add samtools stats output and possibly others eventually,
