@@ -14,6 +14,7 @@ compute_queue: "big"
 memory_queue: "big"
 max_concurrent: 40  # max concurrent running jobs for especially high-bandwidth rules, to control hitting the fsx bandwidth cap
 center_id: "54gene"
+time_threshold: 5 # exclude rules from benchmarking report if below this elapsed time threshold in minutes
 
 # QC thresholds for sample removal:
 max_het_ratio: 2.5

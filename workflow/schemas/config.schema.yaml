@@ -36,19 +36,19 @@ properties:
   cluster_mode:
     oneOf:
      - type: string
-     - type: null
+     - type: "null"
   default_queue:
     oneOf:
      - type: string
-     - type: null
+     - type: "null"
   compute_queue:
     oneOf:
      - type: string
-     - type: null
+     - type: "null"
   memory_queue:
     oneOf:
      - type: string
-     - type: null
+     - type: "null"
   center_id:
     type: string
   max_concurrent:
