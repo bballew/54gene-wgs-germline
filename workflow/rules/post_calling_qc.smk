@@ -1,6 +1,3 @@
-from glob import glob
-
-
 rule variant_stats:
     input:
         r="resources/Homo_sapiens_assembly38.fasta",
@@ -204,7 +201,6 @@ rule exclude_samples:
 
 
 if full:
-
     rule multiqc:
         """Generate one multiQC report for all input fastqs.
         Should add samtools stats output and possibly others eventually,
@@ -224,7 +220,7 @@ if full:
             "results/qc/bcftools_stats/joint_called_stats.out",
             expand("results/paired_trimmed_reads/{rg}_fastp.json", rg=sampleDict.keys()),
             expand("results/dedup/{sample}.metrics.txt", sample=SAMPLES),
-            expand("results/bqsr/{sample}.recal_table", sample=SAMPLES),
+            expand("results/bqsr/{sample}.recal_table",sample=SAMPLES),
             expand("results/alignment_stats/{sample}.txt", sample=SAMPLES),
             expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES),
             "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
@@ -247,9 +243,7 @@ if full:
         shell:
             "multiqc --force -o {params.outDir} -n {params.outName} --config {input.mqc_config} {params.inDirs} {params.relatedness}"
 
-
 if jointgeno:
-
     rule multiqc:
         """Generate one multiQC report for joint genotyping run mode.
         Should add samtools stats output and possibly others eventually,
