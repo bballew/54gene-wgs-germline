@@ -1,6 +1,6 @@
 # 54gene workflow: 54gene WGS germline
 
-This workflow is designed to take either fastqs or gvcfs as input, and emit a joint-called multi-sample VCF.  Please see [Read the Docs]() for additional documentation.
+This workflow is designed to take either fastqs or gvcfs as input, and emit a joint-called multi-sample VCF.  Please see [Read the Docs](https://54gene-wgs-germline.readthedocs.io/en/latest/) for additional documentation.
 
 You can find a small test dataset and pre-configured files for this pipeline [here](https://gitlab.com/data-analysis5/dna-sequencing/54gene-wgs-test-data).
 
