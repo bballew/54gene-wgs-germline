@@ -38,7 +38,6 @@ full = config["runType"]["full"]
 jointgeno = config["runType"]["joint_genotyping"]
 fastq_qc_only = config["runType"]["fastq_qc_only"]
 global_vars = config["global_vars"]
-bed = config["bed"]
 max_concurrent = config["max_concurrent"]
 intervalsFile = config["intervalsFile"]
 
