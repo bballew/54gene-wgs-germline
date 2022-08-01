@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configuration &mdash; 54gene-wgs-germline  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Execution" href="execution.html" />
+    <link rel="prev" title="Installation" href="installation.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+<a href="index.html" class="icon icon-home"> 54gene-wgs-germline
+<a href="https://54gene.com">
+    <img src="_static/54gene_logo.png" class="logo" alt="Logo"/>
+</a>
+  <div class="version">
+    1.0.0
+  </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#configuration-file">Configuration file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manifest-file">Manifest file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#intervals-file">Intervals file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sex-linker-file">Sex linker file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multiqc-configuration">MultiQC configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#config-parameters">Config parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="execution.html">Execution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="investigateresults.html">Investigate the results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="corepipeline.html">Core pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fordevelopers.html">For developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">54gene-wgs-germline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Configuration</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/configuration.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section id="configuration">
+<h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline"></a></h1>
+<p>The workflow needs to be configured to perform the analysis of your choice by editing the following files in the <code class="docutils literal notranslate"><span class="pre">config/</span></code> folder.  Each file is described in more detail below.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#configuration-file"><span class="std std-ref">Configuration file</span></a></p></li>
+<li><p><a class="reference internal" href="#manifest-file"><span class="std std-ref">Manifest file</span></a></p></li>
+<li><p><a class="reference internal" href="#intervals-file"><span class="std std-ref">Intervals file</span></a></p></li>
+<li><p><a class="reference internal" href="#sex-linker-file"><span class="std std-ref">Sex linker file</span></a></p></li>
+<li><p><a class="reference internal" href="#multiqc-configuration"><span class="std std-ref">MultiQC configuration</span></a></p></li>
+</ul>
+<section id="configuration-file">
+<span id="id1"></span><h2>Configuration file<a class="headerlink" href="#configuration-file" title="Permalink to this headline"></a></h2>
+<p>The pipeline offers three run modes. Please specify the run mode in <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>.  The name of the file defaults to <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> but you can use other filenames in conjunction with Snakemake’s <code class="docutils literal notranslate"><span class="pre">--configfile</span></code> command line flag.</p>
+<ul class="simple">
+<li><p><strong>full</strong>: This mode starts with FASTQs and emits a joint-called, filtered, multi-sample VCF.</p></li>
+<li><p><strong>joint_genotyping</strong>: This mode starts with gVCFs and runs joint-calling and filtering, emitting a multi-sample VCF. In the event you have analyzed batches of samples in the full-run mode, these batches can then jointly re-genotyped with this run mode.</p></li>
+<li><p><strong>fastqc_only</strong>: This mode starts with FASTQs and emits trimmed FASTQs as well as a multiQC report for raw and trimmed reads. This run mode is meant for performing QC on FASTQ data before further downstream analysis.</p></li>
+</ul>
+</section>
+<section id="manifest-file">
+<span id="id2"></span><h2>Manifest file<a class="headerlink" href="#manifest-file" title="Permalink to this headline"></a></h2>
+<p>You will need to provide a headerless, white-space delimited manifest file to run the pipeline for all three run-modes.  The default name for the file is <code class="docutils literal notranslate"><span class="pre">manifest.txt</span></code> but this is user configurable in the config file under <code class="docutils literal notranslate"><span class="pre">sampleFile</span></code>.</p>
+<p>For <strong>full</strong> and <strong>fastqc_only</strong> mode, the <code class="docutils literal notranslate"><span class="pre">manifest.txt</span></code> requires the following columns:</p>
+<ul class="simple">
+<li><p>Columns: <code class="docutils literal notranslate"><span class="pre">readgroup</span>&#160; <span class="pre">sample_ID</span>&#160;&#160; <span class="pre">path/to/r1.fastq</span>&#160;&#160;&#160; <span class="pre">path/to/r2.fastq</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">readgroup</span></code> values should be unique, e.g. &lt;sampleID&gt;_&lt;barcode&gt;_&lt;lane&gt;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sample_ID</span></code> should be the same for all FASTQ pairs from a single sample, and can be different from the FASTQ filenames</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Sample1_S1_L001</span> <span class="n">Sample1</span> <span class="nb">input</span><span class="o">/</span><span class="n">Sample_001_S1_L001_R1</span><span class="o">.</span><span class="n">fastq</span>   <span class="nb">input</span><span class="o">/</span><span class="n">Sample_001_S1_L001_R2</span><span class="o">.</span><span class="n">fastq</span>
+<span class="n">Sample1_S1_L002</span> <span class="n">Sample1</span> <span class="nb">input</span><span class="o">/</span><span class="n">Sample_001_S1_L002_R1</span><span class="o">.</span><span class="n">fastq</span>   <span class="nb">input</span><span class="o">/</span><span class="n">Sample_001_S1_L002_R2</span><span class="o">.</span><span class="n">fastq</span>
+</pre></div>
+</div>
+<p>For <strong>joint_genotyping</strong> mode:</p>
+<ul class="simple">
+<li><p>Columns: <code class="docutils literal notranslate"><span class="pre">sample_ID</span>&#160;&#160; <span class="pre">path/to/file.g.vcf.gz</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sample_ID</span></code> values should be unique, and should correspond to the sample IDs in the gVCF header</p></li>
+<li><p>gVCFs should be bgzipped and indexed</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Sample1</span> <span class="n">vcfs</span><span class="o">/</span><span class="n">Sample1</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">vcf</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">Sample2</span> <span class="n">vcfs</span><span class="o">/</span><span class="n">Sample2</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">vcf</span><span class="o">.</span><span class="n">gz</span>
+</pre></div>
+</div>
+</section>
+<section id="intervals-file">
+<span id="id3"></span><h2>Intervals file<a class="headerlink" href="#intervals-file" title="Permalink to this headline"></a></h2>
+<p>For <strong>full</strong> and <strong>joint_genotyping</strong> modes only.</p>
+<p>Joint-calling for a large number of samples is computationally expensive and time-consuming. This pipeline was designed to mitigate these issues by parallelizing joint-calling over multiple intervals of the genome.  To specify the number of intervals, and which regions to parallelize over, a 2-column tab-delmited <code class="docutils literal notranslate"><span class="pre">intervals.tsv</span></code> file can be specified.  The filename can be customized and edited in the config file under <code class="docutils literal notranslate"><span class="pre">intervalsFile</span></code>.</p>
+<p>This file contains two columns with headers:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">interval_name</span></code> for the name of the particular interval or region</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">file_path</span></code> full path to the interval/region BED file, Picard-style <code class="docutils literal notranslate"><span class="pre">.interval_list</span></code>, VCF file, or GATK-style <code class="docutils literal notranslate"><span class="pre">.list</span></code> or <code class="docutils literal notranslate"><span class="pre">.intervals</span></code> file (see further details on these formats <a class="reference external" href="https://gatk.broadinstitute.org/hc/en-us/articles/360035531852-Intervals-and-interval-lists">here</a>)</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">interval_name</span>   <span class="n">file_path</span>
+<span class="n">interval_1</span>  <span class="n">resources</span><span class="o">/</span><span class="n">scattered_calling_intervals</span><span class="o">/</span><span class="n">interval_1</span><span class="o">.</span><span class="n">bed</span>
+<span class="n">interval_2</span>  <span class="n">resources</span><span class="o">/</span><span class="n">scattered_calling_intervals</span><span class="o">/</span><span class="n">interval_2</span><span class="o">.</span><span class="n">bed</span>
+</pre></div>
+</div>
+<p>The pipeline will supply these interval files to the GATK <code class="docutils literal notranslate"><span class="pre">HaplotypeCaller</span></code>, <code class="docutils literal notranslate"><span class="pre">GenomicsDBImport</span></code>, and <code class="docutils literal notranslate"><span class="pre">GenotypeGVCFs</span></code> steps to run concurrent instances of these rules at each specified interval(s), reducing overall execution time.</p>
+<p>We recommend specifying regions of equal size for parallelization.</p>
+</section>
+<section id="sex-linker-file">
+<span id="id4"></span><h2>Sex linker file<a class="headerlink" href="#sex-linker-file" title="Permalink to this headline"></a></h2>
+<p>The pipeline provides a boolean option <code class="docutils literal notranslate"><span class="pre">somalier</span></code> to estimate relatedness amongst the samples using <a class="reference external" href="https://github.com/brentp/somalier">Somalier</a> in the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> (see <code class="docutils literal notranslate"><span class="pre">check_relatedness</span></code> parameter in <a class="reference internal" href="#"><span class="doc">Configuration</span></a>).  This requires a 2-column, tab-delimited file.  The filename defaults to <code class="docutils literal notranslate"><span class="pre">sex_linker.tsv</span></code> and is specified in the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> under <code class="docutils literal notranslate"><span class="pre">sexLinker</span></code>.  This file requires:</p>
+<ul class="simple">
+<li><p>First column with the header <code class="docutils literal notranslate"><span class="pre">Sample</span></code> with all sample names</p></li>
+<li><p>Second column with the header <code class="docutils literal notranslate"><span class="pre">Sex</span></code> containing case-insensitive encodings of sex in either m/f or male/female format</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Sample</span>  <span class="n">Sex</span>
+<span class="n">NA12878</span> <span class="n">F</span>
+<span class="n">Subject1</span>    <span class="n">female</span>
+<span class="n">Subject2</span>    <span class="n">m</span>
+</pre></div>
+</div>
+</section>
+<section id="multiqc-configuration">
+<span id="id5"></span><h2>MultiQC configuration<a class="headerlink" href="#multiqc-configuration" title="Permalink to this headline"></a></h2>
+<p>A configuration file for MultiQC can be found in <code class="docutils literal notranslate"><span class="pre">config/multiqc.yaml</span></code> and is used for generating and specifying the order of the various modules in the MultiQC report from the pipeline. We <strong>do not</strong> recommend modifying this file unless you understand how this configuration file is setup or how MultiQC works.</p>
+</section>
+<section id="config-parameters">
+<span id="id6"></span><h2>Config parameters<a class="headerlink" href="#config-parameters" title="Permalink to this headline"></a></h2>
+<p>Below are descriptions and usage options for the various config parameters specified in <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 11%" />
+<col style="width: 63%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Required</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sampleFile</span></code></p></td>
+<td><p>Y</p></td>
+<td><p>Manifest file with IDs</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">intervalsFile</span></code></p></td>
+<td><p>Y</p></td>
+<td><p>File with interval names and file paths</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">jobs</span></code></p></td>
+<td><p>Y</p></td>
+<td><p>Max jobs to run concurrently</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sexLinker</span></code></p></td>
+<td><p>Y</p></td>
+<td><p>File with reported sex of each sample ID</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">tempDir</span></code></p></td>
+<td><p>Y</p></td>
+<td><p>Location of temp directory; does not have to exist prior
+to pipeline execution</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">runType</span></code></p></td>
+<td><p>Y</p></td>
+<td><p>Specify run mode to use (see below)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">full</span></code></p></td>
+<td><p>Y</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[yes|no]</span></code> Set to yes for full run mode</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">joint_genotyping</span></code></p></td>
+<td><p>Y</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[yes|no]</span></code> Set to yes for joint calling from gVCFs</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fastq_qc_only</span></code></p></td>
+<td><p>Y</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[yes|no]</span></code> Set to yes for FASTQ QC and trimming</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">global_vars</span></code></p></td>
+<td><p>N</p></td>
+<td><p>Set global java options</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cluster_mode</span></code></p></td>
+<td><p>N</p></td>
+<td><p>Used to submit jobs to a cluster only if you are using
+the optional wrapper script.  See <a class="reference internal" href="execution.html"><span class="doc">Execution</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">default_queue</span></code></p></td>
+<td><p>Y</p></td>
+<td><p>Name of your default cluster partition/queue; can be <code class="docutils literal notranslate"><span class="pre">~</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">compute_queue</span></code></p></td>
+<td><p>Y</p></td>
+<td><p>Name of queue/partition best suited for compute-
+intensive jobs; can be <code class="docutils literal notranslate"><span class="pre">~</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">memory_queue</span></code></p></td>
+<td><p>Y</p></td>
+<td><p>Name of queue/partition best suited for memory-intensive
+jobs; can be <code class="docutils literal notranslate"><span class="pre">~</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">center_id</span></code></p></td>
+<td><p>Y</p></td>
+<td><p>Name of sequencing center for use in <code class="docutils literal notranslate"><span class="pre">&#64;RG</span></code> tag in bams</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">max_concurrent</span></code></p></td>
+<td><p>Y</p></td>
+<td><p>Max concurrent jobs for specific high-bandwidth rules,
+to avoid potentially hitting bandwidth caps if deployed
+in a cloud environment; see wrapper script for an example
+of how to pass this in to snakemake.  Set to the same
+number as <code class="docutils literal notranslate"><span class="pre">jobs</span></code> if you don’t want to limit concurrent
+rules in this way</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">max_het_ratio</span></code></p></td>
+<td><p>Y</p></td>
+<td><p>Max het/hom ratio to allow through post-calling QC</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">min_avg_depth</span></code></p></td>
+<td><p>Y</p></td>
+<td><p>Minimum depth required for sample to pass post-calling QC</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">max_contam</span></code></p></td>
+<td><p>Y</p></td>
+<td><p>Max % contamination to allow through post-calling QC</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">time_threshold</span></code></p></td>
+<td><p>Y</p></td>
+<td><p>(minutes) Exclude rules from the benchmarking report if
+elapsed time is below this threshold</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">somalier</span></code></p></td>
+<td><p>Y</p></td>
+<td><p>Check relatedness and sex discordance with Somalier
+(requires sex_linker.tsv) only available in full run
+mode.  Support of Mac OSX is experimental, so you may
+want to set this to False on a Mac</p></td>
+</tr>
+</tbody>
+</table>
+<p>The remainder of the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> file contains a selected set of exposed per-tool parameters.  For the most part, this allows tuning of resource allocation on a per-tool basis (i.e. <code class="docutils literal notranslate"><span class="pre">threads</span></code> and <code class="docutils literal notranslate"><span class="pre">memory</span></code> in MB).  Java-based tools also allow for arbitrary java options to be passed through via <code class="docutils literal notranslate"><span class="pre">java_opts</span></code>.  Additional exposed parameters include:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">genomicsDBImport</span></code> and <code class="docutils literal notranslate"><span class="pre">genotypeGVCFs</span></code>: We have exposed some useful parameters that have been helpful to adjust as scale increases.  Please see GATK documentation for the relevant tools to learn more.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">verifyBamID</span></code>: A <code class="docutils literal notranslate"><span class="pre">region</span></code> field allows the user to specify chromosomes over which to run contamination analysis, in an attempt to mitigate large memory requirements.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+          <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <a href="execution.html" class="btn btn-neutral float-right" title="Execution" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+      </div>
+
+    <hr/>
+
+    <div role="contentinfo">
+      <p>&#169; Copyright 2022, B. Ballew, E. Joshi, C. Palmer, 54gene.</p>
+    </div>
+
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
+
+
+  </footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

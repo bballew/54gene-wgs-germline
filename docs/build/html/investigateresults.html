@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Investigate the results &mdash; 54gene-wgs-germline  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tests" href="tests.html" />
+    <link rel="prev" title="Execution" href="execution.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+<a href="index.html" class="icon icon-home"> 54gene-wgs-germline
+<a href="https://54gene.com">
+    <img src="_static/54gene_logo.png" class="logo" alt="Logo"/>
+</a>
+  <div class="version">
+    1.0.0
+  </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="execution.html">Execution</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Investigate the results</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#assessing-completion">Assessing completion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#outputs-and-results">Outputs and results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qc">QC</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="corepipeline.html">Core pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fordevelopers.html">For developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">54gene-wgs-germline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Investigate the results</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/investigateresults.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section id="investigate-the-results">
+<h1>Investigate the results<a class="headerlink" href="#investigate-the-results" title="Permalink to this headline"></a></h1>
+<section id="assessing-completion">
+<h2>Assessing completion<a class="headerlink" href="#assessing-completion" title="Permalink to this headline"></a></h2>
+<p>Upon pipeline completion, verify that all steps have completed without error by checking the top-level log (called  <code class="docutils literal notranslate"><span class="pre">WGS_&lt;datestamp&gt;.out</span></code> if using the optional wrapper script; otherwise see Snakemake’s documentation for the default location of stdout).  The bottom few lines of the file should contain something similar to <code class="docutils literal notranslate"><span class="pre">nnn</span> <span class="pre">of</span> <span class="pre">nnn</span> <span class="pre">steps</span> <span class="pre">(100%)</span> <span class="pre">done</span></code>.  Additional job logs (when run on a high-performance computing cluster) are stored in the <code class="docutils literal notranslate"><span class="pre">logs/</span></code> sub-directory.</p>
+</section>
+<section id="outputs-and-results">
+<h2>Outputs and results<a class="headerlink" href="#outputs-and-results" title="Permalink to this headline"></a></h2>
+<p>All pipeline results are stored in the <code class="docutils literal notranslate"><span class="pre">results/</span></code> directory.</p>
+<ul class="simple">
+<li><p>The hard-filtered, joint-called VCF can be found in <code class="docutils literal notranslate"><span class="pre">results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz</span></code></p></li>
+<li><p>For future joint-calling, the gVCFs are located at <code class="docutils literal notranslate"><span class="pre">results/HaplotypeCaller/called/&lt;sample&gt;_all_chroms.g.vcf.gz</span></code></p></li>
+<li><p>Deduplicated and post-BQSR bams are found at <code class="docutils literal notranslate"><span class="pre">results/bqsr/&lt;sample&gt;.bam</span></code></p></li>
+</ul>
+<p>Samples that fail the following thresholds are automatically removed from the above joint-called VCF, and the output is placed in <code class="docutils literal notranslate"><span class="pre">results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz</span></code>.  The record of sample exclusions, along with reasons for exclusion, is found at <code class="docutils literal notranslate"><span class="pre">results/post_qc_exclusions/exclude_list_with_annotation.tsv</span></code>.  Values listed are defaults, but can be changed in the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>.</p>
+<ol class="arabic simple">
+<li><p>Average depth of coverage &lt; 20x</p></li>
+<li><p>Contamination &gt; 3%</p></li>
+<li><p>Het/Hom ratio &gt; 2.5</p></li>
+</ol>
+</section>
+<section id="qc">
+<h2>QC<a class="headerlink" href="#qc" title="Permalink to this headline"></a></h2>
+<p>The following QC metrics are available (depending on run mode selected):</p>
+<ul class="simple">
+<li><p>Pre- and post-trimming FastQC reports at <code class="docutils literal notranslate"><span class="pre">results/fastqc/</span></code> and <code class="docutils literal notranslate"><span class="pre">results/post_trimming_fastqc/</span></code>, respectively</p></li>
+<li><p>Trimming stats via fastp at <code class="docutils literal notranslate"><span class="pre">results/paired_trimmed_reads/</span></code></p></li>
+<li><p>Alignment stats via samtools at <code class="docutils literal notranslate"><span class="pre">results/alignment_stats/</span></code></p></li>
+<li><p>Recalibration stats from bqsr at <code class="docutils literal notranslate"><span class="pre">results/bqsr/</span></code></p></li>
+<li><p>Relatedness via <a class="reference external" href="https://github.com/brentp/somalier">Somalier</a> at <code class="docutils literal notranslate"><span class="pre">results/qc/relatedness/</span></code></p></li>
+<li><p>Sample contamination via <a class="reference external" href="https://genome.sph.umich.edu/wiki/VerifyBamID">verifyBamID</a> at <code class="docutils literal notranslate"><span class="pre">results/qc/contamination_check/</span></code> (for full runs only; <strong>not</strong> included in joint-genotyping only run mode)</p></li>
+<li><p>Inferred sex via bcftools +guess-ploidy at <code class="docutils literal notranslate"><span class="pre">results/qc/sex_check/</span></code></p></li>
+<li><p>Picard metrics at <code class="docutils literal notranslate"><span class="pre">results/HaplotypeCaller/filtered/</span></code></p></li>
+<li><p>bcftools stats at <code class="docutils literal notranslate"><span class="pre">results/qc/bcftools_stats/</span></code></p></li>
+<li><p>MultiQC report at <code class="docutils literal notranslate"><span class="pre">results/multiqc/</span></code></p></li>
+<li><p>Benchmarking report of pipeline performance statistics (i.e. elapsed time, memory and CPU utilization for rules above specified <code class="docutils literal notranslate"><span class="pre">time_threshold</span></code> in <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>) at <code class="docutils literal notranslate"><span class="pre">performance_benchmarks/benchmarking_report.html</span></code></p></li>
+<li><p>Run summary report for the pipeline, excluded samples and discordances at <code class="docutils literal notranslate"><span class="pre">results/run_summary/run_summary.html</span></code></p></li>
+</ul>
+<section id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline"></a></h3>
+<p>Below is an example of a plot from the <code class="docutils literal notranslate"><span class="pre">benchmarking_report.html</span></code> report generated, showing execution time across rules in a pipeline run:</p>
+<blockquote>
+<div><a class="reference internal image-reference" href="_images/benchmarking_report.png"><img alt="Execution time plot example from a benchmarking report" src="_images/benchmarking_report.png" style="width: 600px;" /></a>
+</div></blockquote>
+<p>Below is an example of the final subject tracking table generated in the <code class="docutils literal notranslate"><span class="pre">run_summary.html</span></code> report, showing QC outcomes for subjects included in a pipeline run:</p>
+<a class="reference internal image-reference" href="_images/run_summary.png"><img alt="Example of final subject tracking table from a run summary report" src="_images/run_summary.png" style="width: 600px;" /></a>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+          <a href="execution.html" class="btn btn-neutral float-left" title="Execution" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <a href="tests.html" class="btn btn-neutral float-right" title="Tests" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+      </div>
+
+    <hr/>
+
+    <div role="contentinfo">
+      <p>&#169; Copyright 2022, B. Ballew, E. Joshi, C. Palmer, 54gene.</p>
+    </div>
+
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
+
+
+  </footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

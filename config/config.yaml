@@ -13,6 +13,8 @@ default_queue: "big"
 compute_queue: "big"
 memory_queue: "big"
 max_concurrent: 40  # max concurrent running jobs for especially high-bandwidth rules, to control hitting the fsx bandwidth cap
+center_id: "54gene"
+
 # QC thresholds for sample removal:
 max_het_ratio: 2.5
 min_avg_depth: 20.0

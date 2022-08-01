@@ -128,7 +128,8 @@ wildcard_constraints:
 localrules:
     combine_benchmarks,
     benchmarking_report,
-    
+
+
 rule all:
     input:
         TARGETS,
