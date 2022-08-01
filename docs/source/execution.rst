@@ -30,6 +30,16 @@ The ``wrapper.sh`` script embeds the ``snakemake`` command and other command-lin
 
 This wrapper script can be edited to your needs and run using ``bash run.sh``.
 
+Automatic retries with scaling resources
+-----------------------------------------
+
+Many rules in this pipeline are configured to automatically re-submit upon failure up to a user-specified number of times.  This is controlled via Snakemake's ``--restart-times`` command line parameter.  The relevant rules will automatically scale resource requests with every retry as follows (example from ``rule align_reads``)::
+
+     resources:
+        mem_mb=lambda wildcards, attempt: attempt * config["bwa"]["memory"],
+
+In this case, upon attempt 1, the job will be submitted with 1 * the initial memory setting in ``config.yaml``.  On attempt 2, the job will be submitted with 2 * the initial memory setting, and so forth.
+
 .. _logging:
 
 Logging

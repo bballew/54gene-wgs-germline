@@ -35,8 +35,8 @@ For **full** and **fastqc_only** mode, the ``manifest.txt`` requires the followi
 
 For example::
 
-    Sample1_S1_L001 Sample1 input/Sample_001_S1_L001_R1.fastq   input/Sample_001_S1_L001_R1.fastq
-    Sample1_S1_L002 Sample1 input/Sample_001_S1_L002_R1.fastq   input/Sample_001_S1_L002_R1.fastq
+    Sample1_S1_L001 Sample1 input/Sample_001_S1_L001_R1.fastq   input/Sample_001_S1_L001_R2.fastq
+    Sample1_S1_L002 Sample1 input/Sample_001_S1_L002_R1.fastq   input/Sample_001_S1_L002_R2.fastq
 
 For **joint_genotyping** mode:
 
@@ -66,8 +66,8 @@ This file contains two columns with headers:
 For example::
 
     interval_name   file_path
-    interval_1  /resources/scattered_calling_intervals/interval_1.bed
-    interval_2  /resources/scattered_calling_intervals/interval_2.bed
+    interval_1  resources/scattered_calling_intervals/interval_1.bed
+    interval_2  resources/scattered_calling_intervals/interval_2.bed
 
 
 The pipeline will supply these interval files to the GATK ``HaplotypeCaller``, ``GenomicsDBImport``, and ``GenotypeGVCFs`` steps to run concurrent instances of these rules at each specified interval(s), reducing overall execution time.

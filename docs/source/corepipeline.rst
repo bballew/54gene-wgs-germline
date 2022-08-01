@@ -55,7 +55,7 @@ We exposed these and other parameters for GenomicsDBImport after encountering `r
 
 The per-interval/region, genotyped gVCFs will be concatenated into one sorted, indexed, project-level multi-sample gVCF for downstream analysis in ``results/HaplotypeCaller/genotyped/HC_variants.vcf.gz``.
 
-*Note*: While GenomicsDBImport supports adding N+1 samples to the datastores, our pipeline does not utilize this functionality and instead creates the databases every time from scratch.  This was a development choice made to avoid issues with potential failures with maintaining the datastores and revisitng them in future analyses.
+*Note*: While GenomicsDBImport supports adding N+1 samples to the datastores, our pipeline does not utilize this functionality and instead creates the databases every time from scratch.  This was a development choice made to avoid issues with potential failures with maintaining the datastores and revisiting them in future analyses.
 
 Variant filtering
 -----------------
@@ -114,7 +114,7 @@ We exclude samples from the project-level hard-filtered VCF in ``rule create_exc
 
 These thresholds can be tweaked in the ``config.yaml``.  A list of samples to exclude and another list with these samples and annotations for why they were excluded will be generated in ``results/post_qc_exclusions/``.
 
-Post sample exclusion, another sorted and indexed, project-level, hard-filtered VCF will emitted in ``results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz``.  Note that the ID column here will also be updated to ``%CHROM:%POS:%REF:%ALT`` using bcftools annotate.
+Post sample exclusion, another sorted and indexed, project-level, hard-filtered VCF will emitted in ``results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz``.  Note that the ID column here will also be updated to ``CHROM:POS:REF:ALT`` using bcftools annotate.
 
 .. _multiqc:
 
