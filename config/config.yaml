@@ -19,7 +19,6 @@ center_id: "54gene"
 max_het_ratio: 2.5
 min_avg_depth: 20.0
 max_contam: 0.03  # N/A for joint_genotyping
-time_threshold: 5 # exclude rules from benchmarking report if below this elapsed time threshold in minutes
 
 somalier: True
 fastqc:

@@ -42,7 +42,6 @@ bed = config["bed"]
 max_concurrent = config["max_concurrent"]
 intervalsFile = config["intervalsFile"]
 
-
 # create temp and log dirs if needed
 pathlib.Path(tempDir).mkdir(parents=True, exist_ok=True)
 pathlib.Path("logs/").mkdir(parents=True, exist_ok=True)
