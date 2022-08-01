@@ -1,8 +1,9 @@
+from io import StringIO
 from unittest import mock
 
+import pandas as pd
 import pytest
 from scripts import utils
-
 
 sampleDict_full = {
     "sampleA_rg1": ["sampleA", "A1_r1.fq", "A1_r2.fq"],
@@ -10,11 +11,17 @@ sampleDict_full = {
     "sampleB_rg1": ["sampleB", "B_r1.fq", "B_r2.fq"],
 }
 
-
 sampleDict_jointgeno = {
     "sampleA": "sampleA.g.vcf.gz",
     "sampleB": "sampleB.g.vcf.gz",
 }
+
+
+@pytest.fixture
+def sample_intervalsDf():
+    return pd.DataFrame(
+        {"interval_name": ["interval_A", "interval_B"], "file_path": ["/path/to/A", "/path/to/B"]}
+    ).set_index("interval_name")
 
 
 class wildcards:
@@ -27,7 +34,7 @@ def test_read_in_manifest_full():
         read_data="rg1\tsample1\tsample1_r1.fq\tsample1_r2.fq\nrg2 sample2 sample2_r1.fq sample2_r2.fq"
     )
     with mock.patch("scripts.utils.open", m):
-        test_out = utils.read_in_manifest("file", True)
+        test_out = utils.read_in_manifest("file", True, False)
     exp_dict = {
         "rg1": ("sample1", "sample1_r1.fq", "sample1_r2.fq"),
         "rg2": ("sample2", "sample2_r1.fq", "sample2_r2.fq"),
@@ -133,13 +140,6 @@ def test_get_batch_limit_number(test_in, exp_out):
     assert utils.get_batch_limit_number(test_in[0], test_in[1]) == exp_out
 
 
-def test_get_chrom_list():
-    m = mock.mock_open(read_data="chr1 123 124\nchr20 456 457\nchr3 123 124\nchrY 123 154")
-    with mock.patch("scripts.utils.open", m):
-        test_out = utils.get_chrom_list("bed")
-    assert test_out == ["chr1", "chr3", "chr20", "chrY"]
-
-
 @pytest.mark.parametrize(
     "test_in, exp_out",
     [("chr1", 1), ("chr10", 10), ("20", 20), ("chrM", 25), ("chrY", 24), ("X", 23)],
@@ -165,3 +165,19 @@ def test_karyotypic_sort_exit(capsys):
 )
 def test_allow_blanks(test_in, exp_out):
     assert utils.allow_blanks(test_in) == exp_out
+
+
+def test_read_in_intervals(sample_intervalsDf):
+    valid_intervals = StringIO(
+        "interval_name\tfile_path\ninterval_A\t/path/to/A\ninterval_B\t/path/to/B"
+    )
+    test_out = utils.read_in_intervals(valid_intervals)
+    pd.testing.assert_frame_equal(test_out, sample_intervalsDf)
+
+
+def test_read_in_intervals_fail():
+    duplicate_intervals = StringIO(
+        "interval_name\tfile_path\ninterval_A\t/path/to/A\ninterval_A\t/path/to/B"
+    )
+    with pytest.raises(Exception):
+        utils.read_in_intervals(duplicate_intervals)

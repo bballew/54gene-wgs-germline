@@ -8,8 +8,13 @@ type: object
 properties:
   sampleFile:
     type: string
+  intervalsFile:
+    type: string
+  sexLinker:
+    type: string
   jobs:
     type: integer
+    minimum: 1
   tempDir:
     type: string
   runType:
@@ -19,154 +24,295 @@ properties:
         type: boolean
       joint_genotyping:
         type: boolean
+      fastq_qc_only:
+        type: boolean
     required:
       - full
       - joint_genotyping
+      - fastq_qc_only
+    additionalProperties: false
   global_vars:
     type: string
   cluster_mode:
-    type: string
+    oneOf:
+     - type: string
+     - type: null
   default_queue:
-    type: string
+    oneOf:
+     - type: string
+     - type: null
   compute_queue:
-    type: string
+    oneOf:
+     - type: string
+     - type: null
   memory_queue:
-    type: string
-  bed:
+    oneOf:
+     - type: string
+     - type: null
+  center_id:
     type: string
   max_concurrent:
-    type: number
+    type: integer
+    minimum: 1
   max_het_ratio:
     type: number
+    exclusiveMinimum: 0
   min_avg_depth:
     type: number
+    exclusiveMinimum: 0
   max_contam:
     type: number
+    minimum: 0
+    maximum: 1
+  time_threshold:
+    type: number
+    minimum: 1
+  somalier:
+    type: boolean
   fastqc:
     type: object
     properties:
       threads:
         type: number
+        minimum: 1
       memory:
         type: number
+        minimum: 100
+    required:
+      - threads
+      - memory
+    additionalProperties: false
   fastp:
     type: object
     properties:
       threads:
         type: number
+        minimum: 1
       memory:
         type: number
+        minimum: 100
+    required:
+      - threads
+      - memory
+    additionalProperties: false
   bwa:
     type: object
     properties:
       threads:
         type: number
+        minimum: 1
       memory:
         type: number
+        minimum: 100
+    required:
+      - threads
+      - memory
+    additionalProperties: false
   samtools_sort:
     type: object
     properties:
       threads:
         type: number
+        minimum: 1
       memory:
         type: number
+        minimum: 100
+    required:
+      - threads
+      - memory
+    additionalProperties: false
   markDuplicates:
     type: object
     properties:
       memory:
         type: number
+        minimum: 100
       xmx:
         type: number
+        minimum: 100
       java_opts:
         type: ["string", "null"]
+    required:
+      - memory
+      - xmx
+      - java_opts
+    additionalProperties: false
   baseRecalibrator:
     type: object
     properties:
       memory:
         type: number
+        minimum: 100
       xmx:
         type: number
+        minimum: 100
       java_opts:
         type: ["string", "null"]
+    required:
+      - memory
+      - xmx
+      - java_opts
+    additionalProperties: false
   applyBQSR:
     type: object
     properties:
       memory:
         type: number
+        minimum: 100
       xmx:
         type: number
+        minimum: 100
       java_opts:
         type: ["string", "null"]
+    required:
+      - memory
+      - xmx
+      - java_opts
+    additionalProperties: false
   haplotypeCaller:
     type: object
     properties:
       memory:
         type: number
+        minimum: 100
       xmx:
         type: number
+        minimum: 100
       java_opts:
         type: ["string", "null"]
+    required:
+      - memory
+      - xmx
+      - java_opts
+    additionalProperties: false
   gatherVcfs:
     type: object
     properties:
       memory:
         type: number
+        minimum: 100
       xmx:
         type: number
+        minimum: 100
       java_opts:
         type: ["string", "null"]
+    required:
+      - memory
+      - xmx
+      - java_opts
+    additionalProperties: false
   genomicsDBImport:
     type: object
     properties:
       memory:
         type: number
+        minimum: 100
       xmx:
         type: number
+        minimum: 100
       java_opts:
         type: ["string", "null"]
       batch_size:
-        type: number
+        type: integer
+        minimum: 1
       reader_threads:
-        type: number
+        type: integer
+        minimum: 1
+    required:
+      - memory
+      - xmx
+      - java_opts
+      - batch_size
+      - reader_threads
+    additionalProperties: false
   genotypeGVCFs:
     type: object
     properties:
       memory:
         type: number
+        minimum: 100
       xmx:
         type: number
+        minimum: 100
+      max_alt_alleles:
+        type: integer
+        minimum: 1
+      genomicsdb_max_alt_alleles:
+        type: integer
+        minimum: 1
+      max_genotype_count:
+        type: integer
+        minimum: 2
       java_opts:
         type: ["string", "null"]
+    required:
+      - memory
+      - xmx
+      - max_alt_alleles
+      - genomicsdb_max_alt_alleles
+      - max_genotype_count
+      - java_opts
+    additionalProperties: false
   bcftools:
     type: object
     properties:
       memory:
         type: number
+        minimum: 1
       threads:
-        type: number
+        type: integer
+        minimum: 1
+    required:
+      - memory
+      - threads
+    additionalProperties: false
   selectVariants:
     type: object
     properties:
       memory:
         type: number
+        minimum: 100
       xmx:
         type: number
+        minimum: 100
       java_opts:
         type: ["string", "null"]
+    required:
+      - memory
+      - xmx
+      - java_opts
+    additionalProperties: false
   variantFiltration:
     type: object
     properties:
       memory:
         type: number
+        minimum: 100
       xmx:
         type: number
+        minimum: 100
       java_opts:
         type: ["string", "null"]
+    required:
+      - memory
+      - xmx
+      - java_opts
+    additionalProperties: false
   verifyBamID:
     type: object
     properties:
       memory:
         type: number
+        minimum: 100
+      region:
+        type: array
+        items:
+          type: string
+          pattern: "^chr[1-9]$|^chr1[0-9]$|^chr2[0-2]$|^chr[XYM]$"
+    required:
+      - memory
+      - region
+    additionalProperties: false
   picardCollectVariantCallingMetrics:
     type: object
     properties:
@@ -176,10 +322,53 @@ properties:
         type: number
       java_opts:
         type: ["string", "null"]
-
+    required:
+      - memory
+      - xmx
+      - java_opts
+    additionalProperties: false
+  multiqc:
+    type: object
+    properties:
+      memory:
+        type: number
+    required:
+      - memory
+    additionalProperties: false
 # entries that have to be in the config file for successful validation
 required:
   - sampleFile
+  - sexLinker
+  - intervalsFile
   - jobs
   - tempDir
   - runType
+  - global_vars
+  - cluster_mode
+  - default_queue
+  - compute_queue
+  - memory_queue
+  - center_id
+  - max_concurrent
+  - max_het_ratio
+  - min_avg_depth
+  - max_contam
+  - somalier
+  - fastqc
+  - fastp
+  - bwa
+  - samtools_sort
+  - markDuplicates
+  - baseRecalibrator
+  - applyBQSR
+  - haplotypeCaller
+  - gatherVcfs
+  - genomicsDBImport
+  - genotypeGVCFs
+  - bcftools
+  - selectVariants
+  - variantFiltration
+  - verifyBamID
+  - picardCollectVariantCallingMetrics
+  - multiqc
+additionalProperties: false

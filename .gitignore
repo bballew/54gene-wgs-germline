@@ -1,4 +1,6 @@
 # Project Folders and logs
+package*json
+node_modules
 temp
 results/*
 !tests/unit/*/results/*

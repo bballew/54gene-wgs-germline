@@ -4,6 +4,7 @@
 
 AUTHORS:
     B. Ballew
+    E. Joshi
 
 This pipeline takes demultiplexed, adapter-removed, compressed fastqs as input,
 and generates QC reports, aligned BAMs, gVCFs, and multi-sample VCFs.
@@ -16,8 +17,11 @@ import pathlib
 from snakemake.utils import validate
 from scripts import utils
 
-label = subprocess.check_output(["git", "describe", "--always"]).strip()
-print(f"54gene WGS germline workflow {label}")
+try:
+    label = subprocess.check_output(["git", "describe", "--always"]).strip()
+    print(f"54gene WGS germline workflow {label}")
+except subprocess.CalledProcessError:
+    print("54gene WGS germline workflow, version not detected!")
 
 
 # reference the config file
@@ -32,45 +36,56 @@ jobs = config["jobs"]
 tempDir = config["tempDir"]
 full = config["runType"]["full"]
 jointgeno = config["runType"]["joint_genotyping"]
+fastq_qc_only = config["runType"]["fastq_qc_only"]
 global_vars = config["global_vars"]
 bed = config["bed"]
 max_concurrent = config["max_concurrent"]
+intervalsFile = config["intervalsFile"]
 
 # create temp and log dirs if needed
 pathlib.Path(tempDir).mkdir(parents=True, exist_ok=True)
 pathlib.Path("logs/").mkdir(parents=True, exist_ok=True)
 
+# generate list of interval names from the interval file dataframe
+try:
+    intervals_df = utils.read_in_intervals(intervalsFile)
+except ValueError:
+    sys.exit(f"Duplicate interval names are not allowed in {intervalsFile}.")
+
+intervalList = list(intervals_df.index.values)
+
 # configure shell behavior for all rules
 shell.executable("/bin/bash")
-shell.prefix(f"set -euo pipefail; export TMPDIR={tempDir}; {global_vars}; ")
+shell.prefix("set -euo pipefail; {}; ".format(global_vars))
 
 # dict where key is readgroup, values are sample, r1 fastq, r2 fastq
-sampleDict = utils.read_in_manifest(sampleFile, full)
+sampleDict = utils.read_in_manifest(sampleFile, full, fastq_qc_only)
 
 # list of unique sample names
-SAMPLES = utils.create_samples_set(sampleDict) if full else sampleDict.keys()
+SAMPLES = utils.create_samples_set(sampleDict) if full or fastq_qc_only else sampleDict.keys()
 
 # weight for trimming and fastqc rules, to avoid hitting fsx throughput limits
 # The Second parameter is the desired max number of concurrently-running jobs of
 # that rule.
 concurrent_limit = utils.get_batch_limit_number(jobs, max_concurrent)
 
-chromList = utils.get_chrom_list(bed)
 
 TARGETS = [
-    # "results/HaplotypeCaller/filtered/HC.variant_calling_detail_metrics",
-    "results/qc/bcftools_stats/plots/plot-vcfstats.log",
-    # "results/qc/relatedness/somalier.pairs.tsv",
-    # "results/qc/sex_check/ploidy.png",
-    "results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz",
     "results/multiqc/multiqc.html",
+    "results/run_summary/run_summary.html",
+    "results/performance_benchmarks/benchmarking_report.html",
 ]
+
 
 if full:
 
     TARGETS.append(expand("results/alignment_stats/{sample}.txt", sample=SAMPLES))
     TARGETS.append(expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES))
+    # TARGETS.append("results/run_summary/run_summary.html")
+    TARGETS.append("results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz")
+    TARGETS.append("results/qc/bcftools_stats/plots/plot-vcfstats.log")
 
+    include: "rules/track_time.smk"
     include: "rules/resources.smk"
     include: "rules/fastq_qc.smk"
     include: "rules/align.smk"
@@ -78,20 +93,40 @@ if full:
     include: "rules/HC_joint_geno.smk"
     include: "rules/filter.smk"
     include: "rules/post_calling_qc.smk"
+    include: "rules/report.smk"
 
 
 elif jointgeno:
 
+    # TARGETS.append("results/run_summary/run_summary.html")
+    TARGETS.append("results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz")
+    TARGETS.append("results/qc/bcftools_stats/plots/plot-vcfstats.log")
+
+    include: "rules/track_time.smk"
     include: "rules/resources.smk"
     include: "rules/HC_joint_geno.smk"
     include: "rules/filter.smk"
     include: "rules/post_calling_qc.smk"
+    include: "rules/report.smk"
+
+
+elif fastq_qc_only:
+
+    include: "rules/fastq_qc.smk"
+    include: "rules/post_calling_qc.smk"
+    include: "rules/report.smk"
+    include: "rules/track_time.smk"
 
 
 wildcard_constraints:
+    interval="|".join(intervalList),
     sample="|".join(SAMPLES),
     rg="|".join(sampleDict.keys()),
-    chrom="|".join(chromList),
+
+
+localrules:
+    combine_benchmarks,
+    benchmarking_report,
 
 
 rule all:

@@ -1,25 +1,3 @@
-# from snakemake.utils import validate
-# import pandas as pd
-
-
-# this container defines the underlying OS for each job when using the workflow
-# with --use-conda --use-singularity
-# singularity: "docker://continuumio/miniconda3"
-
-
-##### load config and sample sheets #####
-
-
-# configfile: "config/config.yaml"
-
-
-# validate(config, schema="../schemas/config.schema.yaml")
-
-# samples = pd.read_csv(config["samples"], sep="\t").set_index("sample", drop=False)
-# samples.index.names = ["sample_id"]
-# validate(samples, schema="../schemas/samples.schema.yaml")
-
-
 rule get_resources:
     """Programmatically retrieve Broad resources from an AWS s3 bucket.
     May want to allow a switch to their GCP bucket, depending on
@@ -56,4 +34,4 @@ rule get_resources:
         "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz resources/ --no-sign-request && "
         "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.known_indels.vcf.gz.tbi resources/ --no-sign-request && "
         "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf resources/ --no-sign-request && "
-        "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf.idx resources/ --no-sign-request"
+        "aws s3 cp s3://broad-references/hg38/v0/Homo_sapiens_assembly38.dbsnp138.vcf.idx resources/ --no-sign-request "

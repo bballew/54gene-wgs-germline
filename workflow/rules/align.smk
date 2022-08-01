@@ -23,8 +23,8 @@ rule align_reads:
         pac="resources/Homo_sapiens_assembly38.fasta.64.pac",
         sa="resources/Homo_sapiens_assembly38.fasta.64.sa",
     output:
-        bam = temp("results/mapped/{rg}.bam"),
-        t = temp(directory("results/mapped/{rg}")),
+        bam=temp("results/mapped/{rg}.bam"),
+        t=temp(directory("results/mapped/{rg}")),
     benchmark:
         "results/performance_benchmarks/align_reads/{rg}.tsv"
     params:
@@ -34,6 +34,7 @@ rule align_reads:
         sm=utils.get_sm,
         samtools_threads=config["samtools_sort"]["threads"],
         samtools_mem=config["samtools_sort"]["memory"],
+        center=config["center_id"],
     threads: config["bwa"]["threads"]
     conda:
         "../envs/bwa_samtools.yaml"
@@ -41,10 +42,10 @@ rule align_reads:
         mem_mb=lambda wildcards, attempt: attempt * config["bwa"]["memory"],
         queue=config["compute_queue"],
     shell:
-        "mkdir -p {output.t} && " 
+        "mkdir -p {output.t} && "
         "bwa mem "
         "-K 10000000 -M "
-        '-R "@RG\\tCN:54gene\\tID:{params.rg}\\tSM:{params.sm}\\tPL:{params.pl}\\tLB:N/A" '
+        '-R "@RG\\tCN:{params.center}\\tID:{params.rg}\\tSM:{params.sm}\\tPL:{params.pl}\\tLB:N/A" '
         "-t {threads} "
         "{input.r} {input.r1} {input.r2} | "
         "samtools sort -@ {params.samtools_threads} -T {output.t} -m {params.samtools_mem}M -o {output.bam} - "

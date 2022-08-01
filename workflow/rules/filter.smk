@@ -167,21 +167,23 @@ if full:
             vcf="results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz",
             i="results/HaplotypeCaller/filtered/snps.hardfiltered.vcf.gz.tbi",
         output:
-            vcf=temp("results/qc/contamination_check/chr5_and_10.snps.hardfiltered.vcf.gz"),
-            i=temp("results/qc/contamination_check/chr5_and_10.snps.hardfiltered.vcf.gz.tbi"),
+            vcf=temp("results/qc/contamination_check/subset.snps.hardfiltered.vcf.gz"),
+            i=temp("results/qc/contamination_check/subset.snps.hardfiltered.vcf.gz.tbi"),
+        params:
+            region=",".join(config["verifyBamID"]["region"]),
         benchmark:
             "results/performance_benchmarks/subset_for_contam_check/subset.tsv"
         threads: config["bcftools"]["threads"]
         conda:
             "../envs/bcftools_tabix.yaml"
         shell:
-            "bcftools view --threads {threads} -r chr5,chr10 -Oz -o {output.vcf} {input.vcf} && "
+            "bcftools view --threads {threads} -r {params.region} -Oz -o {output.vcf} {input.vcf} && "
             "tabix -p vcf {output.vcf}"
 
     rule contamination_check:
         input:
-            vcf="results/qc/contamination_check/chr5_and_10.snps.hardfiltered.vcf.gz",
-            i1="results/qc/contamination_check/chr5_and_10.snps.hardfiltered.vcf.gz.tbi",
+            vcf="results/qc/contamination_check/subset.snps.hardfiltered.vcf.gz",
+            i1="results/qc/contamination_check/subset.snps.hardfiltered.vcf.gz.tbi",
             bam="results/bqsr/{sample}.bam",
             i2="results/bqsr/{sample}.bai",
         output:
@@ -271,7 +273,8 @@ rule picard_metrics:
             * config["picardCollectVariantCallingMetrics"]["memory"]
         ),
         xmx=(
-            lambda wildcards, attempt: attempt * config["picardCollectVariantCallingMetrics"]["xmx"]
+            lambda wildcards, attempt: attempt
+            * config["picardCollectVariantCallingMetrics"]["xmx"]
         ),
     shell:
         'export _JAVA_OPTIONS="" && '
