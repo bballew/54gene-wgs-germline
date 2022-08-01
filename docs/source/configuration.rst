@@ -35,8 +35,8 @@ For **full** and **fastqc_only** mode, the ``manifest.txt`` requires the followi
 
 For example::
 
-    Sample1_S1_L001 Sample1 input/Sample_001_S1_L001_R1.fastq   input/Sample_001_S1_L001_R1.fastq
-    Sample1_S1_L002 Sample1 input/Sample_001_S1_L002_R1.fastq   input/Sample_001_S1_L002_R1.fastq
+    Sample1_S1_L001 Sample1 input/Sample1_S1_L001_R1.fastq   input/Sample1_S1_L001_R2.fastq
+    Sample1_S1_L002 Sample1 input/Sample1_S1_L002_R1.fastq   input/Sample1_S1_L002_R2.fastq
 
 For **joint_genotyping** mode:
 
