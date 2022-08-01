@@ -63,6 +63,7 @@
 <li class="toctree-l1"><a class="reference internal" href="corepipeline.html">Core pipeline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fordevelopers.html">For developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
 </ul>
 
         </div>
@@ -114,18 +115,18 @@
 <p>For <strong>full</strong> and <strong>fastqc_only</strong> mode, the <code class="docutils literal notranslate"><span class="pre">manifest.txt</span></code> requires the following columns:</p>
 <ul class="simple">
 <li><p>Columns: <code class="docutils literal notranslate"><span class="pre">readgroup</span>&#160; <span class="pre">sample_ID</span>&#160;&#160; <span class="pre">path/to/r1.fastq</span>&#160;&#160;&#160; <span class="pre">path/to/r2.fastq</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">readgroup</span></code> values should be unique, e.g. sampleID_flowcellID</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">readgroup</span></code> values should be unique, e.g. &lt;sampleID&gt;_&lt;barcode&gt;_&lt;lane&gt;</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">sample_ID</span></code> should be the same for all FASTQ pairs from a single sample, and can be different from the FASTQ filenames</p></li>
 </ul>
 <p>For example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Sample1_S1_L001</span> <span class="n">Sample1</span> <span class="nb">input</span><span class="o">/</span><span class="n">Sample_001_S1_L001_R1</span><span class="o">.</span><span class="n">fastq</span>   <span class="nb">input</span><span class="o">/</span><span class="n">Sample_001_S1_L001_R1</span><span class="o">.</span><span class="n">fastq</span>
-<span class="n">Sample1_S1_L002</span> <span class="n">Sample1</span> <span class="nb">input</span><span class="o">/</span><span class="n">Sample_001_S1_L002_R1</span><span class="o">.</span><span class="n">fastq</span>   <span class="nb">input</span><span class="o">/</span><span class="n">Sample_001_S1_L002_R1</span><span class="o">.</span><span class="n">fastq</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Sample1_S1_L001</span> <span class="n">Sample1</span> <span class="nb">input</span><span class="o">/</span><span class="n">Sample1_S1_L001_R1</span><span class="o">.</span><span class="n">fastq</span>   <span class="nb">input</span><span class="o">/</span><span class="n">Sample1_S1_L001_R2</span><span class="o">.</span><span class="n">fastq</span>
+<span class="n">Sample1_S1_L002</span> <span class="n">Sample1</span> <span class="nb">input</span><span class="o">/</span><span class="n">Sample1_S1_L002_R1</span><span class="o">.</span><span class="n">fastq</span>   <span class="nb">input</span><span class="o">/</span><span class="n">Sample1_S1_L002_R2</span><span class="o">.</span><span class="n">fastq</span>
 </pre></div>
 </div>
 <p>For <strong>joint_genotyping</strong> mode:</p>
 <ul class="simple">
 <li><p>Columns: <code class="docutils literal notranslate"><span class="pre">sample_ID</span>&#160;&#160; <span class="pre">path/to/file.g.vcf.gz</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">sample_ID</span></code> values should be unique, and should correspond to the sample IDs in the gVCFs</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sample_ID</span></code> values should be unique, and should correspond to the sample IDs in the gVCF header</p></li>
 <li><p>gVCFs should be bgzipped and indexed</p></li>
 </ul>
 <p>For example:</p>

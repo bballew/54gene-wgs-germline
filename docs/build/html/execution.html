@@ -52,6 +52,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Execution</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#deploying-the-pipeline">Deploying the pipeline</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#wrapper-scripts">Wrapper scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#job-submission-and-memory">Job submission and memory</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#logging">Logging</a></li>
 </ul>
 </li>
@@ -60,6 +61,7 @@
 <li class="toctree-l1"><a class="reference internal" href="corepipeline.html">Core pipeline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fordevelopers.html">For developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
 </ul>
 
         </div>
@@ -108,13 +110,17 @@
 <section id="wrapper-scripts">
 <h2>Wrapper scripts<a class="headerlink" href="#wrapper-scripts" title="Permalink to this heading"></a></h2>
 <p>We have provided two convenience scripts in the 54gene-wgs-germline repository to execute the workflow in a cluster environment: <code class="docutils literal notranslate"><span class="pre">run.sh</span></code> and <code class="docutils literal notranslate"><span class="pre">wrapper.sh</span></code>.  You may customize these scripts for your needs, or run using a profile (e.g. <a class="reference external" href="https://github.com/Snakemake-Profiles/slurm">this</a> profile for a slurm job scheduler).</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">wrapper.sh</span></code> script embeds the <code class="docutils literal notranslate"><span class="pre">snakemake</span></code> command and other command-line flags to control submission of jobs to an HPC using the <code class="docutils literal notranslate"><span class="pre">cluster_mode</span></code> string pulled from the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>. This script also directs all stdout from Snakemake to a log file named <code class="docutils literal notranslate"><span class="pre">WGS_${DATE}.out</span></code> which will include the latest git tag and version of the pipeline, if cloned from our repository. For additional logging information, see <a class="reference internal" href="#logging"><span class="std std-ref">Logging</span></a>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">wrapper.sh</span></code> script embeds the <code class="docutils literal notranslate"><span class="pre">snakemake</span></code> command and other command-line flags to control submission of jobs to an HPC using the <code class="docutils literal notranslate"><span class="pre">cluster_mode</span></code> string pulled from the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>. This script also directs all stdout from Snakemake to a log file to the parent directory named <code class="docutils literal notranslate"><span class="pre">WGS_${DATE}.out</span></code> which will include the latest git tag and version of the pipeline, if cloned from our repository. For additional logging information, see <a class="reference internal" href="#logging"><span class="std std-ref">Logging</span></a>.</p>
 <p>This wrapper script can be edited to your needs and run using <code class="docutils literal notranslate"><span class="pre">bash</span> <span class="pre">run.sh</span></code>.</p>
+</section>
+<section id="job-submission-and-memory">
+<h2>Job submission and memory<a class="headerlink" href="#job-submission-and-memory" title="Permalink to this heading"></a></h2>
+<p>While the resource allocation (i.e. memory and threads) can be tuned on a per-tool basis in the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>, several rules in this pipeline have also been written to scale up the memory requirements based on this initial specified amount for each job invocation, should it fail. This can be found in the <code class="docutils literal notranslate"><span class="pre">resources</span></code> block for these rules where the required memory for a job is a function of the specified memory in the <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> multiplied by the attempt number. For example, if the specified amount for <code class="docutils literal notranslate"><span class="pre">bwa</span></code> used in <code class="docutils literal notranslate"><span class="pre">align_reads</span></code> is set to <code class="docutils literal notranslate"><span class="pre">memory:</span> <span class="pre">3000</span></code> but the job fails due to insufficient memory, the job will be resubmitted on a second attempt with twice the memory. Subsequently, it if fails again, a third attempt with three times the memory will be submitted. If your system or infrastructure does not have the necessary memory available, there is potential for re-submission of jobs to fail in the re-attempts.</p>
 </section>
 <section id="logging">
 <span id="id1"></span><h2>Logging<a class="headerlink" href="#logging" title="Permalink to this heading"></a></h2>
-<p>All job-specific logs will be directed to a <code class="docutils literal notranslate"><span class="pre">logs/</span></code> subdirectory in the home analysis directory of the pipeline. This directory is automatically created for you upon execution of the pipeline. These log files will follow the naming structure of <code class="docutils literal notranslate"><span class="pre">snakejob.&lt;name_of_rule&gt;.&lt;job_number&gt;</span></code>.</p>
-<p>If you choose to use the <code class="docutils literal notranslate"><span class="pre">wrapper.sh</span></code> script provided and modified for your environment, a <code class="docutils literal notranslate"><span class="pre">WGS_${DATE}.out</span></code> log file containing all stdout from snakemake will also be available in the home analysis directory.</p>
+<p>All job-specific logs will be directed to a <code class="docutils literal notranslate"><span class="pre">logs/</span></code> subdirectory in the home analysis directory of the pipeline. This directory is automatically created for you upon execution of the pipeline. For example, if you run the pipeline on a SLURM cluster, these log files will follow the naming structure of <code class="docutils literal notranslate"><span class="pre">snakejob.&lt;name_of_rule&gt;.&lt;job_number&gt;</span></code>.</p>
+<p>If you choose to use the <code class="docutils literal notranslate"><span class="pre">wrapper.sh</span></code> script provided and modified for your environment, a <code class="docutils literal notranslate"><span class="pre">WGS_${DATE}.out</span></code> log file containing all stdout from snakemake will also be available in the parent directory of the pipeline.</p>
 </section>
 </section>
 

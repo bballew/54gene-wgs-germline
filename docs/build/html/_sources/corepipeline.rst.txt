@@ -29,9 +29,11 @@ Read alignment, deduplication, and BQSR
 
 **In full mode only:**
 
-Trimmed reads are aligned to the reference genome using `BWA <https://github.com/lh3/bwa>`_ in ``rule align_reads``. The read1 and read2 data are combined into a single output BAM per FASTQ pair. If samples were run over several lanes (e.g. 4 lanes), each per-lane read1 and read2 FASTQ pair will be aligned individually, then combined during subsequent deduplication (see ``rule mark_duplicates``). This helps with efficient alignment by running multiple smaller alignments in parallel.  The output of this rule will be a sorted BAM for each sample within ``results/mapped/<readgroup>.bam`` but is flagged as temp, so will be automatically removed unless run with ``--notemp`` (see `Snakemake documentation <https://snakemake.readthedocs.io/en/stable/executing/cli.html#BEHAVIOR>`_).
+Trimmed reads are aligned to the reference genome using `BWA <https://github.com/lh3/bwa>`_ in ``rule align_reads``. The read1 and read2 data are combined into a single output BAM per FASTQ pair. If samples were run over several lanes (e.g. 4 lanes), each per-lane read1 and read2 FASTQ pair will be aligned individually, then combined during the subsequent deduplication step (see ``rule mark_duplicates``). This helps with efficient alignment by running multiple smaller alignments in parallel. The read group IDs of the BAM files will include the sequencing centre ID specified in the ``config.yaml`` under the ``center_id`` parameter.
 
-Duplicates for each sorted sample BAM are then marked and removed in ``rule mark_duplicates``.  Samples split over multiple lanes will be merged in this step, and subsequently named with the sample ID given in the manifest. The pipeline will then use GATK's BaseRecalibrator to generate a recalibration table for base quality scores using known sites VCF pulled from the Broad's resources bucket. This recalibration is then applied to each BAM in ``rule apply_bqsr``.  Samtools stats are then generated for all BAMs.  See the :doc:`investigateresults` page for more information on where to find the stats.
+The output of ``rule align-reads``  will be multiple aligned, sorted BAMs for each readgroup of a particular sample, found as ``results/mapped/<readgroup>.bam``. These BAMs will be flagged as temp, so they will be automatically removed unless run with the ``--notemp`` Snakemake flag (see `Snakemake documentation <https://snakemake.readthedocs.io/en/stable/executing/cli.html#BEHAVIOR>`_).
+
+After alignment, duplicate reads in the sorted BAMs generated for each readgroup are then marked and removed in ``rule mark_duplicates``.  It is at this step that samples split over multiple lanes will be merged, and subsequently named with the sample ID provided in the manifest. This generates one BAM file for each sample, found as ``results/dedup/<sample ID>.bam``. Subsequently, the pipeline will use GATK's BaseRecalibrator to generate a recalibration table for base quality scores using known sites VCF pulled from the Broad's resources bucket. This recalibration is then applied to each BAM in ``rule apply_bqsr``.  Samtools stats are then generated for all BAMs.  See the :doc:`investigateresults` page for more information on where to find the stats. Upon recalibration, the per-sample, sorted BAM files and their indexes can be found in ``results/bqsr/<sample ID>.bam``.
 
 Variant calling
 ---------------
@@ -55,7 +57,7 @@ We exposed these and other parameters for GenomicsDBImport after encountering `r
 
 The per-interval/region, genotyped gVCFs will be concatenated into one sorted, indexed, project-level multi-sample gVCF for downstream analysis in ``results/HaplotypeCaller/genotyped/HC_variants.vcf.gz``.
 
-*Note*: While GenomicsDBImport supports adding N+1 samples to the datastores, our pipeline does not utilize this functionality and instead creates the databases every time from scratch.  This was a development choice made to avoid issues with potential failures with maintaining the datastores and revisitng them in future analyses.
+*Note*: While GenomicsDBImport supports adding N+1 samples to the datastores, our pipeline does not utilize this functionality and instead creates the databases every time from scratch.  This was a development choice made to avoid issues with potential failures with maintaining the datastores and revisiting them in future analyses.
 
 Variant filtering
 -----------------
