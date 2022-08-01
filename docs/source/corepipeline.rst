@@ -29,7 +29,7 @@ Read alignment, deduplication, and BQSR
 
 **In full mode only:**
 
-Trimmed reads are aligned to the reference genome using `BWA <https://github.com/lh3/bwa>`_ in ``rule align_reads``. The read1 and read2 data are combined into a single output BAM per FASTQ pair. If samples were run over several lanes (e.g. 4 lanes), each per-lane read1 and read2 FASTQ pair will be aligned individually, then combined during the subsequent deduplication step (see ``rule mark_duplicates``). This helps with efficient alignment by running multiple smaller alignments in parallel. The read group IDs of the BAM files will include the centre ID specified in the ``config.yaml`` under the ``center_id`` parameter.
+Trimmed reads are aligned to the reference genome using `BWA <https://github.com/lh3/bwa>`_ in ``rule align_reads``. The read1 and read2 data are combined into a single output BAM per FASTQ pair. If samples were run over several lanes (e.g. 4 lanes), each per-lane read1 and read2 FASTQ pair will be aligned individually, then combined during the subsequent deduplication step (see ``rule mark_duplicates``). This helps with efficient alignment by running multiple smaller alignments in parallel. The read group IDs of the BAM files will include the sequencing centre ID specified in the ``config.yaml`` under the ``center_id`` parameter.
 
 The output of ``rule align-reads``  will be multiple aligned, sorted BAMs for each readgroup of a particular sample, found as ``results/mapped/<readgroup>.bam``. These BAMs will be flagged as temp, so they will be automatically removed unless run with the ``--notemp`` Snakemake flag (see `Snakemake documentation <https://snakemake.readthedocs.io/en/stable/executing/cli.html#BEHAVIOR>`_).
 
