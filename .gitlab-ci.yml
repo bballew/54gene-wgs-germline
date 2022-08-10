@@ -1,6 +1,7 @@
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 stages:
     - test
@@ -56,4 +57,4 @@ unit_tests:
   artifacts:
     paths:
       - coverage.txt
-  coverage: '/Code coverage: TOTAL.*\s+(\d+%)/'
+  coverage: '/TOTAL.*\s+(\d+\%)/'
