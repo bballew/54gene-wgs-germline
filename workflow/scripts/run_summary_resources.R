@@ -177,43 +177,46 @@ add.coverage <- function(df, bcftools.stats.filename) {
     df
 }
 
+# TODO: EJ (2022/08)
+# Fix this so we input the guess ploidy file with inferred
+# sex and then the sex linker ped file and report samples
+# with discordances
+
 #' Compare self-reported sex and inferred sex from Somalier
 #' and report out samples with discordances.  Samples with
 #' missing self-reported sex are also reported as discordant.
 #'
-#' @param output.subjects.filename character vector, name
-#' of file containing subject list from `bcftools query -l`
-#' @param somalier.sex.filename character vector, name of
-#' file containing self-reported and inferred sex
-#' @return data.frame, table of sex discordant or self-reported
-#' sex missing samples
-report.sex.discordances <- function(output.subjects.filename, somalier.sex.filename) {
-	stopifnot(is.character(output.subjects.filename))
-	stopifnot(file.exists(output.subjects.filename))
-    stopifnot(is.character(somalier.sex.filename))
-    stopifnot(file.exists(somalier.sex.filename))
+#' @param sex.linker.filename character vector, name of
+#' sex linker ped file generated from rule create_ped from
+#' input sex linker TSV specified in the config.yaml
+#' @param guess.ploidy.filename character vector, name of
+#' file containing bcftools guess-ploidy results
+#' @return data.frame, table of sex discordant samples
+report.sex.discordances <- function(sex.linker.filename, guess.ploidy.filename) {
+	stopifnot(is.character(sex.linker.filename))
+	stopifnot(file.exists(sex.linker.filename))
+    stopifnot(is.character(guess.ploidy.filename))
+    stopifnot(file.exists(guess.ploidy.filename))
 
-	output.subjects <- c()
-	if (file.info(output.subjects.filename)$size  > 0) {
-		output.subjects <- read.table(output.subjects.filename, header = FALSE, stringsAsFactors = FALSE)[, 1]
-	}
+    if (file.info(sex.linker.filename)$size  > 0) {
+        sex.linker <- read.table(sex.linker.filename, header = FALSE, stringsAsFactors = FALSE)[, c(1,5)]
+        colnames(sex.linker) <- c("Subjects", "Reported Sex")
+    }
 
-	somalier.sex <- data.frame("x", 1, "y")[0, ]
-	if (file.info(somalier.sex.filename)$size > 0) {
-		lines.in.file = length(readLines(somalier.sex.filename, n = 2))
-		if (lines.in.file == 2) {
-			somalier.sex <- read.table(somalier.sex.filename, header = FALSE, stringsAsFactors = FALSE)[, c(2,5,7)]
-			somalier.sex <- somalier.sex[somalier.sex[, 1] %in% output.subjects &
-									 ((somalier.sex[, 2] != 2 & somalier.sex[, 3] == "female")
-									 | (somalier.sex[, 2] != 1 & somalier.sex[, 3] == "male")
-									 | !(somalier.sex[, 3] %in% c("male", "female"))) ,]
-		}
-	}
-	rownames(somalier.sex) <- NULL
-	colnames(somalier.sex) <- c("Subject",
-								"Inferred Sex",
-								"Self-reported Sex")
-	somalier.sex
+    if (file.info(guess.ploidy.filename)$size  > 0) {
+        guess.ploidy.sex <- read.table(guess.ploidy.filename, header = FALSE, stringsAsFactors = FALSE)[, c(2,3)]
+        colnames(guess.ploidy.sex) <- c("Subjects", "Inferred Sex")
+    }
+    # merge the two dfs from sex linker and sex check into one by Subject
+    # return discordant rows
+    sex.discords <- merge(guess.ploidy.sex, sex.linker, by="Subjects")
+    sex.discords <- sex.discords[((sex.discords[, 2] == "M" & sex.discords[, 3] != 1)
+      | (sex.discords[, 2] == "F" & sex.discords[, 3] != 2) | !(sex.discords[, 2] %in% c("M", "F"))) ,]
+    sex.discords[, 3][sex.discords[, 3] == 1] <- "M"
+    sex.discords[, 3][sex.discords[, 3] == 2] <- "F"
+
+	rownames(sex.discords) <- NULL
+	sex.discords
 }
 
 #'
