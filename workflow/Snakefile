@@ -81,7 +81,9 @@ if full:
     TARGETS.append(expand("results/alignment_stats/{sample}.txt", sample=SAMPLES))
     TARGETS.append(expand("results/qc/contamination_check/{sample}.selfSM", sample=SAMPLES))
     # TARGETS.append("results/run_summary/run_summary.html")
-    TARGETS.append("results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz")
+    TARGETS.append(
+        "results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.PASS.vcf.gz"
+    )
     TARGETS.append("results/qc/bcftools_stats/plots/plot-vcfstats.log")
 
     include: "rules/track_time.smk"
@@ -98,7 +100,9 @@ if full:
 elif jointgeno:
 
     # TARGETS.append("results/run_summary/run_summary.html")
-    TARGETS.append("results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz")
+    TARGETS.append(
+        "results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.PASS.vcf.gz"
+    )
     TARGETS.append("results/qc/bcftools_stats/plots/plot-vcfstats.log")
 
     include: "rules/track_time.smk"
