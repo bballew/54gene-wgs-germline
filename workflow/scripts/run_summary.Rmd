@@ -89,7 +89,7 @@ write.output.table(res, tsv.path)
 
 `r if (somalier.run) {"## Subjects Flagged for Discordant Self-Reported vs. Inferred Sex"}`
 
-`r if (somalier.run) {"The following subjects were identified as having an inferred sex (via bcftools guess-ploidy plugin) that was different from the sex listed in the linker file provided when running this pipeline.  These subjects may correlate with unexpected genetic duplicates; rarely, there may be evidence of sex chromosome karyotypes that can confound this analysis (e.g. XO, XXY, etc.).  These subjects are not automatically removed from the final VCF and
+`r if (somalier.run) {"The following subjects were identified as having an inferred sex (via bcftools guess-ploidy plugin) that was different from or not included in the sex linker file provided when running this pipeline.  These subjects may correlate with unexpected genetic duplicates; rarely, there may be evidence of sex chromosome karyotypes that can confound this analysis (e.g. XO, XXY, etc.).  These subjects are not automatically removed from the final VCF and
 require manual follow-up."}`
 
 
