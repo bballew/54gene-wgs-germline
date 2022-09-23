@@ -184,7 +184,8 @@ add.coverage <- function(df, bcftools.stats.filename) {
 
 #' Compare self-reported sex and inferred sex from Somalier
 #' and report out samples with discordances.  Samples with
-#' missing self-reported sex are also reported as discordant.
+#' missing self-reported sex are also reported as discordant
+#' within the resultant table as "NA'.
 #'
 #' @param sex.linker.filename character vector, name of
 #' sex linker ped file generated from rule create_ped from
@@ -209,13 +210,15 @@ report.sex.discordances <- function(sex.linker.filename, guess.ploidy.filename) 
     }
     # merge the two dfs from sex linker and sex check into one by Subject
     # return discordant rows
-    sex.discords <- merge(guess.ploidy.sex, sex.linker, by="Subjects")
+    sex.discords <- merge(guess.ploidy.sex, sex.linker, by="Subjects", all=TRUE)
     sex.discords <- sex.discords[((sex.discords[, 2] == "M" & sex.discords[, 3] != 1)
-      | (sex.discords[, 2] == "F" & sex.discords[, 3] != 2) | !(sex.discords[, 2] %in% c("M", "F"))) ,]
+      | (sex.discords[, 2] == "F" & sex.discords[, 3] != 2) | !(sex.discords[, 2] %in% c("M", "F"))) | (is.na(sex.discords[, 3])), ]
+
+    # standardize sex encodings to M/F
     sex.discords[, 3][sex.discords[, 3] == 1] <- "M"
     sex.discords[, 3][sex.discords[, 3] == 2] <- "F"
 
-	rownames(sex.discords) <- NULL
+    rownames(sex.discords) <- NULL
 	sex.discords
 }
 
