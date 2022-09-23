@@ -177,11 +177,6 @@ add.coverage <- function(df, bcftools.stats.filename) {
     df
 }
 
-# TODO: EJ (2022/08)
-# Fix this so we input the guess ploidy file with inferred
-# sex and then the sex linker ped file and report samples
-# with discordances
-
 #' Compare self-reported sex and inferred sex from Somalier
 #' and report out samples with discordances.  Samples with
 #' missing self-reported sex are also reported as discordant
