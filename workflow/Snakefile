@@ -38,7 +38,6 @@ full = config["runType"]["full"]
 jointgeno = config["runType"]["joint_genotyping"]
 fastq_qc_only = config["runType"]["fastq_qc_only"]
 global_vars = config["global_vars"]
-bed = config["bed"]
 max_concurrent = config["max_concurrent"]
 intervalsFile = config["intervalsFile"]
 
@@ -47,7 +46,11 @@ pathlib.Path(tempDir).mkdir(parents=True, exist_ok=True)
 pathlib.Path("logs/").mkdir(parents=True, exist_ok=True)
 
 # generate list of interval names from the interval file dataframe
-intervals_df = utils.read_in_intervals(intervalsFile)
+try:
+    intervals_df = utils.read_in_intervals(intervalsFile)
+except ValueError:
+    sys.exit(f"Duplicate interval names are not allowed in {intervalsFile}.")
+
 intervalList = list(intervals_df.index.values)
 
 # list of canonical chromosomes
@@ -69,7 +72,13 @@ SAMPLES = utils.create_samples_set(sampleDict) if full or fastq_qc_only else sam
 # that rule.
 concurrent_limit = utils.get_batch_limit_number(jobs, max_concurrent)
 
-TARGETS = ["results/multiqc/multiqc.html", "results/run_summary/run_summary.html"]
+
+TARGETS = [
+    "results/multiqc/multiqc.html",
+    "results/run_summary/run_summary.html",
+    "results/performance_benchmarks/benchmarking_report.html",
+]
+
 
 if full:
 
@@ -134,6 +143,11 @@ wildcard_constraints:
     sample="|".join(SAMPLES),
     rg="|".join(sampleDict.keys()),
     chrom="|".join(chromList),
+
+
+localrules:
+    combine_benchmarks,
+    benchmarking_report,
 
 
 rule all:

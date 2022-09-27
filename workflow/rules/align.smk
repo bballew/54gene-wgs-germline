@@ -34,6 +34,7 @@ rule align_reads:
         sm=utils.get_sm,
         samtools_threads=config["samtools_sort"]["threads"],
         samtools_mem=config["samtools_sort"]["memory"],
+        center=config["center_id"],
     threads: config["bwa"]["threads"]
     conda:
         "../envs/bwa_samtools.yaml"
@@ -44,7 +45,7 @@ rule align_reads:
         "mkdir -p {output.t} && "
         "bwa mem "
         "-K 10000000 -M "
-        '-R "@RG\\tCN:54gene\\tID:{params.rg}\\tSM:{params.sm}\\tPL:{params.pl}\\tLB:N/A" '
+        '-R "@RG\\tCN:{params.center}\\tID:{params.rg}\\tSM:{params.sm}\\tPL:{params.pl}\\tLB:N/A" '
         "-t {threads} "
         "{input.r} {input.r1} {input.r2} | "
         "samtools sort -@ {params.samtools_threads} -T {output.t} -m {params.samtools_mem}M -o {output.bam} - "

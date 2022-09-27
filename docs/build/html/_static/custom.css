@@ -1,0 +1,47 @@
+.wy-nav-side {
+    background: #424f73;
+}
+
+.wy-side-nav-search, .wy-nav-top {
+    background: #f4f4f4;
+}
+
+.wy-side-nav-search>a {
+   color: #424f73;
+   font-size:120%;
+   max-width: 60%;
+}
+
+.wy-side-nav-search>div.version {
+   color: #424f73;
+}
+
+code.literal {
+    color: #ff4982 !important;
+    background-color: #f4f4f4 !important;
+}
+
+h1, h2, h3, h4 {
+    font-family: "Georgia", "Times New Roman", "Playfair Display", "Didot", Times, serif;
+    font-weight: bold;
+}
+
+body {
+    color: #424f73;
+}
+
+.wy-nav-content-wrap a:visited {
+    color: #aaaaaa /*#f0b421*/;
+}
+
+.wy-nav-content-wrap a {
+    color: #75c471;
+}
+
+footer {
+    background-image: url("images/54gene_background.svg");
+    background-repeat: no-repeat;
+    background-size: 110px 115px;
+    background-position: 550px 105px;
+    padding-bottom: 100px;
+}

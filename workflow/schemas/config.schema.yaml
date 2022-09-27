@@ -36,14 +36,22 @@ properties:
   global_vars:
     type: string
   cluster_mode:
-    type: string
+    oneOf:
+     - type: string
+     - type: "null"
   default_queue:
-    type: string
+    oneOf:
+     - type: string
+     - type: "null"
   compute_queue:
-    type: string
+    oneOf:
+     - type: string
+     - type: "null"
   memory_queue:
-    type: string
-  bed:
+    oneOf:
+     - type: string
+     - type: "null"
+  center_id:
     type: string
   max_concurrent:
     type: integer
@@ -58,6 +66,9 @@ properties:
     type: number
     minimum: 0
     maximum: 1
+  time_threshold:
+    type: number
+    minimum: 1
   somalier:
     type: boolean
   fastqc:
@@ -324,6 +335,14 @@ properties:
       - xmx
       - java_opts
     additionalProperties: false
+  multiqc:
+    type: object
+    properties:
+      memory:
+        type: number
+    required:
+      - memory
+    additionalProperties: false
 # entries that have to be in the config file for successful validation
 required:
   - sampleFile
@@ -337,7 +356,7 @@ required:
   - default_queue
   - compute_queue
   - memory_queue
-  - bed
+  - center_id
   - max_concurrent
   - max_het_ratio
   - min_avg_depth
@@ -359,4 +378,5 @@ required:
   - variantFiltration
   - verifyBamID
   - picardCollectVariantCallingMetrics
+  - multiqc
 additionalProperties: false

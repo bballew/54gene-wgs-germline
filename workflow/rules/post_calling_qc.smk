@@ -1,3 +1,6 @@
+from glob import glob
+
+
 rule variant_stats:
     input:
         r="resources/Homo_sapiens_assembly38.fasta",
@@ -54,9 +57,6 @@ rule plot_variant_stats:
         "../envs/bcftools_tabix.yaml"
     shell:
         "plot-vcfstats -P -p {params.d} {input.i}"
-
-
-# ID and exclude samples with het/hom above....x?  Make tunable for WGS vs WES?  Use some outlier threshold?
 
 
 rule create_ped:
@@ -116,16 +116,23 @@ else:
             "touch {output}"
 
 
-# rule per_base_coverage:
-#     input:
-#     output:
-#     params:
-#     benchmark:
-#     conda:
-#         "../envs/bedtools.yaml"
-#     resources:
-#     shell:
-#         "bedtools genomecov ...."
+rule sex_check:
+    input:
+        vcf="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
+        i="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz.tbi",
+    output:
+        txt="results/qc/sex_check/ploidy.txt",
+        png="results/qc/sex_check/ploidy.png",
+    params:
+        p="results/qc/sex_check/ploidy",
+    benchmark:
+        "results/performance_benchmarks/sex_check/sex_check.tsv"
+    conda:
+        "../envs/bcftools_tabix.yaml"
+    shell:
+        "bcftools +guess-ploidy -g hg38 {input.vcf} -v > {output.txt} && "
+        "guess-ploidy.py {output.txt} {params.p}"
+
 
 if full:
 
@@ -196,7 +203,6 @@ rule exclude_samples:
 
 
 if full:
-
     rule multiqc:
         """Generate one multiQC report for all input fastqs.
         Should add samtools stats output and possibly others eventually,
@@ -243,9 +249,10 @@ if full:
             relatedness="results/qc/relatedness" if config["somalier"] else "",
         conda:
             "../envs/fastqc_multiqc.yaml"
+        resources:
+            mem_mb=lambda wildcards, attempt: attempt * config["multiqc"]["memory"],
         shell:
             "multiqc --force -o {params.outDir} -n {params.outName} --config {input.mqc_config} {params.inDirs} {params.relatedness}"
-
 
 if jointgeno:
 
@@ -282,6 +289,8 @@ if jointgeno:
             relatedness="results/qc/relatedness" if config["somalier"] else "",
         conda:
             "../envs/fastqc_multiqc.yaml"
+        resources:
+            mem_mb=lambda wildcards, attempt: attempt * config["multiqc"]["memory"],
         shell:
             "multiqc --force -o {params.outDir} --config {input.mqc_config} -n {params.outName} {params.inDirs} {params.relatedness}"
 
@@ -307,5 +316,7 @@ if fastq_qc_only:
             inDirs="results/fastqc results/post_trimming_fastqc",
         conda:
             "../envs/fastqc_multiqc.yaml"
+        resources:
+            mem_mb=lambda wildcards, attempt: attempt * config["multiqc"]["memory"],
         shell:
             "multiqc --force -o {params.outDir} --config {input.mqc_config} -n {params.outName} {params.inDirs}"
