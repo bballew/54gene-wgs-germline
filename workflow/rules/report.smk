@@ -4,7 +4,7 @@ rule bcftools_extract_final_subject_list:
     vcf file
     """
     input:
-        vcf="results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz",
+        vcf="results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.PASS.vcf.gz",
     output:
         "results/run_summary/final_subject_list.tsv",
     conda:

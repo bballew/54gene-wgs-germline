@@ -166,12 +166,12 @@ else:
 
 rule exclude_samples:
     input:
-        v="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
-        i="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz.tbi",
+        v="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.PASS.vcf.gz",
+        i="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.PASS.vcf.gz.tbi",
         l="results/post_qc_exclusions/exclude_list.tsv",
     output:
-        v="results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz",
-        i="results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz.tbi",
+        v="results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.PASS.vcf.gz",
+        i="results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.PASS.vcf.gz.tbi",
     benchmark:
         "results/performance_benchmarks/exclude_samples/exclude_samples.tsv"
     threads: config["bcftools"]["threads"]
@@ -184,6 +184,7 @@ rule exclude_samples:
 
 
 if full:
+
     rule multiqc:
         """Generate one multiQC report for all input fastqs.
         Should add samtools stats output and possibly others eventually,
@@ -225,6 +226,7 @@ if full:
             mem_mb=lambda wildcards, attempt: attempt * config["multiqc"]["memory"],
         shell:
             "multiqc --force -o {params.outDir} -n {params.outName} --config {input.mqc_config} {params.inDirs} {params.relatedness}"
+
 
 if jointgeno:
 

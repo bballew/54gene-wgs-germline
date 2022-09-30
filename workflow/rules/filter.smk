@@ -284,3 +284,33 @@ rule picard_metrics:
         "--DBSNP {input.dbsnp} "
         "-SD {input.d} "
         "-O {params.d}"
+
+
+rule extract_filtered:
+    """
+    Generate a VCF with only passing variants for convenience based
+    on the hard filtering steps performed above.
+    """
+    input:
+        vcf="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz",
+        index="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.vcf.gz.tbi",
+    output:
+        vcf="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.PASS.vcf.gz",
+        index="results/HaplotypeCaller/filtered/HC_variants.hardfiltered.PASS.vcf.gz.tbi",
+    params:
+        t=tempDir,
+        java_opts=utils.allow_blanks(config["selectVariants"]["java_opts"]),
+    benchmark:
+        "results/performance_benchmarks/extract_filtered/benchmarks.tsv"
+    conda:
+        "../envs/gatk.yaml"
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * config["selectVariants"]["memory"],
+        xmx=lambda wildcards, attempt: attempt * config["selectVariants"]["xmx"],
+    shell:
+        'export _JAVA_OPTIONS="" && '
+        'gatk --java-options "-Xmx{resources.xmx}m {params.java_opts}" SelectVariants '
+        "--tmp-dir {params.t} "
+        "-V {input.vcf} "
+        "--exclude-filtered "
+        "-O {output.vcf}"
