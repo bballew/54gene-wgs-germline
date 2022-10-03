@@ -115,21 +115,6 @@ def aggregate_benchmark_files(wildcards):
     return [j for i in expand("results/performance_benchmarks/*/*.tsv") for j in glob(i)]
 
 
-rule combine_benchmarks:
-    """Create a concatenated file with all the benchmarking stats generated for
-    a specified set of rules defined in a list within the config as 'benchmarks',
-    and append the rule name and process (i.e. sample name) to the file as columns.
-    """
-    input:
-        tsv=aggregate_benchmark_files,
-    output:
-        benchmarks="results/performance_benchmarks/combined_benchmarks.tsv",
-    conda:
-        "../envs/r.yaml"
-    script:
-        "../scripts/combine_benchmarks.R"
-
-
 rule benchmarking_report:
     """Take the concatenated benchmark file and generate a standard HTML report for it
     with standard plots for each metric. This report is definitely a work in progress
@@ -138,12 +123,14 @@ rule benchmarking_report:
     The concatenated benchmark file is passed as an input using the snakemake object in R.
     """
     input:
-        benchmarks="results/performance_benchmarks/combined_benchmarks.tsv",
+        r_resources="workflow/scripts/combine_benchmarks.R",
+        tsv=aggregate_benchmark_files,
         start_time="results/tat_tracking/start_time.txt",
     output:
         "results/performance_benchmarks/benchmarking_report.html",
     params:
         threshold=config["time_threshold"],
+        benchmarks="results/performance_benchmarks/combined_benchmarks.tsv",
     conda:
         "../envs/r.yaml"
     script:
