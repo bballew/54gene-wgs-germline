@@ -19,10 +19,6 @@ col.types <- cols(
   cpu_time = col_double()
 )
 
-# load in snakemake objects
-in.files <- snakemake@input[["tsv"]]
-out.name <- snakemake@output[["benchmarks"]]
-
 #' Function parse rule and process names from filename
 #' to append to final dataset as columns.
 #'
@@ -46,8 +42,8 @@ read.benchmarks <- function(filename) {
 #' @return data.frame, with benchmarking outputs for all rules
 #'
 create.dataset <- function(infiles) {
-  stopifnot(is.vector(infiles, mode = "character"),
-  length(infiles) > 1)
+  # stopifnot(is.vector(infiles, mode = "character"),
+  # length(infiles) > 1)
   df <- infiles %>% lapply(read.benchmarks) %>% bind_rows()
   df
 }
@@ -63,7 +59,3 @@ create.tsv <- function(dataset, filename) {
   stopifnot(is.character(filename))
   write_tsv(dataset, filename)
 }
-
-# generate combined benchmarking file
-df <- create.dataset(in.files)
-create.tsv(df, out.name)
