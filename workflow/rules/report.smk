@@ -116,11 +116,8 @@ def aggregate_benchmark_files(wildcards):
 
 
 rule benchmarking_report:
-    """Take the concatenated benchmark file and generate a standard HTML report for it
-    with standard plots for each metric. This report is definitely a work in progress
-    and there is plenty of room for improvement in the visualizations.
-
-    The concatenated benchmark file is passed as an input using the snakemake object in R.
+    """
+    Takes all benchmarking files and created a concatenated file called performance_benchmarks/combined_benchmarks.tsv and generates an HTML report of standard plots with psutil statistics for per-rule performance meeting the defined time threshold specified in the config.yaml.
     """
     input:
         r_resources="workflow/scripts/combine_benchmarks.R",
