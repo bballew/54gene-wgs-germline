@@ -11,7 +11,7 @@ output:
     toc_depth: 5
 ---
 
-```{r data.setup, include=FALSE, echo=FALSE, eval=TRUE}
+```{r data.setup, include=FALSE, echo=FALSE, eval=TRUE, message=FALSE}
 # Load required packages
 knitr::opts_chunk$set(echo = TRUE, fig.width=12, fig.height=8)
 require(knitr, quietly = TRUE)
@@ -21,16 +21,30 @@ require(dplyr, quietly = TRUE)
 require(gluedown, quietly = TRUE)
 require(gridExtra, quietly = TRUE)
 require(lubridate, quietly = TRUE)
+```
+```{r load.resources, eval=TRUE, echo=FALSE, message=FALSE}
+# import resource functions
+source(snakemake@input[["r_resources"]])
+```
 
-# set input variable from snakemake
-benchmarks.table <- snakemake@input[["benchmarks"]]
+```{r load.snakemake.objects, eval=TRUE, echo=FALSE}
+in.files <- snakemake@input[["tsv"]]
+out.name <- snakemake@params[["benchmarks"]]
 
-# read in tsv
-dataset <- read.table(benchmarks.table, header=TRUE, sep="\t")
+# start time to calculate elapsed time
+tat.file <- snakemake@input[["start_time"]]
+
+# time cutoff parameter specified in config
+time.param <- snakemake@params[["threshold"]]
+```
+
+```{r data.prep, eval=TRUE, echo=FALSE, message=FALSE}
+# load in the dataset of benchmarking data
+dataset <- create.dataset(in.files)
 
 # some light date/time manipulation for ease in plotting
-dataset$times <- hms(dataset$h.m.s)
-d.lub <- hour(dataset$times) + minute(dataset$times)/60 + second(dataset$times)/3600
+dataset$times <- hms(dataset$`h:m:s`)
+d.lub <- hour(dataset$`h:m:s`) + minute(dataset$`h:m:s`)/60 + second(dataset$`h:m:s`)/3600
 dataset$walltime <- d.lub
 
 # some upfront unit conversions  & derivations for ease in comprehension
@@ -49,16 +63,11 @@ dataset$cpuwall_ratio <- (dataset$cpu_time / dataset$s)
 subset.df <- dataset %>% group_by(rule) %>% filter(n() > 1)
 
 # subset the dataset to get data points for rules meeting time_threshold
-# parameter specified at the rule level
-time.param <- snakemake@params[["threshold"]]
 time.threshold <- time.param * 60
 filtered.df <- dataset %>% group_by(rule) %>% filter(s >= time.threshold)
-
-# start time to calculate elapsed time
-tat.file <- snakemake@input[["start_time"]]
 ```
 
-```{r plot.functions, eval=TRUE, echo=FALSE}
+```{r plot.functions, eval=TRUE, echo=FALSE, message=FALSE}
 # plotting function for box/jitter plot where single data points are omitted
 # from boxplots
 create.boxjitter.plot <- function(df, df.subset, xvar, yvar, xlab, ylab) {
@@ -111,6 +120,7 @@ end.time <- as.integer(format(Sys.time(), "%s"))
 elapsed.time <- round((end.time - start.time) / 3600, 2)
 ```
 The total elapsed time for this pipeline was: `r elapsed.time` hours.
+
 ```{r all.time.exec, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE}
 # plot walltime for all rules benchmarked
 exec.time.all <- create.boxjitter.plot(dataset, subset.df, "rule", "walltime", "Rule", "Total walltime in hours for all rules")
@@ -279,6 +289,11 @@ CPU/s ≈ *N* indicates the process saturated the allocated number of processors
 # plot cpu to walltime ratio (i.e. CPU/s)
 cpuwall.ratio <- create.boxjitter.plot(filtered.df, subset.df, "rule", "cpuwall_ratio", "Rule", "CPU/second")
 cpuwall.ratio
+```
+
+```{r render.tsv, eval=TRUE, echo=FALSE, message=FALSE}
+# write combined benchmarks file to tsv
+create.tsv(dataset, out.name)
 ```
 
 #### Session Info
