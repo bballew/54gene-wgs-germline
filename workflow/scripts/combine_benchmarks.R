@@ -42,8 +42,8 @@ read.benchmarks <- function(filename) {
 #' @return data.frame, with benchmarking outputs for all rules
 #'
 create.dataset <- function(infiles) {
-  # stopifnot(is.vector(infiles, mode = "character"),
-  # length(infiles) > 1)
+  stopifnot(is.vector(infiles, mode = "character"),
+  length(infiles) > 1)
   df <- infiles %>% lapply(read.benchmarks) %>% bind_rows()
   df
 }
