@@ -4,7 +4,7 @@ rule bcftools_extract_final_subject_list:
     vcf file
     """
     input:
-        vcf="results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.vcf.gz",
+        vcf="results/post_qc_exclusions/samples_excluded.HC_variants.hardfiltered.PASS.vcf.gz",
     output:
         "results/run_summary/final_subject_list.tsv",
     conda:
@@ -28,7 +28,8 @@ if full:
             r_resources="workflow/scripts/run_summary_resources.R",
             exclude_list="results/post_qc_exclusions/exclude_list_with_annotation.tsv",
             relatedness="results/qc/relatedness/somalier.pairs.tsv",
-            sex="results/qc/relatedness/somalier.samples.tsv",
+            sex="results/qc/sex_check/ploidy.txt",
+            ped_file="results/qc/relatedness/sex_linker.ped",
             fastqc="results/multiqc/multiqc_data/multiqc_fastqc_1.txt",
             bcftools_stats="results/qc/bcftools_stats/joint_called_stats.out",
         output:
@@ -59,7 +60,8 @@ if jointgeno:
             r_resources="workflow/scripts/run_summary_resources.R",
             exclude_list="results/post_qc_exclusions/exclude_list_with_annotation.tsv",
             relatedness="results/qc/relatedness/somalier.pairs.tsv",
-            sex="results/qc/relatedness/somalier.samples.tsv",
+            sex="results/qc/sex_check/ploidy.txt",
+            ped_file="results/qc/relatedness/sex_linker.ped",
             bcftools_stats="results/qc/bcftools_stats/joint_called_stats.out",
         output:
             report="results/run_summary/run_summary.html",

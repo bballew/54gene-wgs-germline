@@ -49,7 +49,8 @@ exclude.reasons.filename <- snakemake@input[["exclude_list"]]
 output.subjects.filename <- snakemake@input[["output_subject_list"]]
 somalier.run <- snakemake@params[["somalier"]]
 somalier.relatedness.filename <- snakemake@input[["relatedness"]]
-somalier.sex.filename <- snakemake@input[["sex"]]
+guess.ploidy.filename <- snakemake@input[["sex"]]
+sex.linker.filename <- snakemake@input[["ped_file"]]
 fastqc.filename <- snakemake@input[["fastqc"]]
 bcftools.stats.filename <- snakemake@input[["bcftools_stats"]]
 tsv.path <- snakemake@params[["out_prefix"]]
@@ -84,19 +85,16 @@ knitr::kable(res, caption = "Summary of Subject Fate") %>% kableExtra::kable_sty
 
 write.output.table(res, tsv.path)
 ```
-
 `r if (somalier.run) {"***\n<br>"}`
 
 `r if (somalier.run) {"## Subjects Flagged for Discordant Self-Reported vs. Inferred Sex"}`
 
-`r if (somalier.run) {"The following subjects were identified as having an inferred sex (via Somalier) that was different from the sex listed in the
-linker file provided when running this pipeline.  These subjects may correlate with unexpected genetic duplicates; rarely, there may be evidence of
-sex chromosome karyotypes that can confound this analysis (e.g. XO, XXY, etc.).  These subjects are not automatically removed from the final VCF and
+`r if (somalier.run) {"The following subjects were identified as having an inferred sex (via bcftools guess-ploidy plugin) that was different from or not included in the sex linker file provided when running this pipeline.  These subjects may correlate with unexpected genetic duplicates; rarely, there may be evidence of sex chromosome karyotypes that can confound this analysis (e.g. XO, XXY, etc.).  These subjects are not automatically removed from the final VCF and
 require manual follow-up."}`
 
 
 ```{r report.sex, eval=somalier.run, echo=FALSE, results="asis"}
-res <- report.sex.discordances(output.subjects.filename, somalier.sex.filename)
+res <- report.sex.discordances(sex.linker.filename, guess.ploidy.filename)
 
 if (nrow(res) == 0) {
     cat("No sex discordant subjects were identified.")
