@@ -4,6 +4,8 @@ channels:
 dependencies:
   - r-base>=4
   - r-ggplot2
+  - pandoc
+  - icu<60
   - xorg-libxau
   - r-knitr
   - r-rmarkdown
