@@ -7,7 +7,7 @@ You can find a small test dataset and pre-configured files for this pipeline [he
 ## Authors
 
 * Esha Joshi
-* Cameron Palmer
+* Lightning Auriga
 * Bari Jane Ballew (@bballew)
 
 ## Usage
