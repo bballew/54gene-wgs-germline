@@ -2,7 +2,7 @@
 title: "WGS Run Summary"
 author:
   - "Bari Ballew"
-  - "Cameron Palmer"
+  - "Lightning Auriga"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 params:
   rmd: "run_summary.Rmd"

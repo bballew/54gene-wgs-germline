@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = "54gene-wgs-germline"
-copyright = "2022, B. Ballew, E. Joshi, C. Palmer, 54gene"
-author = "Bari Jane Ballew, Esha Joshi, Cameron Palmer"
+copyright = "2022, B. Ballew, E. Joshi, L. Auriga, 54gene"
+author = "Bari Jane Ballew, Esha Joshi, Lightning Auriga"
 version = "1.0.0"
 
 # -- General configuration ---------------------------------------------------
